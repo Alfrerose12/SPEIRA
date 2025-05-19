@@ -1,0 +1,7 @@
+{
+  "name": "speira",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

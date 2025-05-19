@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Speira</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="login.css">
+  <link rel="icon" type="image/x-icon" href="img/logo_speira.png">
+</head>
+
+<body>
+  <div class="container">
+    <h2>Iniciar sesión</h2>
+    <p>Inicia sesión para visualizar la documentación Swagger</p>
+    <form id="loginForm">
+      <label for="usuario" class="visually-hidden">Usuario</label>
+      <input type="text" id="usuario" name="nombre" placeholder="Usuario" required autocomplete="username">
+      <label for="password" class="visually-hidden">Contraseña</label>
+      <input type="password" id="password" name="password" placeholder="Contraseña" required autocomplete="current-password">
+      <button type="submit">Entrar</button>
+    </form>
+    <div id="mensaje"></div>
+  </div>
+  <script src="login.js"></script>
+</body>
+
+</html>
