@@ -1,0 +1,56 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      <span style="font-weight: bold; color: #00bcd4;">REGISTRO</span>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="logo-container">
+    <picture>
+      <source
+        media="(min-width:1024px)"
+        srcset="assets/LOGO SPEIRA ESCRITORIO.png"
+      />
+      <img src="assets/LOGO SPEIRA.png" alt="Speira Logo" class="responsive-logo" />
+    </picture>
+  </div>
+
+  <div class="white-box">
+    <div style="text-align: center; margin-top: 10px;">
+      <div>
+        <span style="font-weight: bold; color: #006dd4;">REGISTRARSE</span>
+      </div>
+      <span style="color: #acacac;">Crea una cuenta para continuar</span>
+    </div>
+
+    <div class="shadow-box">
+      <ion-list class="register-form">
+        <ion-item>
+          <ion-label position="floating">Nombre</ion-label>
+          <ion-input type="text" placeholder="Ingresa tu nombre" [(ngModel)]="name"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Correo electrónico</ion-label>
+          <ion-input type="email" placeholder="Ingresa tu correo" [(ngModel)]="email"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Contraseña</ion-label>
+          <ion-input type="password" placeholder="Crea una contraseña" [(ngModel)]="password"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Confirmar Contraseña</ion-label>
+          <ion-input type="password" placeholder="Confirma tu contraseña" [(ngModel)]="confirmPassword"></ion-input>
+        </ion-item>
+      </ion-list>
+
+      <div style="text-align: center; margin-top: 10px;">
+        <ion-button expand="block" (click)="register()" class="register-button">REGISTRARSE</ion-button>
+      </div>
+      <div style="text-align: center; margin-top: 20px;">
+        <a (click)="navigateToLogin()">¿Ya tienes cuenta? Inicia sesión aquí</a>
+      </div>
+    </div>
+  </div>
+</ion-content>

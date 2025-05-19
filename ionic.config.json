@@ -1,0 +1,7 @@
+{
+  "name": "spirum",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

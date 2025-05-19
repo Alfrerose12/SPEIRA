@@ -1,0 +1,54 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      <span style="font-weight: bold; color: #00bcd4;">LOGIN</span>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="logo-container">
+    <picture>
+      <source
+    media="(min-width:1024px)"
+    srcset="assets/LOGO SPEIRA ESCRITORIO.png"
+    />
+     <img src="assets/LOGO SPEIRA.png" alt="Speira Logo" class="responsive-logo"/>
+    </picture>
+     
+  </div>
+
+  <div class="white-box">
+
+    <div style="text-align: center; margin-top: 10px;">
+      <div>
+      <span style="font-weight: bold; color: #006dd4;">INGRESAR</span>
+      </div>
+      <span style="color: #acacac;">Iniciar sesión para continuar</span>
+    </div>
+
+    <div class="shadow-box">
+    <ion-list class="login-form">
+      <ion-item>
+        <div style="text-align: center; margin-top: 20px;">
+          <div>
+            <span style="font-weight: bold; text-align: center; color: #000000;">Correo electrónico</span>
+          </div>
+          <ion-input type="email" placeholder="Ingresa tu correo" [(ngModel)]="email"></ion-input>
+        </div>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating">Contraseña</ion-label>
+        <ion-input type="password"  placeholder="Ingresa tu contraseña" [(ngModel)]="password"></ion-input>
+      </ion-item>
+    </ion-list>
+
+    <div style="text-align: center; margin-top: 10px;">
+      <ion-button expand="block" (click)="login()" class="login-button">INGRESAR</ion-button>
+    </div>
+    <div style="text-align: center; margin-top: 20px;">
+      <a (click)="navigateToRegister()">¿No tienes cuenta? Regístrate aquí</a>
+    </div>
+  </div>
+</div>
+</ion-content>
