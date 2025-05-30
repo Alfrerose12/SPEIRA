@@ -6,35 +6,42 @@ const {
   obtenerDatosPorPeriodo,
   generarReporte,
   obtenerDatosPorNombreEstanque
-} = require('../controllers/sensorController');
+} = require('../controllers/datosController');
 
 const {
   crearEstanque,
   obtenerEstanques,
-  editarEstanque
+  editarEstanque,
+  eliminarEstanque
 } = require('../controllers/estanqueController');
 
 const {
   registrarUsuario,
+  editarUsuario,
+  eliminarUsuario,
   iniciarSesion,
   obtenerUsuarios,
-  obtenerUsuariosPorNombre
+  obtenerUsuariosPorNombre,
+  cerrarSesion
 } = require('../controllers/usuarioController');
 
 
 router.post('/datos', crearDato); 
-
-router.get('/datos/:periodo/:fecha', obtenerDatosPorPeriodo); 
-router.post('/reportes', generarReporte);
+router.get('/datos/estanque/:nombre', obtenerDatosPorNombreEstanque); 
+router.get('/datos/:periodo/:fecha', obtenerDatosPorPeriodo);
+router.post('/datos/reportes', generarReporte);
 
 router.post('/estanque', crearEstanque);
+router.put('/estanque/:nombre', editarEstanque);
+router.delete('/estanque/:nombre', eliminarEstanque);
 router.get('/estanques', obtenerEstanques);
-router.put('/estanque/:id', editarEstanque);
-router.get('/datos/estanque/nombre/:nombre', obtenerDatosPorNombreEstanque);
 
-router.post('/registrar', registrarUsuario);
-router.post('/iniciar-sesion', iniciarSesion);
+router.post('/usuario/registro', registrarUsuario);
+router.put('/usuario/:id', editarUsuario);
+router.delete('/usuario/:id', eliminarUsuario);
+router.post('/usuario/iniciar-sesion', iniciarSesion);
+router.get('/usuario/cerrar-sesion', cerrarSesion);
 router.get('/usuarios', obtenerUsuarios);
-router.get('/usuarios/nombre/:nombre', obtenerUsuariosPorNombre);
+router.get('/usuarios/:nombre', obtenerUsuariosPorNombre);
 
 module.exports = router;

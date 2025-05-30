@@ -1,3 +1,4 @@
+const { request } = require('http');
 const os = require('os');
 
 const getLocalIPAddress = () => {
@@ -23,7 +24,8 @@ const swaggerDefination = {
   },
   servers: [
     { url: 'http://localhost:3000/api', description: 'Servidor local' },
-    { url: `http://${localIP}:3000/api`, description: 'Servidor en red local' }
+    { url: `http://${localIP}:3000/api`, description: 'Servidor en red local' },
+    { url: 'https://speira.com/api', description: 'Servidor en producción' }
   ],
   paths: {
     '/datos': {
@@ -84,168 +86,10 @@ const swaggerDefination = {
         }
       }
     },
-    '/datos/estanque/nombre/{nombre}': {
-      get: {
-        tags: ['Datos'],
-        summary: 'Obtener datos por estanque',
-        description: 'Obtiene datos de un estanque específico.',
-        parameters: [
-          {
-            name: 'nombre',
-            in: 'path',
-            required: true,
-            schema: {
-              type: 'string',
-              description: 'Nombre del estanque',
-              example: 'Estanque 1'
-            }
-          }
-        ],
-        responses: {
-          200: {
-            description: 'Datos del estanque',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/DatosSensorArray'
-                }
-              }
-            }
-          },
-          404: {
-            description: 'Estanque no encontrado',
-            content: {
-              'application/json': {
-                example: { error: "Estanque no encontrado" }
-              }
-            }
-          }
-        }
-      }
-    },
-    '/estanque': {
-      post: {
-        tags: ['Estanque'],
-        summary: 'Crear estanque',
-        description: 'Crea un nuevo estanque.',
-        parameters: [
-          {
-            name: 'nombre',
-            in: 'query',
-            required: true,
-            schema: {
-              type: 'string',
-              description: 'Nombre del estanque',
-              example: 'Estanque 1'
-            }
-          }
-        ],
-        responses: {
-          201: {
-            description: 'Estanque creado exitosamente',
-            content: {
-              'application/json': {
-                example: { mensaje: "Estanque creado exitosamente" }
-              }
-            }
-          },
-          400: {
-            description: 'Error al crear el estanque',
-            content: {
-              'application/json': {
-                example: { error: "Error al crear el estanque" }
-              }
-            }
-          }
-        }
-      }
-    },
-    '/estanques': {
-      get: {
-        tags: ['Estanque'],
-        summary: 'Obtener lista de estanques',
-        description: 'Obtiene una lista de todos los estanques.',
-        responses: {
-          200: {
-            description: 'Lista de estanques',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
-                      nombre: { type: 'string', example: 'Estanque 1' },
-                      createdAt: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' },
-                      updatedAt: { type: 'string', format: 'date-time', example: '2025-01-01T15:45:00.000Z' }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          404: {
-            description: 'No se encontraron estanques',
-            content: {
-              'application/json': {
-                example: { error: "No se encontraron estanques" }
-              }
-            }
-          }
-        }
-      }
-    },
-    '/estanque/{id}': {
-      put: {
-        tags: ['Estanque'],
-        summary: 'Editar estanque',
-        description: 'Actualiza los datos de un estanque específico.',
-        parameters: [
-          {
-            name: 'id',
-            in: 'path',
-            required: true,
-            schema: {
-              type: 'string',
-              description: 'ID del estanque'
-            }
-          },
-          {
-            name: 'nombre',
-            in: 'query',
-            required: true,
-            schema: {
-              type: 'string',
-              description: 'Nombre del estanque',
-              example: 'Estanque 1'
-            }
-          }
-        ],
-        responses: {
-          200: {
-            description: 'Estanque actualizado exitosamente',
-            content: {
-              'application/json': {
-                example: { mensaje: "Estanque actualizado exitosamente" }
-              }
-            }
-          },
-          404: {
-            description: 'Estanque no encontrado',
-            content: {
-              'application/json': {
-                example: { error: "Estanque no encontrado" }
-              }
-            }
-          }
-        }
-      }
-    },
     '/datos/{periodo}/{fecha}': {
       get: {
-        tags: ['Reportes'],
-        summary: 'Obtener datos por período',
+        tags: ['Datos'],
+        summary: 'Obtener datos de sensores por período y fecha',
         description: 'Obtiene datos según el período especificado. Formatos de fecha requeridos:<br>' +
           '- Diario: YYYY-MM-DD (ej: 2025-01-01)<br>' +
           '- Semanal: YYYY-MM-DD (debe ser lunes, ej: 2025-01-06)<br>' +
@@ -325,9 +169,48 @@ const swaggerDefination = {
         }
       }
     },
-    '/reportes': {
+    '/datos/estanque/{nombre}': {
+      get: {
+        tags: ['Datos'],
+        summary: 'Obtener datos de sensores por estanque',
+        description: 'Obtiene datos de un estanque específico.',
+        parameters: [
+          {
+            name: 'nombre',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+              description: 'Nombre del estanque',
+              example: 'Estanque 1'
+            }
+          }
+        ],
+        responses: {
+          200: {
+            description: 'Datos del estanque',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/DatosSensorArray'
+                }
+              }
+            }
+          },
+          404: {
+            description: 'Estanque no encontrado',
+            content: {
+              'application/json': {
+                example: { error: "Estanque no encontrado" }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/datos/reportes': {
       post: {
-        tags: ['Reportes'],
+        tags: ['Datos'],
         summary: 'Generar reporte PDF',
         description: 'Genera un reporte PDF según el período especificado. Formatos de fecha requeridos:<br>' +
           '- Diario: YYYY-MM-DD (ej: 2025-01-01)<br>' +
@@ -420,44 +303,195 @@ const swaggerDefination = {
         }
       }
     },
-    '/registrar': {
+    '/estanque': {
+      post: {
+        tags: ['Estanque'],
+        summary: 'Crear estanque',
+        description: 'Crea un nuevo estanque.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  nombre: {
+                    type: 'string',
+                    description: 'Nombre del estanque',
+                    example: 'Estanque 1'
+                  }
+                },
+                required: ['nombre']
+              }
+            }
+          }
+        },
+        responses: {
+          201: {
+            description: 'Estanque creado exitosamente',
+            content: {
+              'application/json': {
+                example: { mensaje: "Estanque creado exitosamente" }
+              }
+            }
+          },
+          400: {
+            description: 'Error al crear el estanque',
+            content: {
+              'application/json': {
+                example: { error: "Error al crear el estanque" }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/estanque/{nombre}': {
+      put: {
+        tags: ['Estanque'],
+        summary: 'Editar estanque',
+        description: 'Actualiza los datos de un estanque específico.',
+        parameters: [
+          {
+            name: 'nombre',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+              description: 'Nombre del estanque',
+              example: 'Estanque 1'
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  nuevoNombre: {
+                    type: 'string',
+                    description: 'Nuevo nombre del estanque',
+                    example: 'Estanque 1 Modificado'
+                  }
+                },
+                required: ['nuevoNombre']
+              }
+            }
+          }
+        },
+        responses: {
+          200: {
+            description: 'Estanque actualizado exitosamente',
+            content: {
+              'application/json': {
+                example: { mensaje: "Estanque actualizado exitosamente" }
+              }
+            }
+          },
+          404: {
+            description: 'Estanque no encontrado',
+            content: {
+              'application/json': {
+                example: { error: "Estanque no encontrado" }
+              }
+            }
+          }
+        }
+      },
+      delete: {
+        tags: ['Estanque'],
+        summary: 'Eliminar estanque',
+        description: 'Elimina un estanque específico por su nombre.',
+        parameters: [
+          {
+            name: 'nombre',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+              description: 'Nombre del estanque a eliminar',
+              example: 'Estanque 1'
+            }
+          }
+        ],
+        responses: {
+          200: {
+            description: 'Estanque eliminado exitosamente',
+            content: {
+              'application/json': {
+                example: { mensaje: "Estanque eliminado exitosamente" }
+              }
+            }
+          },
+          404: {
+            description: 'Estanque no encontrado',
+            content: {
+              'application/json': {
+                example: { error: "Estanque no encontrado" }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/estanques': {
+      get: {
+        tags: ['Estanque'],
+        summary: 'Obtener lista de estanques',
+        description: 'Obtiene una lista de todos los estanques.',
+        responses: {
+          200: {
+            description: 'Lista de estanques',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
+                      nombre: { type: 'string', example: 'Estanque 1' },
+                      createdAt: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' },
+                      updatedAt: { type: 'string', format: 'date-time', example: '2025-01-01T15:45:00.000Z' }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          404: {
+            description: 'No se encontraron estanques',
+            content: {
+              'application/json': {
+                example: { error: "No se encontraron estanques" }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/usuario/registro': {
       post: {
         tags: ['Usuario'],
         summary: 'Registrar usuario',
         description: 'Registra un nuevo usuario en el sistema.',
-        parameters: [
-          {
-            name: 'nombre',
-            in: 'query',
-            required: true,
-            schema: {
-              type: 'string',
-              description: 'Nombre del usuario',
-              example: 'Juan Pérez'
-            }
-          },
-          {
-            name: 'email',
-            in: 'query',
-            required: true,
-            schema: {
-              type: 'string',
-              format: 'email',
-              description: 'Email del usuario',
-              example: 'alfonso@example.com'
-            }
-          },
-          {
-            name: 'password',
-            in: 'query',
-            required: true,
-            schema: {
-              type: 'string',
-              description: 'Contraseña del usuario',
-              example: 'password123'
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  nombre: { type: 'string', description: 'Nombre del usuario', example: 'Alfonso Pérez' },
+                  email: { type: 'string', format: 'email', description: 'Email del usuario', example: 'alfonso@example.com' },
+                  password: { type: 'string', description: 'Contraseña del usuario', example: 'password123' }
+                }
+              }
             }
           }
-        ],
+        },
         responses: {
           201: {
             description: 'Usuario registrado exitosamente',
@@ -467,7 +501,7 @@ const swaggerDefination = {
                   type: 'object',
                   properties: {
                     id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
-                    nombre: { type: 'string', example: 'Juan Pérez' },
+                    nombre: { type: 'string', example: 'Alfonso Pérez' },
                     email: { type: 'string', format: 'email', example: '' },
                     fechaCreacion: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' }
                   }
@@ -486,34 +520,137 @@ const swaggerDefination = {
         }
       }
     },
-    '/iniciar-sesion': {
+    '/usuario/{id}': {
+      put: {
+        tags: ['Usuario'],
+        summary: 'Editar usuario',
+        description: 'Actualiza los datos de un usuario específico. Se pueden enviar uno o más de los siguientes campos: nombre, email y/o contraseña.',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            description: 'ID del usuario a editar',
+            schema: {
+              type: 'string',
+              example: '60d5f484f1b2c8a4b8e4c8a4'
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  nombre: { type: 'string', description: 'Nuevo nombre del usuario', example: 'Alfonso Pérez' },
+                  email: { type: 'string', format: 'email', description: 'Nuevo correo electrónico', example: 'alfonso@example.com' },
+                  password: { type: 'string', description: 'Nueva contraseña', example: 'nuevaPassword123' }
+                },
+                required: [] // Ningún campo es obligatorio, se pueden enviar solo los que se quieren modificar
+              }
+            }
+          }
+        },
+        responses: {
+          200: {
+            description: 'Usuario editado exitosamente',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
+                    nombre: { type: 'string', example: 'Alfonso Pérez' },
+                    email: { type: 'string', format: 'email', example: 'alfonso@example.com' },
+                    fechaCreacion: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' }
+                  }
+                }
+              }
+            }
+          },
+          400: {
+            description: 'Email duplicado u otro error de validación',
+            content: {
+              'application/json': {
+                example: { error: 'El email ya está registrado por otro usuario' }
+              }
+            }
+          },
+          404: {
+            description: 'Usuario no encontrado',
+            content: {
+              'application/json': {
+                example: { error: 'Usuario no encontrado' }
+              }
+            }
+          },
+          500: {
+            description: 'Error inesperado en el servidor',
+            content: {
+              'application/json': {
+                example: { error: 'Error al editar usuario', detalles: 'Mensaje técnico del error' }
+              }
+            }
+          }
+        }
+      },
+      delete: {
+        tags: ['Usuario'],
+        summary: 'Eliminar usuario',
+        description: 'Elimina un usuario específico por su ID.',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+              description: 'ID del usuario a eliminar',
+              example: '60d5f484f1b2c8a4b8e4c8a4'
+            }
+          }
+        ],
+        responses: {
+          200: {
+            description: 'Usuario eliminado exitosamente',
+            content: {
+              'application/json': {
+                example: { mensaje: "Usuario eliminado exitosamente" }
+              }
+            }
+          },
+          404: {
+            description: 'Usuario no encontrado',
+            content: {
+              'application/json': {
+                example: { error: "Usuario no encontrado" }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/usuario/iniciar-sesion': {
       post: {
         tags: ['Usuario'],
         summary: 'Iniciar sesión',
         description: 'Inicia sesión con las credenciales del usuario.',
-        parameters: [
-          {
-            name: 'email',
-            in: 'query',
-            required: true,
-            schema: {
-              type: 'string',
-              format: 'email',
-              description: 'Email del usuario',
-              example: 'juan@example.com'
-            }
-          },
-          {
-            name: 'password',
-            in: 'query',
-            required: true,
-            schema: {
-              type: 'string',
-              description: 'Contraseña del usuario',
-              example: 'password123'
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  email: { type: 'string', format: 'email', description: 'Email del usuario', example: 'alfonso@example.com' },
+                  password: { type: 'string', description: 'Contraseña del usuario', example: 'password123' }
+                }
+              }
             }
           }
-        ],
+        },
         responses: {
           200: {
             description: 'Inicio de sesión exitoso',
@@ -523,7 +660,7 @@ const swaggerDefination = {
                   type: 'object',
                   properties: {
                     id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
-                    nombre: { type: 'string', example: 'Juan Pérez' },
+                    nombre: { type: 'string', example: 'Alfonso Pérez' },
                     email: { type: 'string', format: 'email', example: '' },
                     fechaCreacion: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' }
                   }
@@ -536,6 +673,31 @@ const swaggerDefination = {
             content: {
               'application/json': {
                 example: { error: "Credenciales inválidas" }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/usuario/cerrar-sesion': {
+      get: {
+        tags: ['Usuario'],
+        summary: 'Cerrar sesión',
+        description: 'Cierra la sesión del usuario actual.',
+        responses: {
+          200: {
+            description: 'Sesión cerrada exitosamente',
+            content: {
+              'application/json': {
+                example: { mensaje: "Sesión cerrada exitosamente" }
+              }
+            }
+          },
+          401: {
+            description: 'No se encontró sesión activa',
+            content: {
+              'application/json': {
+                example: { error: "No se encontró sesión activa" }
               }
             }
           }
@@ -558,7 +720,7 @@ const swaggerDefination = {
                     type: 'object',
                     properties: {
                       id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
-                      nombre: { type: 'string', example: 'Juan Pérez' },
+                      nombre: { type: 'string', example: 'Alfonso Pérez' },
                       email: { type: 'string', format: 'email', example: '' },
                       fechaCreacion: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' }
                     }
@@ -578,7 +740,7 @@ const swaggerDefination = {
         }
       }
     },
-    '/usuarios/nombre/{nombre}': {
+    '/usuarios/{nombre}': {
       get: {
         tags: ['Usuario'],
         summary: 'Obtener usuario por nombre',
@@ -591,7 +753,7 @@ const swaggerDefination = {
             schema: {
               type: 'string',
               description: 'Nombre del usuario',
-              example: 'Juan Pérez'
+              example: 'Alfonso Pérez'
             }
           }
         ],
@@ -604,7 +766,7 @@ const swaggerDefination = {
                   type: 'object',
                   properties: {
                     id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
-                    nombre: { type: 'string', example: 'Juan Pérez' },
+                    nombre: { type: 'string', example: 'Alfonso Pérez' },
                     email: { type: 'string', format: 'email', example: '' },
                     fechaCreacion: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' }
                   }
@@ -626,6 +788,24 @@ const swaggerDefination = {
   },
   components: {
     schemas: {
+      Usuario: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
+          nombre: { type: 'string', example: 'Alfonso Pérez' },
+          email: { type: 'string', format: 'email', example: 'alfonso.perez@example.com' },
+          fechaCreacion: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' }
+        }
+      },
+      Estanque: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
+          nombre: { type: 'string', example: 'Estanque 1' },
+          createdAt: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' },
+          updatedAt: { type: 'string', format: 'date-time', example: '2025-01-01T15:45:00.000Z' }
+        }
+      },
       DatosSensor: {
         type: 'object',
         properties: {

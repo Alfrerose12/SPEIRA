@@ -3,26 +3,60 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Speira</title>
+  <title>Speira - Inicio de Sesión</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="login.css">
   <link rel="icon" type="image/x-icon" href="img/logo_speira.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
+  <div class="bubbles">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
   <div class="container">
+    <div class="inicio">
+      <a href="/" class="regreso">
+        <i class="fa fa-arrow-left"></i> Ir a la página principal
+      </a>
+    </div>
+    <img src="img/logo_speira.png" alt="Logo de Speira" class="logo">
     <h2>Iniciar sesión</h2>
     <p>Inicia sesión para visualizar la documentación Swagger</p>
-    <form id="loginForm">
-      <label for="usuario" class="visually-hidden">Usuario</label>
-      <input type="text" id="usuario" name="nombre" placeholder="Usuario" required autocomplete="username">
-      <label for="password" class="visually-hidden">Contraseña</label>
-      <input type="password" id="password" name="password" placeholder="Contraseña" required autocomplete="current-password">
-      <button type="submit">Entrar</button>
+    <form id="loginForm" autocomplete="on">
+      <div class="form-group">
+        <label for="usuario" class="visually-hidden">Usuario o Correo</label>
+        <input type="text" id="usuario" name="usuario" placeholder="Usuario o correo" required autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="password" class="visually-hidden">Contraseña</label>
+        <input type="password" id="password" name="password" placeholder="Contraseña" required
+          autocomplete="current-password">
+      </div>
+      <button type="submit" class="boton">Ingresar</button>
     </form>
-    <div id="mensaje"></div>
   </div>
-  <script src="login.js"></script>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="login.js"></script>
 
 </html>

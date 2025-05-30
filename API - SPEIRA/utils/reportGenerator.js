@@ -1,13 +1,21 @@
 const fs = require('fs');
 const path = require('path');
+const mongoose = require('mongoose');
 const PDFDocument = require('pdfkit-table');
 const moment = require('moment-timezone');
-const DatosSensor = require('../models/sensorModel');
+const DatosSensor = require('../models/datosModel');
+const Usuarios = require('../models/usuarioModel');
 const { obtenerRangoFechas } = require('./dateCalculator');
+const rutaLogo1 = path.join(__dirname, '../utils/assets/logo_colpos.png');
+const rutaLogo2 = path.join(__dirname, '../utils/assets/logo_speira.png');
 
 const ZONA_HORARIA = 'America/Mexico_City';
 
-exports.generarReporte = async (periodo, fechaStr) => {
+exports.generarReporte = async (periodo, fechaStr, userId = 'Sistema') => {
+  const doc = new PDFDocument({ margin: 20, size: 'A4' });
+  const rutaReportes = path.join(__dirname, '../reportes', periodo);
+  if (!fs.existsSync(rutaReportes)) fs.mkdirSync(rutaReportes, { recursive: true });
+
   const { fechaInicio, fechaFin } = obtenerRangoFechas(periodo, fechaStr);
 
   let datos = await DatosSensor.find({
@@ -17,88 +25,31 @@ exports.generarReporte = async (periodo, fechaStr) => {
   if (datos.length === 0) throw new Error('No hay datos para el período seleccionado');
 
   if (periodo === 'diario') {
-    datos = agruparPorDia(datos); 
+    datos = agruparPorDia(datos);
   } else if (periodo === 'semanal') {
     datos = agruparPorSemana(datos);
   } else if (periodo === 'mensual') {
-    datos = agruparPorMes(datos); 
+    datos = agruparPorMes(datos);
   } else if (periodo === 'anual') {
-    datos = agruparPorAnio(datos); 
+    datos = agruparPorAnio(datos);
   }
 
-  const doc = new PDFDocument({ margin: 20, size: 'A4' });
-  const rutaReportes = path.join(__dirname, '../reportes', periodo);
-  if (!fs.existsSync(rutaReportes)) fs.mkdirSync(rutaReportes, { recursive: true });
-
-  const nombreArchivo = periodo === 'semanal' 
+  const nombreArchivo = periodo === 'semanal'
     ? `semanal_${moment(fechaInicio).format('YYYY-MM-DD')}_a_${moment(fechaFin).format('YYYY-MM-DD')}_reporte.pdf`
     : `${periodo}_${fechaStr}_reporte.pdf`;
-  
+
   const rutaArchivo = path.join(rutaReportes, nombreArchivo);
   const stream = fs.createWriteStream(rutaArchivo);
 
-  const configColumnas = [
-    { 
-      key: 'fecha', 
-      label: periodo === 'diario' ? 'Fecha y Hora' : 
-             (periodo === 'semanal' ? 'Semana (Lunes a Domingo)' : 
-             (periodo === 'anual' ? 'Año-Mes' : 'Fecha')),
-      format: (val) => {
-        if (periodo === 'diario') return moment(val).tz(ZONA_HORARIA).format('YYYY-MM-DD HH:mm');
-        if (periodo === 'semanal') {
-          const lunes = moment(val).tz(ZONA_HORARIA);
-          const domingo = lunes.clone().add(6, 'days');
-          return `${lunes.format('YYYY-MM-DD')} a ${domingo.format('YYYY-MM-DD')}`;
-        }
-        if (periodo === 'anual') return moment(val).tz(ZONA_HORARIA).format('YYYY-MM');
-        return moment(val).tz(ZONA_HORARIA).format('YYYY-MM-DD');
-      },
-      width: periodo === 'semanal' ? 180 : 140,
-      align: 'center'
-    },
-    { 
-      key: 'temperatura', 
-      label: 'Temperatura', 
-      format: (val) => `${val.toFixed(2)} °C`, 
-      width: 70,
-      align: 'center'
-    },
-    { 
-      key: 'ph', 
-      label: 'pH', 
-      format: (val) => `${val.toFixed(2)}`, 
-      width: 35,
-      align: 'center'
-    },
-    { 
-      key: 'salinidad', 
-      label: 'Salinidad', 
-      format: (val) => `${val.toFixed(2)} mg/L`, 
-      width: 70,
-      align: 'center'
-    },
-    { 
-      key: 'iluminacion', 
-      label: 'Iluminación', 
-      format: (val) => `${val.toFixed(2)} lúmenes`, 
-      width: 80,
-      align: 'center'
-    },
-    { 
-      key: 'humedad', 
-      label: 'Humedad', 
-      format: (val) => `${val.toFixed(2)} %`,
-      width: 80,
-      align: 'center'
-    },
-    { 
-      key: 'agitacion', 
-      label: 'Agitación', 
-      format: (val) => `${val.toFixed(2)} RPM`, 
-      width: 60,
-      align: 'center'
+  let nombreUsuario = 'Usuario desconocido';
+  if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+    const usuario = await Usuarios.findById(userId).exec();
+    if (usuario) {
+      nombreUsuario = usuario.nombre;
     }
-  ];
+  } else {
+    nombreUsuario = userId || 'Usuario desconocido'; // por si es "Sistema" u otro string válido
+  }
 
   return new Promise((resolve, reject) => {
     stream.on('finish', () => resolve(rutaArchivo));
@@ -106,28 +57,119 @@ exports.generarReporte = async (periodo, fechaStr) => {
 
     doc.pipe(stream);
 
+    try {
+      const logo1Width = 140;
+      const logo1Height = 50;
+      const logo2Width = 65;
+      const logo2Height = 65;
+      const pageWidth = doc.page.width;
+      const margin = doc.page.margins.left;
+
+      const logo1Y = 20; // Altura personalizada para el logo izquierdo
+      const logo2Y = 10; // Altura personalizada para el logo derecho
+
+      // Logo izquierdo
+      doc.image(rutaLogo1, margin, logo1Y, { width: logo1Width, height: logo1Height });
+
+      // Logo derecho
+      doc.image(rutaLogo2, pageWidth - logo2Width - margin, logo2Y, { width: logo2Width, height: logo2Height });
+
+    } catch (e) {
+      console.warn('No se pudo cargar algún logo:', e.message);
+    }
+
+    doc.moveDown(4);
+
+    const fechaGeneracion = moment().tz(ZONA_HORARIA).format('YYYY-MM-DD HH:mm:ss');
+    doc.fontSize(10).text(`Fecha y hora de generación: ${fechaGeneracion}`, { align: 'center' });
+
+    doc.moveDown(1);
+
     const tituloReporte = periodo === 'semanal'
       ? `Reporte de Monitoreo de Espirulina - Semanal (${moment(fechaInicio).format('YYYY-MM-DD')} a ${moment(fechaFin).format('YYYY-MM-DD')})`
       : `Reporte de Monitoreo de Espirulina - ${periodo} ${fechaStr}`;
 
-      doc.fontSize(16).text(tituloReporte, { 
-        align: 'center',
-        underline: false,
-        lineGap: 10,     
-        paragraphGap: 1   
-      });
-      doc.moveDown(0.5);  
+    doc.fontSize(16).text(tituloReporte, {
+      align: 'center',
+      underline: false,
+      lineGap: 10,
+      paragraphGap: 1
+    });
+    doc.moveDown(0.5);
+
+    const configColumnas = [
+      {
+        key: 'fecha',
+        label: periodo === 'diario' ? 'Fecha y Hora' :
+          (periodo === 'semanal' ? 'Semana (Lunes a Domingo)' :
+            (periodo === 'anual' ? 'Año-Mes' : 'Fecha')),
+        format: (val) => {
+          if (periodo === 'diario') return moment(val).tz(ZONA_HORARIA).format('YYYY-MM-DD HH:mm');
+          if (periodo === 'semanal') {
+            const lunes = moment(val).tz(ZONA_HORARIA);
+            const domingo = lunes.clone().add(6, 'days');
+            return `${lunes.format('YYYY-MM-DD')} a ${domingo.format('YYYY-MM-DD')}`;
+          }
+          if (periodo === 'anual') return moment(val).tz(ZONA_HORARIA).format('YYYY-MM');
+          return moment(val).tz(ZONA_HORARIA).format('YYYY-MM-DD');
+        },
+        width: periodo === 'semanal' ? 180 : 140,
+        align: 'center'
+      },
+      {
+        key: 'temperatura',
+        label: 'Temperatura',
+        format: (val) => `${val.toFixed(2)} °C`,
+        width: 70,
+        align: 'center'
+      },
+      {
+        key: 'ph',
+        label: 'pH',
+        format: (val) => `${val.toFixed(2)}`,
+        width: 35,
+        align: 'center'
+      },
+      {
+        key: 'salinidad',
+        label: 'Salinidad',
+        format: (val) => `${val.toFixed(2)} mg/L`,
+        width: 70,
+        align: 'center'
+      },
+      {
+        key: 'iluminacion',
+        label: 'Iluminación',
+        format: (val) => `${val.toFixed(2)} lúmenes`,
+        width: 80,
+        align: 'center'
+      },
+      {
+        key: 'humedad',
+        label: 'Humedad',
+        format: (val) => `${val.toFixed(2)} %`,
+        width: 80,
+        align: 'center'
+      },
+      {
+        key: 'agitacion',
+        label: 'Agitación',
+        format: (val) => `${val.toFixed(2)} RPM`,
+        width: 60,
+        align: 'center'
+      }
+    ];
 
     const tabla = {
       headers: configColumnas.map(col => col.label),
-      rows: datos.map(item => 
+      rows: datos.map(item =>
         configColumnas.map(col => col.format(item[col.key]))
-      ) 
+      )
     };
 
     const columnOptions = {};
     configColumnas.forEach((col, index) => {
-      columnOptions[index] = { 
+      columnOptions[index] = {
         width: col.width,
         align: col.align
       };
@@ -137,10 +179,10 @@ exports.generarReporte = async (periodo, fechaStr) => {
       prepareHeader: () => {
         doc.font('Helvetica-Bold').fontSize(10);
       },
-      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+      prepareRow: () => {
         doc.font('Helvetica').fontSize(9);
       },
-      columnOptions: columnOptions,
+      columnOptions,
       padding: [5, 5, 5, 5],
       divider: {
         header: { disabled: false, width: 0.5, color: '#000000' },
@@ -165,11 +207,9 @@ function agruparPorDia(datos) {
 
 function agruparPorSemana(datos) {
   const agrupados = {};
-  
   datos.forEach(dato => {
     const fechaDato = moment(dato.fecha).tz(ZONA_HORARIA);
     const lunesSemana = fechaDato.clone().startOf('week').format('YYYY-MM-DD');
-    
     if (!agrupados[lunesSemana]) agrupados[lunesSemana] = [];
     agrupados[lunesSemana].push(dato);
   });

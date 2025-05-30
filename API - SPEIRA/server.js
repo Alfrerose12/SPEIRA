@@ -1,5 +1,6 @@
 require('dotenv').config();
 const os = require('os');
+const cors = require('cors');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const auth = require('./middleware/auth');
@@ -10,6 +11,12 @@ const especificacionSwagger = require('./config/swagger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(cors({
+  origin: 'http://localhost:8100', 
+  credentials: true
+}));
+
 
 const getLocalIPAddress = () => {
   const interfaces = os.networkInterfaces();
@@ -51,6 +58,5 @@ app.listen(PORT, '0.0.0.0', () => {
   const localIP = getLocalIPAddress();
   console.log(`🚀 Servidor funcionando en:`);
   console.log(`  📍 Local: http://localhost:${PORT}`);
-  console.log(`  🌐 Red: http://${localIP}:${PORT}`);
-  console.log(`  📚 Documentación Swagger: http://localhost:${PORT}/api-docs`);
+  console.log(`  🌐 Red Local: http://${localIP}:${PORT}`);
 });

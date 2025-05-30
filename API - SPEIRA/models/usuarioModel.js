@@ -16,9 +16,17 @@ const UsuarioSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    fechaCreacion: {
+    createdAt: {
         type: Date,
         default: moment.tz("America/Mexico_City").format()
+    },
+    updatedAt: {
+        type: Date,
+        default: moment.tz("America/Mexico_City").format()
+    },
+    deletedAt: {
+        type: Date,
+        default: null
     }
 });
 
