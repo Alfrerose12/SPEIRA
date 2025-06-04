@@ -1,0 +1,134 @@
+.ingresar-title {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.8rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #00b894 0%, #0984e3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none; /* Opcional: elimina sombra si deseas un look más limpio */
+    letter-spacing: 1px;
+  }
+  ion-content {
+      position: relative;
+      overflow: hidden;
+      --background: none;
+      background: linear-gradient(135deg, #0e6d2d 0%, #0984e3 100%);
+    }
+    
+    /* Centrado del contenido */
+    .white-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Caja con sombra para el formulario */
+    .shadow-box {
+      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    
+    /* Logo centrado */
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+    
+    /* Logo responsivo */
+    .responsive-logo {
+      max-width: 80px;
+      max-height: 80px;
+      height: auto;
+    }
+    
+    @media(min-width: 1024px) {
+      .responsive-logo {
+        max-width: 150px;
+        max-height: 150px;
+      }
+    
+      .shadow-box {
+        max-width: 450px;
+      }
+    }
+    
+    /* Botón de login */
+    .login-button {
+      --background: #00bcd4;
+      --color: #ffffff;
+      font-weight: bold;
+    }
+    
+    /* Burbujas animadas */
+    .bubbles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+    
+    .bubbles span {
+      position: absolute;
+      display: block;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.3); /* más claro */
+      border-radius: 50%;
+      animation: rise 10s infinite ease-in;
+      bottom: -100px;
+      filter: blur(0.5px); /* blur más suave */
+      border: 1px solid rgba(255, 255, 255, 0.479); /* borde tenue */
+    }
+    
+    .bubbles span:nth-child(1) { left: 10%; animation-delay: 0s; width: 60px; height: 60px; }
+    .bubbles span:nth-child(2) { left: 20%; animation-delay: 2s; }
+    .bubbles span:nth-child(3) { left: 35%; animation-delay: 4s; width: 80px; height: 80px; }
+    .bubbles span:nth-child(4) { left: 50%; animation-delay: 1s; }
+    .bubbles span:nth-child(5) { left: 65%; animation-delay: 3s; width: 50px; height: 50px; }
+    .bubbles span:nth-child(6) { left: 75%; animation-delay: 5s; }
+    .bubbles span:nth-child(7) { left: 85%; animation-delay: 6s; width: 70px; height: 70px; }
+    .bubbles span:nth-child(8) { left: 90%; animation-delay: 1.5s; }
+    .bubbles span:nth-child(9) { left: 5%; animation-delay: 3.5s; }
+    .bubbles span:nth-child(10){ left: 95%; animation-delay: 0.5s; width: 100px; height: 100px; }
+    
+    @keyframes rise {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.3;
+      }
+      50% {
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateY(-1200px) scale(1.2);
+        opacity: 0;
+      }
+    }
+    .custom-input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #a7dcd8;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      box-sizing: border-box;
+      background-color: #eafaf9;
+      --highlight-color-focused: transparent; /* elimina el subrayado azul de ion-item */
+      --padding-start: 0;
+      --padding-end: 0;
+    }
+     

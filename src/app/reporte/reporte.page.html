@@ -1,0 +1,31 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Reporte</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="form-container">
+  <form>
+    <!-- Campo para seleccionar el período -->
+    <ion-item>
+      <ion-label position="floating">Periodo</ion-label>
+      <ion-select [(ngModel)]="reporte.periodo" (ionChange)="actualizarFecha()">
+        <ion-select-option value="diario">Diario</ion-select-option>
+        <ion-select-option value="semanal">Semanal</ion-select-option>
+        <ion-select-option value="mensual">Mensual</ion-select-option>
+        <ion-select-option value="anual">Anual</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Campo para mostrar la fecha generada -->
+    <ion-item>
+      <ion-label position="floating">Fecha</ion-label>
+      <ion-input type="text" [(ngModel)]="reporte.fecha" placeholder="Ingresa la fecha"></ion-input>
+    </ion-item>
+
+    <!-- Botón para generar el reporte -->
+    <ion-button expand="full" (click)="generarReporte()">Generar Reporte</ion-button>
+  </form>
+</div>
+</ion-content>

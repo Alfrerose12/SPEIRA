@@ -5,12 +5,8 @@ import { TabsPage } from './tabs.page';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: '/tab1', // Cambia esto si quieres redirigir a otra página
+    redirectTo: '/inicio', // Cambia esto si quieres redirigir a otra página
     pathMatch: 'full'
-  },
-  {
-    path: 'tab1',
-    loadChildren: () => import('../tab1/tab1.module').then(m => m.Tab1PageModule)
   },
   {
     path: 'tab2',

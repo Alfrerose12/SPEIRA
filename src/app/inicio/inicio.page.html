@@ -1,13 +1,75 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>inicio</ion-title>
-  </ion-toolbar>
+<ion-header [translucent]="true"> 
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">inicio</ion-title>
-    </ion-toolbar>
-  </ion-header>
+
+  <div class="bubbles">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <div class="white-box">
+    <div class="shadow-box">
+
+      <div class="logo-container">
+        <picture>
+          <source media="(min-width:1024px)" srcset="assets/LOGO SPEIRA ESCRITORIO.png" />
+          <img src="assets/LOGO SPEIRA.png" alt="Speira Logo" class="responsive-logo" />
+        </picture>
+      </div>
+
+      <div style="text-align: center; margin-top: 10px;">
+        <div>
+          <span class="ingresar-title">Iniciar sesión</span>
+        </div>
+        <span style="color: #acacac;">Iniciar sesión para continuar</span>
+      </div>
+
+      <ion-list class="login-form">
+        <ion-item>
+          <div style=" text-align: center; margin-top: 20px; width: 100%;">
+            <div>
+              <span style="font-weight: bold; text-align: center; color: #006dd4;">Usuario o Correo electrónico</span>
+            </div>
+            <ion-input
+              type="email"
+              class="custom-input"
+              placeholder="Ingresa tu usuario o correo electrónico"
+              [(ngModel)]="email">
+            </ion-input>
+          </div>
+        </ion-item>
+
+        <ion-item>
+          <div style="text-align: center; margin-top: 20px; width: 100%;">
+            <div>
+              <span style="font-weight: bold; text-align: center; color: #006dd4;">Contraseña</span>
+            </div>
+            <ion-input
+              type="password"
+              class="custom-input"
+              placeholder="Ingresa tu contraseña"
+              [(ngModel)]="password">
+            </ion-input>
+          </div>
+        </ion-item>
+      </ion-list>
+
+      <div style="text-align: center; margin-top: 10px;">
+        <ion-button expand="block" (click)="login()" class="login-button" [disabled]="loading">
+          <ion-spinner *ngIf="loading" name="crescent" slot="start"></ion-spinner>
+          {{ loading ? 'Ingresando...' : 'INGRESAR' }}
+        </ion-button>
+      </div>
+      
+      <div style="text-align: center; margin-top: 20px;">
+        <ion-button fill="clear" (click)="navigateToRegister()" class="link-button">
+          ¿No tienes cuenta? Regístrate aquí
+        </ion-button>
+      </div>
+
+      
+
+    </div>
+  </div>
 </ion-content>

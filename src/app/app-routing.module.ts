@@ -1,25 +1,32 @@
 import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { PreloadAllModules, RouterModule, Routes } from '@angular/router'; // ✅ FALTABA ESTA LÍNEA
 
 const routes: Routes = [
   {
     path: '',
-    loadChildren: () => import('./tab1/tab1.module').then(m => m.Tab1PageModule)
+    redirectTo: 'inicio',
+    pathMatch: 'full'
+  },
+  {
+    path: 'inicio',
+    loadChildren: () => import('./inicio/inicio.module').then(m => m.InicioPageModule)
   },
   {
     path: 'register',
     loadChildren: () => import('./register/register.module').then(m => m.RegisterPageModule)
   },
   {
-    path: 'inicio',
-    loadChildren: () => import('./inicio/inicio.module').then( m => m.InicioPageModule)
+    path: 'home',
+    loadChildren: () => import('./home/home.module').then(m => m.HomePageModule)
+  },
+  {
+    path: 'reporte',
+    loadChildren: () => import('./reporte/reporte.module').then( m => m.ReportePageModule)
   }
 ];
 
 @NgModule({
-  imports: [
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
-  ],
+  imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })],
   exports: [RouterModule]
 })
 export class AppRoutingModule {}

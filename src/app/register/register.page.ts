@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { ApiService } from '../services/api.service';
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.scss'],
-  standalone: false,
+  standalone: false
 })
 export class RegisterPage {
   name: string = '';
@@ -13,19 +15,63 @@ export class RegisterPage {
   password: string = '';
   confirmPassword: string = '';
 
-  constructor(private router: Router) {}
+  constructor(
+    private apiService: ApiService,
+    private alertCtrl: AlertController,
+    private router: Router
+  ) {}
 
-  register() {
-    if (this.password !== this.confirmPassword) {
-      console.error('Las contraseñas no coinciden');
+  async register() {
+    // Validar que todos los campos estén llenos
+    if (!this.name || !this.email || !this.password || !this.confirmPassword) {
+      const alert = await this.alertCtrl.create({
+        header: 'Error',
+        message: 'Todos los campos son obligatorios.',
+        buttons: ['OK']
+      });
+      await alert.present();
       return;
     }
-    console.log('Nombre:', this.name, 'Correo:', this.email, 'Contraseña:', this.password);
-    // Aquí puedes agregar lógica adicional para el registro
-    this.router.navigate(['/inicio']);
+
+    // Validar que las contraseñas coincidan
+    if (this.password !== this.confirmPassword) {
+      const alert = await this.alertCtrl.create({
+        header: 'Error',
+        message: 'Las contraseñas no coinciden.',
+        buttons: ['OK']
+      });
+      await alert.present();
+      return;
+    }
+
+    // Llamar al servicio para registrar al usuario
+    this.apiService.register({ 
+      nombre: this.name, 
+      email: this.email, 
+      password: this.password, 
+    }).subscribe({
+      next: async (res: any) => {
+        const alert = await this.alertCtrl.create({
+          header: 'Éxito',
+          message: 'Usuario registrado correctamente.',
+          buttons: ['OK']
+        });
+        await alert.present();
+        this.router.navigate(['/inicio']);
+      },
+      error: async (err: any) => {
+        const errorMessage = err.error?.error || 'Error al registrar. Intenta de nuevo.';
+        const alert = await this.alertCtrl.create({
+          header: 'Error',
+          message: errorMessage,
+          buttons: ['OK']
+        });
+        await alert.present();
+      }
+    });
   }
 
   navigateToLogin() {
-    this.router.navigate(['/tab1']); // Cambia '/login' por la ruta de tu página de inicio de sesión
+    this.router.navigate(['/inicio']); // Redirigir al inicio de sesión
   }
 }

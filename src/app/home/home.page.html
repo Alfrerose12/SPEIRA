@@ -1,0 +1,23 @@
+<ion-content [fullscreen]="true">
+  <div class="bubbles">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <div class="dynamic-images">
+    <p>Estanques</p>
+    <img src="assets/images/estanque.png" alt="Estanque" (click)="onImageClick('Estanque', $event)">
+
+    <p>Cajas</p>
+    <img src="assets/images/caja_de_plastico.png" alt="Caja de plástico" (click)="onImageClick('Caja de plástico', $event)">
+
+    <p>Piscinas</p>
+    <img src="assets/images/tina_blanca.png" alt="Tina blanca" (click)="onImageClick('Piscina', $event)">
+  </div>
+
+  <div>
+    <ion-button expand="block" (click)="navigateToReporte()" class="report-button">
+      Generar Reporte
+    </ion-button>
+  </div>
+</ion-content>

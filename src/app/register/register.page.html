@@ -1,56 +1,84 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      <span style="font-weight: bold; color: #00bcd4;">REGISTRO</span>
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-header [translucent]="true"></ion-header>
 
 <ion-content [fullscreen]="true">
-  <div class="logo-container">
-    <picture>
-      <source
-        media="(min-width:1024px)"
-        srcset="assets/LOGO SPEIRA ESCRITORIO.png"
-      />
-      <img src="assets/LOGO SPEIRA.png" alt="Speira Logo" class="responsive-logo" />
-    </picture>
+
+  <!-- Burbujas de fondo -->
+  <div class="bubbles">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
   </div>
 
+  <!-- Caja blanca centrada con el formulario -->
   <div class="white-box">
-    <div style="text-align: center; margin-top: 10px;">
-      <div>
-        <span style="font-weight: bold; color: #006dd4;">REGISTRARSE</span>
-      </div>
-      <span style="color: #acacac;">Crea una cuenta para continuar</span>
-    </div>
-
     <div class="shadow-box">
-      <ion-list class="register-form">
+
+      <!-- Logo -->
+      <div class="logo-container">
+        <picture>
+          <source media="(min-width:1024px)" srcset="assets/LOGO SPEIRA ESCRITORIO.png" />
+          <img src="assets/LOGO SPEIRA.png" alt="Speira Logo" class="responsive-logo" />
+        </picture>
+      </div>
+
+      <!-- Título -->
+      <div style="text-align: center; margin-top: 10px;">
+        <div>
+          <span class="ingresar-title">Registrarse</span>
+        </div>
+        <span style="color: #acacac;">Regístrate para continuar</span>
+      </div>
+
+      <!-- Formulario -->
+      <ion-list class="login-form">
+
         <ion-item>
-          <ion-label position="floating">Nombre</ion-label>
-          <ion-input type="text" placeholder="Ingresa tu nombre" [(ngModel)]="name"></ion-input>
+          <div style="text-align: center; margin-top: 20px; width: 100%;">
+            <div>
+              <span style="font-weight: bold; text-align: center; color: #006dd4;">Nombre completo</span>
+            </div>
+            <ion-input type="text" class="custom-input" placeholder="Ingresa tu nombre" [(ngModel)]="name"></ion-input>
+          </div>
         </ion-item>
+
         <ion-item>
-          <ion-label position="floating">Correo electrónico</ion-label>
-          <ion-input type="email" placeholder="Ingresa tu correo" [(ngModel)]="email"></ion-input>
+          <div style="text-align: center; margin-top: 20px; width: 100%;">
+            <div>
+              <span style="font-weight: bold; text-align: center; color: #006dd4;">Correo electrónico</span>
+            </div>
+            <ion-input type="email" class="custom-input" placeholder="Ingresa tu correo" [(ngModel)]="email"></ion-input>
+          </div>
         </ion-item>
+
         <ion-item>
-          <ion-label position="floating">Contraseña</ion-label>
-          <ion-input type="password" placeholder="Crea una contraseña" [(ngModel)]="password"></ion-input>
+          <div style="text-align: center; margin-top: 20px; width: 100%;">
+            <div>
+              <span style="font-weight: bold; text-align: center; color: #006dd4;">Contraseña</span>
+            </div>
+            <ion-input type="password" class="custom-input" placeholder="Crea una contraseña" [(ngModel)]="password"></ion-input>
+          </div>
         </ion-item>
+
         <ion-item>
-          <ion-label position="floating">Confirmar Contraseña</ion-label>
-          <ion-input type="password" placeholder="Confirma tu contraseña" [(ngModel)]="confirmPassword"></ion-input>
+          <div style="text-align: center; margin-top: 20px; width: 100%;">
+            <div>
+              <span style="font-weight: bold; text-align: center; color: #006dd4;">Confirmar contraseña</span>
+            </div>
+            <ion-input type="password" class="custom-input" placeholder="Confirma tu contraseña" [(ngModel)]="confirmPassword"></ion-input>
+          </div>
         </ion-item>
+
       </ion-list>
 
+      <!-- Botón de registro -->
       <div style="text-align: center; margin-top: 10px;">
-        <ion-button expand="block" (click)="register()" class="register-button">REGISTRARSE</ion-button>
+        <ion-button expand="block" (click)="register()" class="login-button">REGISTRARSE</ion-button>
       </div>
+
+      <!-- Enlace para login -->
       <div style="text-align: center; margin-top: 20px;">
         <a (click)="navigateToLogin()">¿Ya tienes cuenta? Inicia sesión aquí</a>
       </div>
+
     </div>
   </div>
 </ion-content>

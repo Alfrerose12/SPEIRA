@@ -1,0 +1,40 @@
+/* Contenedor principal del formulario */
+.form-container {
+    padding: 20px;
+    max-width: 400px;
+    margin: 0 auto; /* Centrar el formulario */
+    background-color: #f9f9f9; /* Fondo claro */
+    border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra */
+  }
+  
+  /* Estilo para los campos del formulario */
+  .form-item {
+    margin-bottom: 20px; /* Espaciado entre los campos */
+  }
+  
+  /* Estilo para el botón */
+  .report-button {
+    background-color: #006dd4; /* Color de fondo */
+    color: #ffffff; /* Color del texto */
+    border-radius: 25px; /* Bordes redondeados */
+    font-weight: bold; /* Texto en negrita */
+    padding: 10px 20px; /* Espaciado interno */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra */
+    transition: background-color 0.3s ease, transform 0.2s ease-in-out; /* Transiciones */
+  }
+  
+  .report-button:hover {
+    background-color: #005bb5; /* Color de fondo al pasar el cursor */
+    transform: scale(1.05); /* Efecto de aumento */
+  }
+  
+  .report-button:active {
+    transform: scale(0.95); /* Efecto de clic */
+  }
+  
+  /* Contenedor del botón */
+  .button-container {
+    text-align: center;
+    margin-top: 20px;
+  }
