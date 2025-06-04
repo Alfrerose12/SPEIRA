@@ -303,11 +303,226 @@ const swaggerDefination = {
         }
       }
     },
+    '/sensor': {
+      post: {
+        tags: ['Sensor'],
+        summary: 'Crear sensor',
+        description: 'Crea un nuevo sensor asociado a un estanque por su nombre.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  nombre: {
+                    type: 'string',
+                    description: 'Nombre del sensor',
+                    example: 'Sensor 1'
+                  },
+                  tipo: {
+                    type: 'string',
+                    description: 'Tipo de sensor (temperatura, pH, etc.)',
+                    example: 'temperatura'
+                  },
+                  ubicacion: {
+                    type: 'string',
+                    description: 'Nombre del estanque al que pertenece el sensor',
+                    example: 'Estanque 1'
+                  }
+                },
+                required: ['nombre', 'tipo', 'ubicacion']
+              }
+            }
+          }
+        },
+        responses: {
+          201: {
+            description: 'Sensor creado exitosamente',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/Sensor'
+                }
+              }
+            }
+          },
+          400: {
+            description: 'Error al crear el sensor',
+            content: {
+              'application/json': {
+                example: { error: "Error al crear el sensor" }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/sensor/{id}': {
+      put: {
+        tags: ['Sensor'],
+        summary: 'Editar sensor',
+        description: 'Actualiza los datos de un sensor específico.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  nombre: {
+                    type: 'string',
+                    description: 'Nuevo nombre del sensor',
+                    example: 'Sensor 1 Modificado'
+                  },
+                  tipo: {
+                    type: 'string',
+                    description: 'Nuevo tipo de sensor (temperatura, pH, etc.)',
+                    example: 'pH'
+                  },
+                  estanque: {
+                    type: 'string',
+                    description: 'ID del estanque al que pertenece el sensor',
+                    example: '60d5f484f1b2c8a4b8e4c8a4'
+                  }
+                },
+                required: ['nombre', 'tipo', 'estanque']
+              }
+            }
+          }
+        },
+        responses: {
+          200: {
+            description: 'Sensor actualizado exitosamente',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/Sensor'
+                }
+              }
+            }
+          },
+          404: {
+            description: 'Sensor no encontrado',
+            content: {
+              'application/json': {
+                example: { error: "Sensor no encontrado" }
+              }
+            }
+          }
+        }
+      },
+      delete: {
+        tags: ['Sensor'],
+        summary: 'Eliminar sensor',
+        description: 'Elimina un sensor específico por su ID.',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+              description: 'ID del sensor a eliminar',
+              example: '60d5f484f1b2c8a4b8e4c8a4'
+            }
+          }
+        ],
+        responses: {
+          200: {
+            description: 'Sensor eliminado exitosamente',
+            content: {
+              'application/json': {
+                example: { mensaje: "Sensor eliminado exitosamente" }
+              }
+            }
+          },
+          404: {
+            description: 'Sensor no encontrado',
+            content: {
+              'application/json': {
+                example: { error: "Sensor no encontrado" }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/sensores': {
+      get: {
+        tags: ['Sensor'],
+        summary: 'Obtener lista de sensores',
+        description: 'Obtiene una lista de todos los sensores registrados.',
+        responses: {
+          200: {
+            description: 'Lista de sensores',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/Sensor'
+                  }
+                }
+              }
+            }
+          },
+          404: {
+            description: 'No se encontraron sensores',
+            content: {
+              'application/json': {
+                example: { error: "No se encontraron sensores" }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/sensores/estanque/{nombreEstanque}': {
+      get: {
+        tags: ['Sensor'],
+        summary: 'Obtener sensores por estanque',
+        description: 'Obtiene todos los sensores asociados a un estanque específico.',
+        parameters: [
+          {
+            name: 'nombreEstanque',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+              description: 'Nombre del estanque',
+              example: 'Estanque 1'
+            }
+          }
+        ],
+        responses: {
+          200: {
+            description: 'Lista de sensores del estanque',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
+                      nombre: { type: 'string', example: 'Sensor 1' },
+                      tipo: { type: 'string', example: 'temperatura' },
+                      estanque: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     '/estanque': {
       post: {
         tags: ['Estanque'],
         summary: 'Crear estanque',
-        description: 'Crea un nuevo estanque.',
+        description: 'Crea un nuevo estanque en el sistema.',
         requestBody: {
           required: true,
           content: {
@@ -331,7 +546,15 @@ const swaggerDefination = {
             description: 'Estanque creado exitosamente',
             content: {
               'application/json': {
-                example: { mensaje: "Estanque creado exitosamente" }
+                schema: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
+                    nombre: { type: 'string', example: 'Estanque 1' },
+                    createdAt: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' },
+                    updatedAt: { type: 'string', format: 'date-time', example: '2025-01-01T15:45:00.000Z' }
+                  }
+                }
               }
             }
           },
@@ -794,7 +1017,19 @@ const swaggerDefination = {
           id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
           nombre: { type: 'string', example: 'Alfonso Pérez' },
           email: { type: 'string', format: 'email', example: 'alfonso.perez@example.com' },
-          fechaCreacion: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' }
+          createdAt: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' },
+          updatedAt: { type: 'string', format: 'date-time', example: '2025-01-01T15:45:00.000Z' }
+        }
+      },
+      Sensor: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
+          nombre: { type: 'string', example: 'Sensor 1' },
+          tipo: { type: 'string', example: 'temperatura' },
+          ubicacion: { type: 'string', example: 'Estanque 1' },
+          createdAt: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' },
+          updatedAt: { type: 'string', format: 'date-time', example: '2025-01-01T15:45:00.000Z' }
         }
       },
       Estanque: {

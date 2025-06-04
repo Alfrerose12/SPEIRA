@@ -28,4 +28,4 @@ EstanqueSchema.pre('save', function (next) {
     next();
 });
 
-module.exports = mongoose.model('Estanque', EstanqueSchema);
+module.exports = mongoose.model('Estanques', EstanqueSchema);

@@ -6,7 +6,6 @@ document.getElementById('loginForm').onsubmit = async function (e) {
 
     const datos = { password };
 
-    // Si tiene un @ se asume que es correo, si no, es nombre
     if (usuario.includes('@')) {
         datos.email = usuario;
     } else {
@@ -22,8 +21,41 @@ document.getElementById('loginForm').onsubmit = async function (e) {
 
         const data = await res.json();
         if (res.ok) {
-            window.location.href = '/api-docs';
-        } else {
+            Swal.fire({
+                title: 'Verificando credenciales',
+                html: `
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <img src="https://cdn-icons-png.flaticon.com/512/5957/5957596.png" width="60" style="margin-bottom: 10px;" />
+        <p style="font-size: 16px;">Por favor espera un momento...</p>
+      </div>
+    `,
+                background: '#f0f2f5',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                timer: 2000,
+                timerProgressBar: true
+            }).then(() => {
+                return Swal.fire({
+                    icon: 'success',
+                    title: '¡Bienvenido!',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true,
+                    background: '#d4edda',
+                    color: '#155724',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                });
+            }).then(() => {
+                window.location.href = '/api-docs';
+            });
+        }
+
+        else {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -55,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.add('fade-out');
             setTimeout(() => {
                 window.location.href = this.href;
-            }, 400); // Tiempo igual al de la animación
+            }, 400);
         });
     }
 });

@@ -9,6 +9,14 @@ const {
 } = require('../controllers/datosController');
 
 const {
+  crearSensor,
+  obtenerSensores,
+  editarSensor,
+  eliminarSensor,
+  obtenerSensoresPorEstanque
+} = require('../controllers/sensorController');
+
+const {
   crearEstanque,
   obtenerEstanques,
   editarEstanque,
@@ -43,5 +51,11 @@ router.post('/usuario/iniciar-sesion', iniciarSesion);
 router.get('/usuario/cerrar-sesion', cerrarSesion);
 router.get('/usuarios', obtenerUsuarios);
 router.get('/usuarios/:nombre', obtenerUsuariosPorNombre);
+
+router.post('/sensor', crearSensor);
+router.put('/sensor/:id', editarSensor);
+router.delete('/sensor/:id', eliminarSensor);
+router.get('/sensores', obtenerSensores);
+router.get('/sensores/estanque/:nombreEstanque', obtenerSensoresPorEstanque);
 
 module.exports = router;
