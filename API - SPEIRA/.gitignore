@@ -1,0 +1,32 @@
+### Node ###
+node_modules/
+.npm
+.npmrc
+npm-debug.log*
+
+# Logs
+yarn-debug.log*
+yarn-error.log*
+*.log
+logs/
+
+# Environment
+.env
+.env.*
+
+# Build
+dist/
+build/
+coverage/
+.out/
+
+### Docker ###
+!.dockerignore
+docker-compose.override.yml
+docker-compose.*.yml
+
+### IDEs ###
+.vscode/
+.idea/
+*.swp
+*.swo
