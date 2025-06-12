@@ -217,46 +217,44 @@ const swaggerDefination = {
           '- Semanal: YYYY-MM-DD (debe ser lunes, ej: 2025-01-06)<br>' +
           '- Mensual: YYYY-MM (ej: 2025-01)<br>' +
           '- Anual: YYYY (ej: 2025)',
-        parameters: [
-          {
-            name: 'periodo',
-            in: 'query',
-            required: true,
-            schema: {
-              type: 'string',
-              enum: ['diario', 'semanal', 'mensual', 'anual'],
-              example: 'diario',
-              description: 'Tipo de reporte a generar'
-            }
-          },
-          {
-            name: 'fecha',
-            in: 'query',
-            required: true,
-            schema: {
-              oneOf: [
-                {
-                  type: 'string',
-                  pattern: '^\\d{4}-\\d{2}-\\d{2}$',
-                  description: 'Formato para diario/semanal',
-                  example: '2025-01-01'
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  periodo: {
+                    type: 'string',
+                    enum: ['diario', 'semanal', 'mensual', 'anual'],
+                    description: 'Período del reporte'
+                  },
+                  fecha: {
+                    type: 'string',
+                    oneOf: [
+                      {
+                        pattern: '^\\d{4}-\\d{2}-\\d{2}$',
+                        description: 'Formato para diario/semanal',
+                        example: '2025-01-01'
+                      },
+                      {
+                        pattern: '^\\d{4}-\\d{2}$',
+                        description: 'Formato para mensual',
+                        example: '2025-01'
+                      },
+                      {
+                        pattern: '^\\d{4}$',
+                        description: 'Formato para anual',
+                        example: '2025'
+                      }
+                    ]
+                  }
                 },
-                {
-                  type: 'string',
-                  pattern: '^\\d{4}-\\d{2}$',
-                  description: 'Formato para mensual',
-                  example: '2025-01'
-                },
-                {
-                  type: 'string',
-                  pattern: '^\\d{4}$',
-                  description: 'Formato para anual',
-                  example: '2025'
-                }
-              ]
+                required: ['periodo', 'fecha']
+              }
             }
           }
-        ],
+        },
         responses: {
           200: {
             description: 'PDF generado exitosamente',
@@ -265,7 +263,8 @@ const swaggerDefination = {
                 schema: {
                   type: 'string',
                   format: 'binary'
-                }
+                },
+                example: 'data:application/pdf;base64,...'
               }
             }
           },

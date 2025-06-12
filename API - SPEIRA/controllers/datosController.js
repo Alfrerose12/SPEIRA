@@ -190,7 +190,7 @@ exports.obtenerDatosPorNombreEstanque = async (req, res) => {
 
 exports.generarReporte = async (req, res) => {
   try {
-    const { periodo, fecha } = req.query;
+    const { periodo, fecha } = req.body;
 
     if (!PERIODOS_VALIDOS.includes(periodo)) {
       return res.status(400).json({

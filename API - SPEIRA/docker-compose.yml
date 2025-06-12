@@ -10,6 +10,8 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
+      - ./reportes:/usr/src/app/reportes  
+      - ./utils/assets:/usr/src/app/utils/assets  
     depends_on:
       - mongo
     networks:

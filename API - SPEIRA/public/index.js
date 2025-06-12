@@ -9,7 +9,15 @@ document.querySelectorAll('a').forEach(link => {
             document.body.classList.add('fade-out');
             setTimeout(() => {
                 window.location.href = this.href;
-            }, 400); // tiempo igual al de la animación
+            }, 400);
         });
     }
 });
+
+const toggleBtn = document.getElementById('toggleFooterBtn');
+const miniFooter = document.getElementById('miniFooter');
+
+toggleBtn.addEventListener('click', () => {
+    miniFooter.classList.toggle('hidden');
+});
+
