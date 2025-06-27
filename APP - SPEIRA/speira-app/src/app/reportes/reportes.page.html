@@ -1,0 +1,60 @@
+<ion-header [translucent]="true">
+</ion-header>
+
+<ion-content class="reportes-content" [fullscreen]="true">
+
+  <div class="bubbles">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <div class="report-card">
+    <img src="assets/images/logo_speira.png" alt="Logo" class="report-logo">
+    <h2 class="report-title">Generar Reporte</h2>
+    <p class="report-subtitle">Ingresa los datos necesarios</p>
+
+    <form class="report-form" [formGroup]="reportForm" (ngSubmit)="onSubmit()">
+      <ion-item class="form-item" lines="none">
+        <ion-label position="floating" class="input-label">Periodo</ion-label>
+        <ion-select formControlName="reportType" class="form-input">
+          <ion-select-option value="daily">Diario</ion-select-option>
+          <ion-select-option value="weekly">Semanal</ion-select-option>
+          <ion-select-option value="monthly">Mensual</ion-select-option>
+          <ion-select-option value="yearly">Anual</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <div class="error-message"
+        *ngIf="reportForm.get('reportType')?.errors?.['required'] && reportForm.get('reportType')?.touched">
+        El periodo es requerido
+      </div>
+
+      <ion-item class="form-item" lines="none">
+        <ion-label position="floating" class="input-label">Fecha a consultar</ion-label>
+        <ion-datetime formControlName="date" class="form-input"></ion-datetime>
+      </ion-item>
+
+      <div class="error-message"
+        *ngIf="reportForm.get('date')?.errors?.['required'] && reportForm.get('date')?.touched">
+        La fecha a consultar es requerida
+      </div>
+      
+      <div class="divider"></div>
+
+      <ion-button expand="block" class="report-button" type="submit" [disabled]="!reportForm.valid">
+        Generar Reporte
+      </ion-button>
+
+    </form>
+  </div>
+
+
+</ion-content>

@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 exports.registrarUsuario = async (req, res) => {
   try {
-    const { nombre, email, password } = req.body;
+    const { nombre, email, password, rol } = req.body;
     if (!nombre || !email || !password) {
       return res.status(400).json({ error: 'Todos los campos son requeridos' });
     }
@@ -13,17 +13,26 @@ exports.registrarUsuario = async (req, res) => {
       return res.status(400).json({ error: 'El email ya está registrado' });
     }
 
-    const nuevoUsuario = new Usuario({ nombre, email, password });
+    const nuevoUsuario = new Usuario({
+      nombre,
+      email,
+      password,
+      rol : rol || 'user',
+    });
+
     await nuevoUsuario.save();
+
     res.status(201).json({
       nombre: nuevoUsuario.nombre,
       email: nuevoUsuario.email,
+      rol: nuevoUsuario.rol,
       fechaCreacion: nuevoUsuario.fechaCreacion,
     });
   } catch (error) {
     res.status(500).json({ error: 'Error al registrar usuario', detalles: error.message });
   }
 };
+
 
 exports.editarUsuario = async (req, res) => {
   const { id } = req.params;
@@ -96,15 +105,21 @@ exports.iniciarSesion = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: usuario._id, nombre: usuario.nombre, email: usuario.email },
+      {
+        id: usuario._id,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        rol: usuario.rol 
+      },
       process.env.JWT_SECRET || 'secreto',
       { expiresIn: '1min' }
     );
 
     res.cookie('token', token, {
       httpOnly: true,
+      secure: false,
       sameSite: 'lax',
-      maxAge: 60 * 1000 // 1 minuto
+      maxAge: 60 * 1000
     });
 
     res.json({
@@ -112,7 +127,7 @@ exports.iniciarSesion = async (req, res) => {
       id: usuario._id,
       nombre: usuario.nombre,
       email: usuario.email,
-      fechaCreacion: usuario.fechaCreacion
+      rol: usuario.rol,
     });
   } catch (err) {
     res.status(500).json({ error: 'Error al iniciar sesión', detalles: err.message });

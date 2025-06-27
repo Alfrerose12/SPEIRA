@@ -9,7 +9,7 @@ const PERIODOS_VALIDOS = ['diario', 'semanal', 'mensual', 'anual'];
 
 exports.crearDato = async (req, res) => {
   try {
-    const { nombre, temperatura, ph, salinidad, agitacion, humedad, iluminacion } = req.query;
+    const { nombre, ph, temperaturaAgua, temperaturaAmbiente, humedad, luminosidad, conductividadElectrica, co2 } = req.body;
 
     if (!nombre) {
       return res.status(400).json({ error: 'El nombre del estanque es requerido' });
@@ -18,12 +18,13 @@ exports.crearDato = async (req, res) => {
     const errores = [];
 
     const rangos = {
-      temperatura: { min: -10, max: 50 },
       ph: { min: 0, max: 14 },
-      salinidad: { min: 0, max: 50 },
-      agitacion: { min: 0, max: 100 },
+      temperaturaAgua: { min: -10, max: 50 },
+      temperaturaAmbiente: { min: -10, max: 50 },
       humedad: { min: 0, max: 100 },
-      iluminacion: { min: 0, max: 100000 }
+      luminosidad: { min: 0, max: 100000 },
+      conductividadElectrica: { min: 0, max: 100000 },
+      co2: { min: 0, max: 1000 }
     };
 
     function validarParametro(nombreParam, valor) {
@@ -37,7 +38,7 @@ exports.crearDato = async (req, res) => {
       return null;
     }
 
-    const params = { temperatura, ph, salinidad, agitacion, humedad, iluminacion };
+    const params = { ph, temperaturaAgua, temperaturaAmbiente, humedad, luminosidad, conductividadElectrica, co2 };
 
     for (const [param, valor] of Object.entries(params)) {
       const error = validarParametro(param, valor);
@@ -48,24 +49,30 @@ exports.crearDato = async (req, res) => {
       return res.status(400).json({ error: 'Parámetros inválidos', detalles: errores });
     }
 
-    const estanque = await Estanque.findOne({ nombre });
+    const nombreNormalizado = nombre.trim().toLowerCase();
+    const estanque = await Estanque.findOne({ nombre: nombreNormalizado }); 
+    
     if (!estanque) {
       return res.status(404).json({ error: 'Estanque no encontrado' });
     }
 
     const datosConFecha = {
-      temperatura: parseFloat(temperatura),
       ph: parseFloat(ph),
-      salinidad: parseFloat(salinidad),
-      agitacion: parseFloat(agitacion),
+      temperaturaAgua: parseFloat(temperaturaAgua),
+      temperaturaAmbiente: parseFloat(temperaturaAmbiente),
       humedad: parseFloat(humedad),
-      iluminacion: parseFloat(iluminacion),
+      luminosidad: parseFloat(luminosidad),
+      conductividadElectrica: parseFloat(conductividadElectrica),
+      co2: parseFloat(co2),
       fecha: moment.tz(ZONA_HORARIA).toDate(),
       estanque: estanque._id
     };
 
     const nuevoDato = new DatosSensor(datosConFecha);
     await nuevoDato.save();
+
+    estanque.datosSensores.push(nuevoDato._id);
+    await estanque.save();
 
     const datoRespuesta = {
       ...nuevoDato._doc,

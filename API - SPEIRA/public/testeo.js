@@ -66,7 +66,7 @@ const createChart = (ctx, label, color, minY, maxY) => {
       },
       plugins: {
         legend: {
-          display: true,
+          display: false,
           labels: { color: '#000' }
         },
         tooltip: {
@@ -83,13 +83,13 @@ const createChart = (ctx, label, color, minY, maxY) => {
   });
 };
 
-const phChart = createChart(document.getElementById('phChart'), 'pH', '#3e95cd', limits.ph.min, limits.ph.max);
-const tempIChart = createChart(document.getElementById('tempIChart'), 'Temperatura Interna (°C)', '#e8c3b9', limits.tempi.min, limits.tempi.max);
-const tempAChart = createChart(document.getElementById('tempAChart'), 'Temperatura Ambiente (°C)', '#8e5ea2', limits.tempa.min, limits.tempa.max);
-const lightningChart = createChart(document.getElementById('lightningChart'), 'Iluminación (μmol/m²s)', '#42a5f5', limits.lightning.min, limits.lightning.max);
+const phChart = createChart(document.getElementById('phChart'), 'pH', '#FFA07A', limits.ph.min, limits.ph.max);
+const tempIChart = createChart(document.getElementById('tempIChart'), 'Temp. del Agua (°C)', '#00bcd4', limits.tempi.min, limits.tempi.max);
+const tempAChart = createChart(document.getElementById('tempAChart'), 'Temp. Ambiental (°C)', '#A9A9A9', limits.tempa.min, limits.tempa.max);
+const lightningChart = createChart(document.getElementById('lightningChart'), 'Iluminación (μmol/m²s)', '#ffc107', limits.lightning.min, limits.lightning.max);
 const humidityChart = createChart(document.getElementById('humidityChart'), 'Humedad (%)', '#66bb6a', limits.humidity.min, limits.humidity.max);
-const co2Chart = createChart(document.getElementById('co2Chart'), 'CO2 (ppm)', '#ff7043', limits.co2.min, limits.co2.max);
-const conductivityChart = createChart(document.getElementById('conductivityChart'), 'Conductividad (mS/cm)', '#ffa726', limits.conductivity.min, limits.conductivity.max);
+const co2Chart = createChart(document.getElementById('co2Chart'), 'CO2 (ppm)', '#CD853F', limits.co2.min, limits.co2.max);
+const conductivityChart = createChart(document.getElementById('conductivityChart'), 'Conductividad (mS/cm)', '#f44336', limits.conductivity.min, limits.conductivity.max);
 
 const prevValues = {
   ph: true,
@@ -166,3 +166,6 @@ function updateData() {
 
 updateData();
 setInterval(updateData, 60000);
+
+// Para pruebas rápidas, actualiza cada segundo
+// setInterval(updateData, 1000);

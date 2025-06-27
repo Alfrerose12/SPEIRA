@@ -82,6 +82,23 @@ input:focus {
   background-color: #ffffff;
 }
 
+#togglePassword {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translate(-100%, -50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  font-size: 1.1rem;
+  padding: 0;
+}
+
+#togglePassword:hover {
+  color: #000;
+}
+
 .boton {
   width: 90%;
   max-width: 260px;

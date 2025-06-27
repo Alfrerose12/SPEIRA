@@ -8,6 +8,7 @@ const swaggerUI = require('swagger-ui-express');
 const conectarDB = require('./config/db');
 const GeneRoutes = require('./routes/geneRoutes');
 const especificacionSwagger = require('./config/swagger');
+const verificarRol = require('./middleware/rolValidator');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,10 +36,9 @@ app.use(express.json());
 app.use(express.static('public'));
 app.use(cookieParser());
 
-app.use('/api-docs', auth);
-
 app.use(
   '/api-docs',
+  verificarRol('admin'),
   swaggerUI.serve,
   swaggerUI.setup(especificacionSwagger, {
     customSiteTitle: 'API Speira - Documentación',

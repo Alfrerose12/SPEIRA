@@ -1,22 +1,52 @@
-const Estanque = require('../models/estanqueModel');
+const Estanques = require('../models/estanqueModel');
 
 exports.crearEstanque = async (req, res) => {
   try {
-    const { nombre } = req.body; 
-    if (!nombre) {
-      return res.status(400).json({ error: 'El nombre es requerido' });
+    const { nombre } = req.body;
+
+    if (!nombre || typeof nombre !== 'string') {
+      return res.status(400).json({ error: 'Nombre inválido' });
     }
-    const estanque = new Estanque({ nombre });
+
+    const nombreNormalizado = nombre.trim();
+
+    const existe = await Estanques.findOne({ 
+      nombre: { $regex: new RegExp(`^${nombreNormalizado}$`, 'i') }
+    });
+
+    if (existe) {
+      return res.status(409).json({ error: 'El estanque ya existe' });
+    }
+
+    const estanque = new Estanques({ 
+      nombre: nombreNormalizado 
+    });
+
     await estanque.save();
-    res.status(201).json(estanque);
+
+    return res.status(201).json({
+      success: true,
+      data: estanque,
+      message: 'Estanque creado exitosamente'
+    });
+
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Error en crearEstanque:', error);
+    
+    if (error.code === 11000) {
+      return res.status(400).json({ error: 'El nombre del estanque ya existe' });
+    }
+
+    return res.status(500).json({ 
+      error: 'Error interno del servidor',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
 exports.obtenerEstanques = async (req, res) => {
   try {
-    const estanques = await Estanque.find();
+    const estanques = await Estanques.find().populate('datosSensores');
     res.json(estanques);
   } catch (error) {
     res.status(500).json({ error: error.message });
