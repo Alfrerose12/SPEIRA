@@ -24,7 +24,7 @@ const swaggerDefination = {
   },
   servers: [
     { url: 'http://localhost:3000/api', description: 'Servidor local' },
-    // { url: `http://${localIP}:3000/api`, description: 'Servidor en red local' },
+    { url: `http://${localIP}:3000/api`, description: 'Servidor en red local' },
     { url: 'https://speira.com/api', description: 'Servidor en producción' }
   ],
   paths: {

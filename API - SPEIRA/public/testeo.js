@@ -165,7 +165,9 @@ function updateData() {
 }
 
 updateData();
-setInterval(updateData, 60000);
+
+// Para pruebas rápidas, actualiza cada minuto
+// setInterval(updateData, 60000);
 
 // Para pruebas rápidas, actualiza cada segundo
-// setInterval(updateData, 1000);
+setInterval(updateData, 1000);

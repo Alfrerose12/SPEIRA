@@ -9,11 +9,17 @@ const PERIODOS_VALIDOS = ['diario', 'semanal', 'mensual', 'anual'];
 
 exports.crearDato = async (req, res) => {
   try {
-    const { nombre, ph, temperaturaAgua, temperaturaAmbiente, humedad, luminosidad, conductividadElectrica, co2 } = req.body;
-
-    if (!nombre) {
-      return res.status(400).json({ error: 'El nombre del estanque es requerido' });
-    }
+    const {
+      estanqueId,
+      nombre,
+      ph,
+      temperaturaAgua,
+      temperaturaAmbiente,
+      humedad,
+      luminosidad,
+      conductividadElectrica,
+      co2
+    } = req.body;
 
     const errores = [];
 
@@ -49,9 +55,15 @@ exports.crearDato = async (req, res) => {
       return res.status(400).json({ error: 'Parámetros inválidos', detalles: errores });
     }
 
-    const nombreNormalizado = nombre.trim().toLowerCase();
-    const estanque = await Estanque.findOne({ nombre: nombreNormalizado }); 
-    
+    let estanque = null;
+
+    if (estanqueId) {
+      estanque = await Estanque.findById(estanqueId);
+    } else if (nombre) {
+      const nombreNormalizado = nombre.trim();
+      estanque = await Estanque.findOne({ nombre: { $regex: `^${nombreNormalizado}$`, $options: 'i' } });
+    }
+
     if (!estanque) {
       return res.status(404).json({ error: 'Estanque no encontrado' });
     }
@@ -65,13 +77,13 @@ exports.crearDato = async (req, res) => {
       conductividadElectrica: parseFloat(conductividadElectrica),
       co2: parseFloat(co2),
       fecha: moment.tz(ZONA_HORARIA).toDate(),
-      estanque: estanque._id
+      estanque: estanque.id
     };
 
     const nuevoDato = new DatosSensor(datosConFecha);
     await nuevoDato.save();
 
-    estanque.datosSensores.push(nuevoDato._id);
+    estanque.datosSensores.push(nuevoDato.id);
     await estanque.save();
 
     const datoRespuesta = {
