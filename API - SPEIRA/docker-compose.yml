@@ -26,9 +26,7 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: _speira2025
+    command: mongod --noauth
     healthcheck:
       test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
       interval: 5s
@@ -41,10 +39,10 @@ services:
 
 volumes:
   mongo-data:
-    name: speira-mongo-data
+    name: speira-mongo-data 
     external: true 
 
 networks:
   speira-network:
     driver: bridge
-    name: speira-network  
+    name: speira-network 
