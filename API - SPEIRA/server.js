@@ -2,6 +2,8 @@ require('dotenv').config();
 const os = require('os');
 const cors = require('cors');
 const express = require('express');
+const helmet = require('helmet');
+const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const auth = require('./middleware/auth');
 const swaggerUI = require('swagger-ui-express');
@@ -10,28 +12,25 @@ const GeneRoutes = require('./routes/geneRoutes');
 const especificacionSwagger = require('./config/swagger');
 const verificarRol = require('./middleware/rolValidator');
 
+if (!process.env.MONGO_URI) throw new Error('❌ MONGO_URI no está definida en .env');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const allowedOrigins = ['https://speira.site', 'http://localhost:3000'];
 app.use(cors({
-  origin: true,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Dominio no permitido por CORS'));
+    }
+  },
   credentials: true
 }));
 
-
-const getLocalIPAddress = () => {
-  const interfaces = os.networkInterfaces();
-  for (const name in interfaces) {
-    for (const iface of interfaces[name]) {
-
-      if (iface.family === 'IPv4' && !iface.internal) {
-        return iface.address;
-      }
-    }
-  }
-  return '127.0.0.1'; 
-};
-
+app.use(helmet());
+app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.static('public'));
 app.use(cookieParser());
@@ -46,7 +45,6 @@ app.use(
 );
 
 conectarDB();
-
 app.use('/api', GeneRoutes);
 
 app.use((err, req, res, next) => {
@@ -54,9 +52,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  const localIP = getLocalIPAddress();
-  console.log(`🚀 Servidor funcionando en:`);
-  console.log(`  📍 Local: http://localhost:${PORT}`);
-  console.log(`  🌐 Red Local: http://${localIP}:${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  const localIP = os.networkInterfaces().eth0?.[0]?.address || '127.0.0.1';
+  console.log(`🚀 Servidor funcionando en:\n  📍 Local: http://localhost:${PORT}\n  🌐 Red Local: http://${localIP}:${PORT}\n  🌐 Dominio: https://speira.site`);
+});
+
+process.on('SIGTERM', () => {
+  console.log('🛑 Apagando servidor...');
+  server.close(() => process.exit(0));
 });

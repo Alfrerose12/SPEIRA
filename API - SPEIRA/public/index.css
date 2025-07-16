@@ -79,6 +79,13 @@ p {
   margin-left: 8px;
 }
 
+.footer-link {
+  color: #00b894;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -350,4 +357,5 @@ p {
 .footer-texto {
   color: white;
 }
+
 

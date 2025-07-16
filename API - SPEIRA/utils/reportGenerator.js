@@ -49,8 +49,191 @@ function agregarEncabezado(doc, periodo, fechaStr, fechaInicio, fechaFin) {
   }
 }
 
-exports.generarReporte = async (periodo, fechaStr) => {
+// Función mejorada para calcular promedios
+function promedio(valores) {
+  if (!valores || valores.length === 0) return 0;
+  
+  // Filtrar valores no numéricos
+  const valoresNumericos = valores.filter(v => typeof v === 'number' && !isNaN(v));
+  
+  if (valoresNumericos.length === 0) return 0;
+  
+  return valoresNumericos.reduce((a, b) => a + b, 0) / valoresNumericos.length;
+}
 
+// Función para validar y formatear datos
+function formatearDato(valor, decimales = 2) {
+  if (typeof valor !== 'number' || isNaN(valor)) return 'N/A';
+  return valor.toFixed(decimales);
+}
+
+// Función para sumar valores numéricos de forma segura
+function sumarSegura(acumulador, valor) {
+  if (typeof valor !== 'number' || isNaN(valor)) return acumulador;
+  return acumulador + valor;
+}
+
+function agruparPorDia(datos) {
+  const datosAgrupados = {};
+
+  datos.forEach(dato => {
+    // Validar que el dato tenga estanque asociado
+    if (!dato.estanque) return;
+
+    const hora = moment(dato.fecha).tz(ZONA_HORARIA).startOf('hour').format(); 
+
+    if (!datosAgrupados[hora]) {
+      datosAgrupados[hora] = {
+        fecha: moment(hora).toDate(),
+        ph: 0,
+        temperaturaAgua: 0,
+        temperaturaAmbiente: 0,
+        humedad: 0,
+        luminosidad: 0,
+        conductividadElectrica: 0,
+        co2: 0,
+        count: 0
+      };
+    }
+
+    // Sumar solo valores válidos
+    datosAgrupados[hora].ph = sumarSegura(datosAgrupados[hora].ph, dato.ph);
+    datosAgrupados[hora].temperaturaAgua = sumarSegura(datosAgrupados[hora].temperaturaAgua, dato.temperaturaAgua);
+    datosAgrupados[hora].temperaturaAmbiente = sumarSegura(datosAgrupados[hora].temperaturaAmbiente, dato.temperaturaAmbiente);
+    datosAgrupados[hora].humedad = sumarSegura(datosAgrupados[hora].humedad, dato.humedad);
+    datosAgrupados[hora].luminosidad = sumarSegura(datosAgrupados[hora].luminosidad, dato.luminosidad);
+    datosAgrupados[hora].conductividadElectrica = sumarSegura(datosAgrupados[hora].conductividadElectrica, dato.conductividadElectrica);
+    datosAgrupados[hora].co2 = sumarSegura(datosAgrupados[hora].co2, dato.co2);
+    
+    // Incrementar contador solo si al menos un valor es válido
+    if ([dato.ph, dato.temperaturaAgua, dato.temperaturaAmbiente, dato.humedad, 
+         dato.luminosidad, dato.conductividadElectrica, dato.co2].some(v => typeof v === 'number' && !isNaN(v))) {
+      datosAgrupados[hora].count++;
+    }
+  });
+
+  return Object.values(datosAgrupados).map(horaData => {
+    const count = horaData.count || 1;
+    return {
+      fecha: horaData.fecha,
+      ph: horaData.ph / count,
+      temperaturaAgua: horaData.temperaturaAgua / count,
+      temperaturaAmbiente: horaData.temperaturaAmbiente / count,
+      humedad: horaData.humedad / count,
+      luminosidad: horaData.luminosidad / count,
+      conductividadElectrica: horaData.conductividadElectrica / count,
+      co2: horaData.co2 / count
+    };
+  });
+}
+
+function agruparPorSemana(datos) {
+  const agrupados = {};
+  datos.forEach(dato => {
+    // Validar que el dato tenga estanque asociado
+    if (!dato.estanque) return;
+
+    const fechaDato = moment(dato.fecha).tz(ZONA_HORARIA);
+    const lunesSemana = fechaDato.clone().startOf('week').format('YYYY-MM-DD');
+    const clave = `${lunesSemana}_${dato.estanque.nombre}`;
+    
+    if (!agrupados[clave]) {
+      agrupados[clave] = { 
+        estanque: dato.estanque.nombre, 
+        datos: [] 
+      };
+    }
+    agrupados[clave].datos.push(dato);
+  });
+
+  return Object.keys(agrupados).map(clave => {
+    const grupo = agrupados[clave];
+    const valores = grupo.datos;
+    return {
+      fecha: clave.split('_')[0],
+      estanque: grupo.estanque,
+      temperaturaAgua: promedio(valores.map(v => v.temperaturaAgua)),
+      temperaturaAmbiente: promedio(valores.map(v => v.temperaturaAmbiente)),
+      ph: promedio(valores.map(v => v.ph)),
+      humedad: promedio(valores.map(v => v.humedad)),
+      luminosidad: promedio(valores.map(v => v.luminosidad)),
+      conductividadElectrica: promedio(valores.map(v => v.conductividadElectrica)),
+      co2: promedio(valores.map(v => v.co2))
+    };
+  });
+}
+
+function agruparPorMes(datos) {
+  const agrupados = {};
+  datos.forEach(dato => {
+    // Validar que el dato tenga estanque asociado
+    if (!dato.estanque) return;
+
+    const dia = moment(dato.fecha).tz(ZONA_HORARIA).format('YYYY-MM-DD');
+    const clave = `${dia}_${dato.estanque.nombre}`;
+    
+    if (!agrupados[clave]) {
+      agrupados[clave] = { 
+        estanque: dato.estanque.nombre, 
+        datos: [] 
+      };
+    }
+    agrupados[clave].datos.push(dato);
+  });
+
+  return Object.keys(agrupados).map(clave => {
+    const grupo = agrupados[clave];
+    const valores = grupo.datos;
+    return {
+      fecha: clave.split('_')[0],
+      estanque: grupo.estanque,
+      temperaturaAgua: promedio(valores.map(v => v.temperaturaAgua)),
+      temperaturaAmbiente: promedio(valores.map(v => v.temperaturaAmbiente)),
+      ph: promedio(valores.map(v => v.ph)),
+      humedad: promedio(valores.map(v => v.humedad)),
+      luminosidad: promedio(valores.map(v => v.luminosidad)),
+      conductividadElectrica: promedio(valores.map(v => v.conductividadElectrica)),
+      co2: promedio(valores.map(v => v.co2))
+    };
+  });
+}
+
+function agruparPorAnio(datos) {
+  const agrupados = {};
+  datos.forEach(dato => {
+    // Validar que el dato tenga estanque asociado
+    if (!dato.estanque) return;
+
+    const mes = moment(dato.fecha).tz(ZONA_HORARIA).format('YYYY-MM');
+    const clave = `${mes}_${dato.estanque.nombre}`;
+    
+    if (!agrupados[clave]) {
+      agrupados[clave] = { 
+        estanque: dato.estanque.nombre, 
+        datos: [] 
+      };
+    }
+    agrupados[clave].datos.push(dato);
+  });
+
+  return Object.keys(agrupados).map(clave => {
+    const grupo = agrupados[clave];
+    const valores = grupo.datos;
+    return {
+      fecha: clave.split('_')[0],
+      estanque: grupo.estanque,
+      temperaturaAgua: promedio(valores.map(v => v.temperaturaAgua)),
+      temperaturaAmbiente: promedio(valores.map(v => v.temperaturaAmbiente)),
+      ph: promedio(valores.map(v => v.ph)),
+      humedad: promedio(valores.map(v => v.humedad)),
+      luminosidad: promedio(valores.map(v => v.luminosidad)),
+      conductividadElectrica: promedio(valores.map(v => v.conductividadElectrica)),
+      co2: promedio(valores.map(v => v.co2))
+    };
+  });
+}
+
+exports.generarReporte = async (periodo, fechaStr) => {
   try {
     const doc = new PDFDocument({ 
       margin: 20, 
@@ -79,7 +262,13 @@ exports.generarReporte = async (periodo, fechaStr) => {
 
     // Procesar datos en streaming
     for await (const dato of datosCursor) {
-      const nombreEstanque = dato.estanque ? dato.estanque.nombre : 'Sin estanque';
+      // Filtrar datos sin estanque
+      if (!dato.estanque) {
+        console.warn('Registro sin estanque encontrado:', dato._id);
+        continue;
+      }
+      
+      const nombreEstanque = dato.estanque.nombre;
       
       if (!datosPorEstanque[nombreEstanque]) {
         datosPorEstanque[nombreEstanque] = [];
@@ -100,6 +289,7 @@ exports.generarReporte = async (periodo, fechaStr) => {
     }
 
     console.log(`Total de registros procesados: ${contador}`);
+    console.log(`Estanques con datos: ${Object.keys(datosPorEstanque).join(', ')}`);
 
     // 2. Procesar cada estanque según el período
     const reportesPorEstanque = {};
@@ -109,11 +299,11 @@ exports.generarReporte = async (periodo, fechaStr) => {
       if (periodo === 'diario') {
         datosEstanque = agruparPorDia(datosEstanque);
       } else if (periodo === 'semanal') {
-        datosEstanque = agruparPorSemana(datosEstanque, nombreEstanque);
+        datosEstanque = agruparPorSemana(datosEstanque);
       } else if (periodo === 'mensual') {
-        datosEstanque = agruparPorMes(datosEstanque, nombreEstanque);
+        datosEstanque = agruparPorMes(datosEstanque);
       } else if (periodo === 'anual') {
-        datosEstanque = agruparPorAnio(datosEstanque, nombreEstanque);
+        datosEstanque = agruparPorAnio(datosEstanque);
       }
 
       reportesPorEstanque[nombreEstanque] = datosEstanque;
@@ -149,6 +339,7 @@ exports.generarReporte = async (periodo, fechaStr) => {
               (periodo === 'semanal' ? 'Semana' :
                 (periodo === 'anual' ? 'Año-Mes' : 'Fecha')),
             format: (val) => {
+              if (!val) return 'N/A';
               if (periodo === 'diario') return moment(val).tz(ZONA_HORARIA).format('YYYY-MM-DD HH:mm');
               if (periodo === 'semanal') {
                 const lunes = moment(val).tz(ZONA_HORARIA);
@@ -164,49 +355,49 @@ exports.generarReporte = async (periodo, fechaStr) => {
           {
             key: 'ph',
             label: 'pH',
-            format: (val) => `${val.toFixed(2)}`,
+            format: (val) => formatearDato(val, 2),
             width: 35,
             align: 'center'
           },
           {
             key: 'temperaturaAgua',
             label: 'Temp. Agua (°C)',
-            format: (val) => `${val.toFixed(2)}`,
+            format: (val) => formatearDato(val, 2),
             width: 50,
             align: 'center'
           },
           {
             key: 'temperaturaAmbiente',
             label: 'Temp. Ambiente (°C)',
-            format: (val) => `${val.toFixed(2)}`,
+            format: (val) => formatearDato(val, 2),
             width: 50,
             align: 'center'
           },
           {
             key: 'humedad',
             label: 'Humedad (%)',
-            format: (val) => `${val.toFixed(2)}`,
+            format: (val) => formatearDato(val, 2),
             width: 50,
             align: 'center'
           },
           {
             key: 'luminosidad',
             label: 'Luminosidad (lx)',
-            format: (val) => `${val.toFixed(2)}`,
+            format: (val) => formatearDato(val, 2),
             width: 50,
             align: 'center'
           },
           {
             key: 'conductividadElectrica',
             label: 'Conductividad Eléctrica (µS/cm)',
-            format: (val) => `${val.toFixed(2)}`,
+            format: (val) => formatearDato(val, 2),
             width: 50,
             align: 'center'
           },
           {
             key: 'co2',
             label: 'CO2 (ppm)',
-            format: (val) => `${val.toFixed(2)}`,
+            format: (val) => formatearDato(val, 2),
             width: 50,
             align: 'center'
           }
@@ -245,7 +436,7 @@ exports.generarReporte = async (periodo, fechaStr) => {
 
             // Procesar datos en trozos
             const datosEstanque = reportesPorEstanque[nombreEstanque];
-            const CHUNK_SIZE = 50; // Mostrar 50 registros por vez
+            const CHUNK_SIZE = 50;
 
             for (let i = 0; i < datosEstanque.length; i += CHUNK_SIZE) {
               const chunk = datosEstanque.slice(i, i + CHUNK_SIZE);
@@ -301,136 +492,5 @@ exports.generarReporte = async (periodo, fechaStr) => {
   } catch (error) {
     console.error('Error general:', error);
     throw error;
-  } finally {
-
   }
 };
-
-function agruparPorDia(datos) {
-  const datosAgrupados = {};
-
-  datos.forEach(dato => {
-    const hora = moment(dato.fecha).tz(ZONA_HORARIA).startOf('hour').format(); 
-
-    if (!datosAgrupados[hora]) {
-      datosAgrupados[hora] = {
-        fecha: moment(hora).toDate(),
-        ph: 0,
-        temperaturaAgua: 0,
-        temperaturaAmbiente: 0,
-        humedad: 0,
-        luminosidad: 0,
-        conductividadElectrica: 0,
-        co2: 0,
-        count: 0
-      };
-    }
-
-    datosAgrupados[hora].ph += dato.ph || 0;
-    datosAgrupados[hora].temperaturaAgua += dato.temperaturaAgua || 0;
-    datosAgrupados[hora].temperaturaAmbiente += dato.temperaturaAmbiente || 0;
-    datosAgrupados[hora].humedad += dato.humedad || 0;
-    datosAgrupados[hora].luminosidad += dato.luminosidad || 0;
-    datosAgrupados[hora].conductividadElectrica += dato.conductividadElectrica || 0;
-    datosAgrupados[hora].co2 += dato.co2 || 0;
-    datosAgrupados[hora].count += 1;
-  });
-
-  return Object.values(datosAgrupados).map(horaData => {
-    const count = horaData.count || 1;
-    return {
-      fecha: horaData.fecha,
-      ph: horaData.ph / count,
-      temperaturaAgua: horaData.temperaturaAgua / count,
-      temperaturaAmbiente: horaData.temperaturaAmbiente / count,
-      humedad: horaData.humedad / count,
-      luminosidad: horaData.luminosidad / count,
-      conductividadElectrica: horaData.conductividadElectrica / count,
-      co2: horaData.co2 / count
-    };
-  });
-}
-
-function agruparPorSemana(datos) {
-  const agrupados = {};
-  datos.forEach(dato => {
-    const fechaDato = moment(dato.fecha).tz(ZONA_HORARIA);
-    const lunesSemana = fechaDato.clone().startOf('week').format('YYYY-MM-DD');
-    const clave = `${lunesSemana}_${dato.estanque}`;
-    if (!agrupados[clave]) agrupados[clave] = { estanque: dato.estanque, datos: [] };
-    agrupados[clave].datos.push(dato);
-  });
-
-  return Object.keys(agrupados).map(clave => {
-    const grupo = agrupados[clave];
-    const valores = grupo.datos;
-    return {
-      fecha: clave.split('_')[0],
-      estanque: grupo.estanque,
-      temperaturaAgua: promedio(valores.map(v => v.temperaturaAgua)),
-      temperaturaAmbiente: promedio(valores.map(v => v.temperaturaAmbiente)),
-      ph: promedio(valores.map(v => v.ph)),
-      humedad: promedio(valores.map(v => v.humedad)),
-      luminosidad: promedio(valores.map(v => v.luminosidad)),
-      conductividadElectrica: promedio(valores.map(v => v.conductividadElectrica)),
-      co2: promedio(valores.map(v => v.co2))
-    };
-  });
-}
-
-function agruparPorMes(datos) {
-  const agrupados = {};
-  datos.forEach(dato => {
-    const dia = moment(dato.fecha).tz(ZONA_HORARIA).format('YYYY-MM-DD');
-    const clave = `${dia}_${dato.estanque}`;
-    if (!agrupados[clave]) agrupados[clave] = { estanque: dato.estanque, datos: [] };
-    agrupados[clave].datos.push(dato);
-  });
-
-  return Object.keys(agrupados).map(clave => {
-    const grupo = agrupados[clave];
-    const valores = grupo.datos;
-    return {
-      fecha: clave.split('_')[0],
-      estanque: grupo.estanque,
-      temperaturaAgua: promedio(valores.map(v => v.temperaturaAgua)),
-      temperaturaAmbiente: promedio(valores.map(v => v.temperaturaAmbiente)),
-      ph: promedio(valores.map(v => v.ph)),
-      humedad: promedio(valores.map(v => v.humedad)),
-      luminosidad: promedio(valores.map(v => v.luminosidad)),
-      conductividadElectrica: promedio(valores.map(v => v.conductividadElectrica)),
-      co2: promedio(valores.map(v => v.co2))
-    };
-  });
-}
-
-function agruparPorAnio(datos) {
-  const agrupados = {};
-  datos.forEach(dato => {
-    const mes = moment(dato.fecha).tz(ZONA_HORARIA).format('YYYY-MM');
-    const clave = `${mes}_${dato.estanque}`;
-    if (!agrupados[clave]) agrupados[clave] = { estanque: dato.estanque, datos: [] };
-    agrupados[clave].datos.push(dato);
-  });
-
-  return Object.keys(agrupados).map(clave => {
-    const grupo = agrupados[clave];
-    const valores = grupo.datos;
-    return {
-      fecha: clave.split('_')[0],
-      estanque: grupo.estanque,
-      temperaturaAgua: promedio(valores.map(v => v.temperaturaAgua)),
-      temperaturaAmbiente: promedio(valores.map(v => v.temperaturaAmbiente)),
-      ph: promedio(valores.map(v => v.ph)),
-      humedad: promedio(valores.map(v => v.humedad)),
-      luminosidad: promedio(valores.map(v => v.luminosidad)),
-      conductividadElectrica: promedio(valores.map(v => v.conductividadElectrica)),
-      co2: promedio(valores.map(v => v.co2))
-    };
-  });
-}
-
-function promedio(valores) {
-  if (valores.length === 0) return 0;
-  return valores.reduce((a, b) => a + b, 0) / valores.length;
-}

@@ -100,6 +100,53 @@ exports.crearDato = async (req, res) => {
   }
 };
 
+exports.obtenerDatosGenerales = async (req, res) => {
+  try {
+    // Obtener todos los estanques
+    const estanques = await Estanque.find().populate({
+      path: 'datosSensores',
+      options: { sort: { fecha: -1 }, limit: 1 } // Solo el dato más reciente
+    });
+
+    if (estanques.length === 0) {
+      return res.status(404).json({ mensaje: 'No hay estanques registrados' });
+    }
+
+    const resumen = estanques.map(estanque => {
+      const ultimoDato = estanque.datosSensores[0];
+      return {
+        estanqueId: estanque._id,
+        nombre: estanque.nombre,
+        fecha: ultimoDato ? moment(ultimoDato.fecha).tz(ZONA_HORARIA).format('YYYY-MM-DD HH:mm') : null,
+        datos: ultimoDato
+          ? {
+              ph: ultimoDato.ph,
+              temperaturaAgua: ultimoDato.temperaturaAgua,
+              temperaturaAmbiente: ultimoDato.temperaturaAmbiente,
+              humedad: ultimoDato.humedad,
+              luminosidad: ultimoDato.luminosidad,
+              conductividadElectrica: ultimoDato.conductividadElectrica,
+              co2: ultimoDato.co2
+            }
+          : null
+      };
+    });
+
+    res.json({
+      zona_horaria: ZONA_HORARIA,
+      total_estanques: resumen.length,
+      resumen
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: 'Error al obtener datos generales',
+      detalles: error.message
+    });
+  }
+};
+
+
 exports.obtenerDatosPorPeriodo = async (req, res) => {
   try {
     const { periodo, fecha } = req.params;

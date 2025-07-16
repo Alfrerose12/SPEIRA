@@ -1,19 +1,19 @@
 const { request } = require('http');
 const os = require('os');
 
-const getLocalIPAddress = () => {
-  const interfaces = os.networkInterfaces();
-  for (const name in interfaces) {
-    for (const iface of interfaces[name]) {
-      if (iface.family === 'IPv4' && !iface.internal) {
-        return iface.address;
-      }
-    }
-  }
-  return '127.0.0.1';
-};
+// const getLocalIPAddress = () => {
+//   const interfaces = os.networkInterfaces();
+//   for (const name in interfaces) {
+//     for (const iface of interfaces[name]) {
+//       if (iface.family === 'IPv4' && !iface.internal) {
+//         return iface.address;
+//       }
+//     }
+//   }
+//   return '127.0.0.1';
+// };
 
-const localIP = getLocalIPAddress();
+// const localIP = getLocalIPAddress();
 
 const swaggerDefination = {
   openapi: '3.0.0',
@@ -23,9 +23,8 @@ const swaggerDefination = {
     description: 'API para gestionar los datos de los sensores del cultivo de espirulina y llevar el control de usuarios.'
   },
   servers: [
-    { url: 'http://localhost:3000/api', description: 'Servidor local' },
-    { url: `http://${localIP}:3000/api`, description: 'Servidor en red local' },
-    { url: 'https://speira.com/api', description: 'Servidor en producción' }
+    { url: 'https://api.speira.site/api', description: 'Servidor en producción' },
+    { url: 'http://localhost:3000/api', description: 'Servidor local' }
   ],
   paths: {
     '/datos': {
@@ -85,6 +84,62 @@ const swaggerDefination = {
                   type: 'object',
                   properties: {
                     error: { type: 'string', example: 'Parámetros inválidos o faltantes' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/datos/generales': {
+      get: {
+        tags: ['Datos'],
+        summary: 'Obtener datos generales de sensores',
+        description: 'Obtiene los datos generales de todos los sensores registrados.',
+        responses: {
+          200: {
+            description: 'Datos generales obtenidos exitosamente',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/DatosSensor'
+                  }
+                }
+              }
+            }
+          },
+          404: {
+            description: 'No se encontraron datos',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    error: { type: 'string', example: 'No se encontraron datos' }
+                  }
+                }
+              }
+            }
+          },
+          400: {
+            description: 'Error en parámetros',
+            content: {
+              'application/json': {
+                examples: {
+                  formatoInvalido: {
+                    value: {
+                      error: "Formato de fecha inválido",
+                      detalles: "Revise el formato requerido para el período seleccionado"
+                    }
+                  },
+                  fechaNoLunes: {
+                    value: {
+                      error: "Fecha inválida para reporte semanal",
+                      detalles: "Para reportes semanales debe proporcionar un lunes"
+                    }
                   }
                 }
               }
