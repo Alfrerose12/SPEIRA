@@ -1,3 +1,4 @@
+@use "sass:math";
 ion-content.monitoring-content {
     --background: linear-gradient(135deg, #0e6d2d 0%, #005ea7 100%);
     position: relative;
@@ -72,11 +73,10 @@ ion-content.monitoring-content {
         
         @for $i from 1 through 10 {
           &:nth-child(#{$i}) {
-            left: random(90) + 5%;
-            width: random(30) + 20px;
-            height: width;
-            animation-delay: random(10) + s;
-            animation-duration: random(15) + 10s;
+            left: math.random(90) + 5%;
+            width: math.random(30) + 20px;
+            animation-delay: math.random(10) + s;
+            animation-duration: math.random(15) + 10s;
           }
         }
       }
