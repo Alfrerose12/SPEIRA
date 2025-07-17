@@ -29,7 +29,15 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://cdn.jsdelivr.net"]
+    }
+  }
+}));
+
 app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.static('public'));
@@ -54,7 +62,7 @@ app.use((err, req, res, next) => {
 
 const server = app.listen(PORT, '0.0.0.0', () => {
   const localIP = os.networkInterfaces().eth0?.[0]?.address || '127.0.0.1';
-  console.log(`🚀 Servidor funcionando en:\n  📍 Local: http://localhost:${PORT}\n  🌐 Red Local: http://${localIP}:${PORT}\n  🌐 Dominio: https://speira.site`);
+  console.log(`🚀 Servidor funcionando en:\n  📍 Local: http://localhost:${PORT}\n  🌐 Red Local: http://${localIP}:${PORT}\n  🌐 Dominio: https://api.speira.site`);
 });
 
 process.on('SIGTERM', () => {
