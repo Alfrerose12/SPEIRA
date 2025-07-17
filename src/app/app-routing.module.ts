@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router'; // ✅ FALTABA ESTA LÍNEA
+import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {
@@ -21,7 +21,11 @@ const routes: Routes = [
   },
   {
     path: 'reporte',
-    loadChildren: () => import('./reporte/reporte.module').then( m => m.ReportePageModule)
+    loadChildren: () => import('./reporte/reporte.module').then(m => m.ReportePageModule)
+  },
+  {
+    path: 'sensor-monitoring',
+    loadChildren: () => import('./sensor-monitoring/sensor-monitoring.module').then(m => m.SensorMonitoringPageModule)
   }
 ];
 

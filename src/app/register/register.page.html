@@ -1,84 +1,78 @@
-<ion-header [translucent]="true"></ion-header>
+<ion-content class="login-content">
 
-<ion-content [fullscreen]="true">
-
-  <!-- Burbujas de fondo -->
   <div class="bubbles">
     <span></span><span></span><span></span><span></span><span></span>
     <span></span><span></span><span></span><span></span><span></span>
   </div>
 
-  <!-- Caja blanca centrada con el formulario -->
-  <div class="white-box">
-    <div class="shadow-box">
+  <div class="login-card">
+    <picture>
+      <source media="(min-width:1024px)" srcset="assets/LOGO SPEIRA ESCRITORIO.png" />
+      <img src="assets/LOGO SPEIRA.png" alt="Speira Logo" class="login-logo" />
+    </picture>
 
-      <!-- Logo -->
-      <div class="logo-container">
-        <picture>
-          <source media="(min-width:1024px)" srcset="assets/LOGO SPEIRA ESCRITORIO.png" />
-          <img src="assets/LOGO SPEIRA.png" alt="Speira Logo" class="responsive-logo" />
-        </picture>
-      </div>
+    <h2 class="login-title">Registro</h2>
+    <p class="login-subtitle">Crea una cuenta para continuar</p>
 
-      <!-- Título -->
-      <div style="text-align: center; margin-top: 10px;">
-        <div>
-          <span class="ingresar-title">Registrarse</span>
-        </div>
-        <span style="color: #acacac;">Regístrate para continuar</span>
-      </div>
+    <form class="login-form" (ngSubmit)="register()">
 
-      <!-- Formulario -->
-      <ion-list class="login-form">
+      <ion-item class="form-item" lines="none">
+        <ion-label position="floating" class="input-label">Nombre completo</ion-label>
+        <ion-input type="text"
+                   class="form-input"
+                   [(ngModel)]="fullName"
+                   name="fullName"
+                   required>
+        </ion-input>
+      </ion-item>
 
-        <ion-item>
-          <div style="text-align: center; margin-top: 20px; width: 100%;">
-            <div>
-              <span style="font-weight: bold; text-align: center; color: #006dd4;">Nombre completo</span>
-            </div>
-            <ion-input type="text" class="custom-input" placeholder="Ingresa tu nombre" [(ngModel)]="name"></ion-input>
-          </div>
-        </ion-item>
+      <ion-item class="form-item" lines="none">
+        <ion-label position="floating" class="input-label">Correo electrónico</ion-label>
+        <ion-input type="email"
+                   class="form-input"
+                   [(ngModel)]="email"
+                   name="email"
+                   required>
+        </ion-input>
+      </ion-item>
 
-        <ion-item>
-          <div style="text-align: center; margin-top: 20px; width: 100%;">
-            <div>
-              <span style="font-weight: bold; text-align: center; color: #006dd4;">Correo electrónico</span>
-            </div>
-            <ion-input type="email" class="custom-input" placeholder="Ingresa tu correo" [(ngModel)]="email"></ion-input>
-          </div>
-        </ion-item>
+      <ion-item class="form-item" lines="none">
+        <ion-label position="floating" class="input-label">Contraseña</ion-label>
+        <ion-input [type]="showPassword ? 'text' : 'password'"
+                   class="form-input"
+                   [(ngModel)]="password"
+                   name="password"
+                   required>
+        </ion-input>
+        <ion-icon slot="end"
+                  [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
+                  (click)="togglePassword()"
+                  class="password-toggle">
+        </ion-icon>
+      </ion-item>
 
-        <ion-item>
-          <div style="text-align: center; margin-top: 20px; width: 100%;">
-            <div>
-              <span style="font-weight: bold; text-align: center; color: #006dd4;">Contraseña</span>
-            </div>
-            <ion-input type="password" class="custom-input" placeholder="Crea una contraseña" [(ngModel)]="password"></ion-input>
-          </div>
-        </ion-item>
+      <ion-item class="form-item" lines="none">
+        <ion-label position="floating" class="input-label">Confirmar contraseña</ion-label>
+        <ion-input [type]="showPassword ? 'text' : 'password'"
+                   class="form-input"
+                   [(ngModel)]="confirmPassword"
+                   name="confirmPassword"
+                   required>
+        </ion-input>
+      </ion-item>
 
-        <ion-item>
-          <div style="text-align: center; margin-top: 20px; width: 100%;">
-            <div>
-              <span style="font-weight: bold; text-align: center; color: #006dd4;">Confirmar contraseña</span>
-            </div>
-            <ion-input type="password" class="custom-input" placeholder="Confirma tu contraseña" [(ngModel)]="confirmPassword"></ion-input>
-          </div>
-        </ion-item>
+      <div class="divider"></div>
 
-      </ion-list>
+      <ion-button type="submit" expand="block" class="login-button" [disabled]="loading">
+        <ion-spinner *ngIf="loading" name="crescent" slot="start"></ion-spinner>
+        {{ loading ? 'Registrando...' : 'REGISTRARSE' }}
+      </ion-button>
+    </form>
 
-      <!-- Botón de registro -->
-      <div style="text-align: center; margin-top: 10px;">
-        <ion-button expand="block" (click)="register()" class="login-button">REGISTRARSE</ion-button>
-      </div>
-
-      <!-- Enlace para login -->
-      <div style="text-align: center; margin-top: 20px;">
-        <a (click)="navigateToLogin()">¿Ya tienes cuenta? Inicia sesión aquí</a>
-      </div>
-
-    </div>
+    <p class="register-text" style="text-align:center; margin-top: 15px;">
+      ¿Ya tienes cuenta?
+      <a (click)="navigateToLogin()">Inicia sesión aquí</a>
+    </p>
   </div>
+
 </ion-content>

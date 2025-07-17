@@ -1,31 +1,71 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Reporte</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-header [translucent]="true"></ion-header>
 
 <ion-content [fullscreen]="true">
-  <div class="form-container">
-  <form>
-    <!-- Campo para seleccionar el período -->
-    <ion-item>
-      <ion-label position="floating">Periodo</ion-label>
-      <ion-select [(ngModel)]="reporte.periodo" (ionChange)="actualizarFecha()">
-        <ion-select-option value="diario">Diario</ion-select-option>
-        <ion-select-option value="semanal">Semanal</ion-select-option>
-        <ion-select-option value="mensual">Mensual</ion-select-option>
-        <ion-select-option value="anual">Anual</ion-select-option>
-      </ion-select>
-    </ion-item>
+  <!-- Burbujas -->
+  <div class="bubbles">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
 
-    <!-- Campo para mostrar la fecha generada -->
-    <ion-item>
-      <ion-label position="floating">Fecha</ion-label>
-      <ion-input type="text" [(ngModel)]="reporte.fecha" placeholder="Ingresa la fecha"></ion-input>
-    </ion-item>
+  <div class="white-box">
+    <div class="shadow-box">
+      <!-- Logo -->
+      <div class="logo-container">
+        <picture>
+          <source media="(min-width:1024px)" srcset="assets/LOGO SPEIRA ESCRITORIO.png" />
+          <img src="assets/LOGO SPEIRA.png" alt="Speira Logo" class="responsive-logo" />
+        </picture>
+      </div>
 
-    <!-- Botón para generar el reporte -->
-    <ion-button expand="full" (click)="generarReporte()">Generar Reporte</ion-button>
-  </form>
-</div>
+      <!-- Título -->
+      <div style="text-align: center; margin-top: 10px;">
+        <div><span class="ingresar-title">Generar Reporte</span></div>
+        <span style="color: #acacac;">Seleccione los parámetros del reporte</span>
+      </div>
+
+      <!-- FORMULARIO -->
+      <ion-list class="login-form">
+        <!-- Selección de período -->
+        <ion-item>
+          <div style="text-align: center; margin-top: 20px; width: 100%;">
+            <div><span style="font-weight: bold; color: #006dd4;">Período</span></div>
+            <ion-select [(ngModel)]="reporte.periodo" (ionChange)="actualizarFecha()" placeholder="Seleccione un período">
+              <ion-select-option value="diario">Diario</ion-select-option>
+              <ion-select-option value="semanal">Semanal</ion-select-option>
+              <ion-select-option value="mensual">Mensual</ion-select-option>
+              <ion-select-option value="anual">Anual</ion-select-option>
+            </ion-select>
+          </div>
+        </ion-item>
+
+        <!-- Campos condicionales según período -->
+        <ion-item *ngIf="reporte.periodo === 'diario'">
+          <ion-label position="floating">Fecha</ion-label>
+          <ion-input [(ngModel)]="reporte.fecha" placeholder="YYYY-MM-DD"></ion-input>
+        </ion-item>
+
+        <ion-item *ngIf="reporte.periodo === 'semanal'">
+          <ion-label position="floating">Seleccione lunes</ion-label>
+          <ion-datetime presentation="date" [(ngModel)]="reporte.fecha" (ionChange)="validarLunes()" locale="es-ES"></ion-datetime>
+        </ion-item>
+
+        <ion-item *ngIf="reporte.periodo === 'mensual'">
+          <ion-label position="floating">Mes y Año</ion-label>
+          <ion-datetime presentation="month-year" [(ngModel)]="reporte.fecha" locale="es-ES"></ion-datetime>
+        </ion-item>
+
+        <ion-item *ngIf="reporte.periodo === 'anual'">
+          <ion-label position="floating">Año</ion-label>
+          <ion-datetime presentation="year" [(ngModel)]="reporte.fecha" locale="es-ES"></ion-datetime>
+        </ion-item>
+      </ion-list>
+
+      <!-- Botón -->
+      <div class="button-container">
+        <ion-button expand="block" (click)="generarReporte()" class="login-button" [disabled]="!reporte.fecha || !reporte.periodo">
+          📄 Generar Reporte
+        </ion-button>
+      </div>
+    </div>
+  </div>
 </ion-content>

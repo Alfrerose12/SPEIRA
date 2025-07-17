@@ -6,15 +6,15 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'http://192.168.1.124:3000/api';
+  private baseUrl = 'https://api.speira.site/api';
 
   constructor(private http: HttpClient) {}
 
-  login(data: { email?: string; password: string; nombre?: string }): Observable<any> {
-    return this.http.post(`${this.baseUrl}/usuario/iniciar-sesion`, data, { withCredentials: true });
+  register(data: { nombre: string; email: string; password: string, rol: string}): Observable<any> {
+    return this.http.post(`${this.baseUrl}/usuario/registro`, data, { withCredentials: true });
   }
 
-  register(data: { nombre: string; email: string; password: string }): Observable<any> {
-    return this.http.post(`${this.baseUrl}/usuario/registro`, data, { withCredentials: true });
+  login(data: { email?: string; password: string; nombre?: string }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/usuario/iniciar-sesion`, data, { withCredentials: true });
   }
 }

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
+import { AlertController, LoadingController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { ApiService } from '../services/api.service';
-import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-register',
@@ -10,32 +10,37 @@ import { AlertController } from '@ionic/angular';
   standalone: false
 })
 export class RegisterPage {
-  name: string = '';
+  fullName: string = '';
   email: string = '';
   password: string = '';
   confirmPassword: string = '';
+  loading: boolean = false;
+  showPassword: boolean = false;
 
   constructor(
     private apiService: ApiService,
-    private alertCtrl: AlertController,
+    private alertController: AlertController,
+    private loadingController: LoadingController,
     private router: Router
   ) {}
 
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
   async register() {
-    // Validar que todos los campos estén llenos
-    if (!this.name || !this.email || !this.password || !this.confirmPassword) {
-      const alert = await this.alertCtrl.create({
-        header: 'Error',
-        message: 'Todos los campos son obligatorios.',
+    if (!this.fullName || !this.email || !this.password || !this.confirmPassword) {
+      const alert = await this.alertController.create({
+        header: 'Campos vacíos',
+        message: 'Por favor, completa todos los campos.',
         buttons: ['OK']
       });
       await alert.present();
       return;
     }
 
-    // Validar que las contraseñas coincidan
     if (this.password !== this.confirmPassword) {
-      const alert = await this.alertCtrl.create({
+      const alert = await this.alertController.create({
         header: 'Error',
         message: 'Las contraseñas no coinciden.',
         buttons: ['OK']
@@ -44,26 +49,48 @@ export class RegisterPage {
       return;
     }
 
-    // Llamar al servicio para registrar al usuario
-    this.apiService.register({ 
-      nombre: this.name, 
-      email: this.email, 
-      password: this.password, 
-    }).subscribe({
-      next: async (res: any) => {
-        const alert = await this.alertCtrl.create({
-          header: 'Éxito',
-          message: 'Usuario registrado correctamente.',
-          buttons: ['OK']
-        });
-        await alert.present();
-        this.router.navigate(['/inicio']);
+    const loading = await this.loadingController.create({
+      message: 'Registrando usuario...'
+    });
+    await loading.present();
+    this.loading = true;
+
+    const registerData = {
+      nombre: this.fullName,
+      email: this.email,
+      password: this.password,
+      rol: 'usuario'  // o lo que desees asignar por defecto
+    };
+
+    this.apiService.register(registerData).subscribe({
+      next: async (response: any) => {
+        await loading.dismiss();
+        this.loading = false;
+
+        if (response.success) {
+          const alert = await this.alertController.create({
+            header: 'Registro exitoso',
+            message: 'Tu cuenta ha sido creada correctamente.',
+            buttons: ['OK']
+          });
+          await alert.present();
+          this.router.navigate(['/inicio']);
+        } else {
+          const alert = await this.alertController.create({
+            header: 'Error',
+            message: response.message || 'No se pudo completar el registro.',
+            buttons: ['OK']
+          });
+          await alert.present();
+        }
       },
       error: async (err: any) => {
-        const errorMessage = err.error?.error || 'Error al registrar. Intenta de nuevo.';
-        const alert = await this.alertCtrl.create({
+        await loading.dismiss();
+        this.loading = false;
+
+        const alert = await this.alertController.create({
           header: 'Error',
-          message: errorMessage,
+          message: err.error?.message || 'No se pudo conectar con el servidor.',
           buttons: ['OK']
         });
         await alert.present();
@@ -72,6 +99,6 @@ export class RegisterPage {
   }
 
   navigateToLogin() {
-    this.router.navigate(['/inicio']); // Redirigir al inicio de sesión
+    this.router.navigate(['/inicio']);
   }
 }

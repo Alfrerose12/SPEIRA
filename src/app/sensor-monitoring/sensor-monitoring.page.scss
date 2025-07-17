@@ -1,0 +1,209 @@
+ion-content.monitoring-content {
+    --background: linear-gradient(135deg, #0e6d2d 0%, #005ea7 100%);
+    position: relative;
+    overflow: hidden;
+    
+    .loading-overlay, .error-message {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      color: white;
+      
+      ion-spinner {
+        width: 48px;
+        height: 48px;
+        --color: white;
+      }
+      
+      p {
+        margin-top: 16px;
+        font-size: 1.1em;
+      }
+    }
+    
+    .error-message {
+      ion-icon {
+        font-size: 48px;
+        color: #ff6b6b;
+        margin-bottom: 16px;
+      }
+      
+      p {
+        color: #ff6b6b;
+        text-align: center;
+        padding: 0 20px;
+      }
+    }
+    
+    .content-wrapper {
+      position: relative;
+      z-index: 1;
+      padding: 16px;
+      height: 100%;
+    }
+    
+    .bubbles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+      
+      span {
+        position: absolute;
+        display: block;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: floatBubbles 15s linear infinite;
+        bottom: -100px;
+        will-change: transform;
+        opacity: 0;
+        
+        @for $i from 1 through 10 {
+          &:nth-child(#{$i}) {
+            left: random(90) + 5%;
+            width: random(30) + 20px;
+            height: width;
+            animation-delay: random(10) + s;
+            animation-duration: random(15) + 10s;
+          }
+        }
+      }
+    }
+    
+    @keyframes floatBubbles {
+      0% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0.4;
+      }
+      50% {
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateY(-100vh) scale(1.2);
+        opacity: 0;
+      }
+    }
+    
+    ion-card {
+      border-radius: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.9);
+      
+      ion-card-header {
+        padding-bottom: 0;
+        
+        ion-card-title {
+          display: flex;
+          align-items: center;
+          font-size: 1.2em;
+          font-weight: 600;
+          color: var(--ion-color-primary);
+          
+          ion-icon {
+            margin-right: 8px;
+          }
+        }
+      }
+      
+      ion-card-content {
+        padding-top: 8px;
+      }
+    }
+    
+    .table-responsive {
+      overflow-x: auto;
+      
+      ion-grid {
+        width: 100%;
+        min-width: 600px;
+        
+        .table-header {
+          font-weight: bold;
+          background: var(--ion-color-light);
+          border-bottom: 2px solid var(--ion-color-medium);
+          
+          ion-col {
+            padding: 12px 8px;
+          }
+        }
+        
+        .table-row {
+          border-bottom: 1px solid var(--ion-color-light-shade);
+          transition: background 0.2s;
+          
+          &:nth-child(even) {
+            background: rgba(var(--ion-color-light-rgb), 0.4);
+          }
+          
+          &:hover {
+            background: rgba(var(--ion-color-primary-rgb), 0.1);
+          }
+          
+          ion-col {
+            padding: 10px 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        }
+      }
+    }
+    
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+      
+      .chart-container {
+        background: white;
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        
+        .chart-header {
+          margin-bottom: 12px;
+          
+          h3 {
+            margin: 0;
+            font-size: 1em;
+            color: var(--ion-color-dark);
+            font-weight: 500;
+          }
+        }
+        
+        .chart-wrapper {
+          position: relative;
+          height: 200px;
+          width: 100%;
+        }
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .chart-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      ion-card {
+        margin-bottom: 12px;
+      }
+      
+      .bubbles span {
+        animation-duration: 20s !important;
+      }
+    }
+  }
