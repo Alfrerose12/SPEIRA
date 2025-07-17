@@ -10,5 +10,3 @@ export const environment = {
     measurementId: "G-DWJCN7HR3Y"
   }
 };
-
-// import 'zone.js/plugins/zone-error';  // Included with Angular CLI.
