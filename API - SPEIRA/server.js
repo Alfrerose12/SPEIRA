@@ -17,7 +17,7 @@ if (!process.env.MONGO_URI) throw new Error('❌ MONGO_URI no está definida en 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const allowedOrigins = ['https://speira.site', 'http://localhost:3000'];
+const allowedOrigins = ['https://speira.site', 'http://localhost:3000', 'https://api.speira.site'];
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
