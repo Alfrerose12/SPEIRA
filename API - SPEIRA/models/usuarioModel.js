@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const moment = require('moment-timezone');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const UsuarioSchema = new mongoose.Schema({
     nombre: {
