@@ -1,33 +1,45 @@
-<ion-content [fullscreen]="true">
+<ion-content class="login-content" [fullscreen]="true">
   <div class="bubbles">
     <span></span><span></span><span></span><span></span><span></span>
     <span></span><span></span><span></span><span></span><span></span>
   </div>
 
-  <div class="dynamic-images">
-    <p>Estanques</p>
-    <img
-      src="https://scontent-qro1-2.xx.fbcdn.net/v/t39.30808-6/518954483_122157612476453754_7849601160781361622_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeHO7dbxPWitJPfEJfK9eCCSd79v3KqqVSt3v2_cqqpVK947I72U8Gt74hyd4jDlEkdGcjx9DbhgCbx5NhBPeLbR&_nc_ohc=lRriI0ued8QQ7kNvwExYzPA&_nc_oc=Adnx_GTbYJ3Xiw_AGQPaZU1HA6I_N0QgfrVWpty9OE7t8nkoYd7dmQwNA84PUyjQc54&_nc_zt=23&_nc_ht=scontent-qro1-2.xx&_nc_gid=4rzX2ZxfggJGmiXKIYIkow&oh=00_AfT24Q5msAG3odxP_YiWjQFgZqI5uCRH_KmldmHcLy9X6g&oe=687F36D3"
-      alt="Estanque"
-      (click)="onImageClick('Estanque', $event)"
-    />
+  <div class="login-card">
+    <div class="button-group">
+      <button class="card-button" (click)="goToEstanques()">Estanques</button>
+      <button class="card-button" (click)="goToPiscinas()">Piscinas</button>
+      <button class="card-button" (click)="goToCajas()">Cajas</button>
+    </div>
 
-    <p>Cajas</p>
-    <img
-      src="https://scontent-qro1-1.xx.fbcdn.net/v/t39.30808-6/518336234_122157612560453754_2974468987765619786_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeEtqU6yzxqN55-sr39xHTvPs-3eH8NJ97ez7d4fw0n3t2HagJOymCquKf2amU_Eute4QRd86lPDHIv7SxJYPtQk&_nc_ohc=Yr9lkmUP65kQ7kNvwEhw1uk&_nc_oc=AdnXF74tZ1hAYUDCplb_yyG1Ip8tEqHxkXbs_SKFkdu4C6wsqiuxIU6duAtJTEGJf-U&_nc_zt=23&_nc_ht=scontent-qro1-1.xx&_nc_gid=ozRmRj13Bkc-vz4zFk6ohQ&oh=00_AfQYorlPFDW1MFbwKxf24qDxrPTENtkPLXwijksbeHwXhg&oe=687F14D7"
-      alt="Caja de plástico"
-      (click)="onImageClick('Caja de plástico', $event)"
-    />
+    <div class="dynamic-images">
+      <p>Estanques</p>
+      <img
+        src="https://scontent-qro1-2.xx.fbcdn.net/v/t39.30808-6/518954483_122157612476453754_7849601160781361622_n.jpg?...&oe=687F36D3"
+        alt="Estanque"
+        (click)="onSelectEstanque('Estanque 1')"
+        [class.selected]="estanqueSeleccionado === 'Estanque 1'"
+        (dblclick)="onImageClick('Estanque 1', $event)"
+      />
 
-    <p>Piscinas</p>
-    <img
-      src="https://scontent-qro1-1.xx.fbcdn.net/v/t39.30808-6/518005056_122157612632453754_8674518625167009561_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeE1ItiYTILdR_0FYMa8inPwwK7j4Jcpb7LAruPglylvssGiNeQCvgXuhgXifrX2yqivDRK3fvVdB9jt2Xci3VlF&_nc_ohc=XwDtXRaQfMUQ7kNvwFTvcG8&_nc_oc=AdnP0sTzf0bPXjYntxU-tXYhBOT7RyoKO7hQKJQ2XxspELnRxSGCDX-cqFk4g7B4P_M&_nc_zt=23&_nc_ht=scontent-qro1-1.xx&_nc_gid=5LCa96FHmtJvDYPEX2hTeA&oh=00_AfRGJ9WeN3FqDD4dDDhqY_KQw1RFsWLqaFn6arWKicYWww&oe=687F264C"
-      alt="Piscina"
-      (click)="onImageClick('Piscina', $event)"
-    />
-  </div>
+      <p>Cajas</p>
+      <img
+        src="https://scontent-qro1-1.xx.fbcdn.net/v/t39.30808-6/518336234_122157612560453754_2974468987765619786_n.jpg?...&oe=687F14D7"
+        alt="Caja de plástico"
+        (click)="onSelectEstanque('Caja de plástico')"
+        [class.selected]="estanqueSeleccionado === 'Caja de plástico'"
+        (dblclick)="onImageClick('Caja de plástico', $event)"
+      />
 
-  <div>
+      <p>Piscinas</p>
+      <img
+        src="https://scontent-qro1-1.xx.fbcdn.net/v/t39.30808-6/518005056_122157612632453754_8674518625167009561_n.jpg?...&oe=687F264C"
+        alt="Piscina"
+        (click)="onSelectEstanque('Piscina')"
+        [class.selected]="estanqueSeleccionado === 'Piscina'"
+        (dblclick)="onImageClick('Piscina', $event)"
+      />
+    </div>
+
     <ion-button expand="block" (click)="navigateToReporte()" class="report-button">
       Generar Reporte
     </ion-button>
