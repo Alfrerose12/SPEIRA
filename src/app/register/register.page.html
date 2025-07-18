@@ -1,20 +1,20 @@
-<ion-content class="login-content">
+<ion-content class="register-content">
 
   <div class="bubbles">
     <span></span><span></span><span></span><span></span><span></span>
     <span></span><span></span><span></span><span></span><span></span>
   </div>
 
-  <div class="login-card">
+  <div class="register-card">
     <picture>
       <source media="(min-width:1024px)" srcset="assets/LOGO SPEIRA ESCRITORIO.png" />
-      <img src="assets/LOGO SPEIRA.png" alt="Speira Logo" class="login-logo" />
+      <img src="assets/LOGO SPEIRA.png" alt="Speira Logo" class="register-logo" />
     </picture>
 
-    <h2 class="login-title">Registro</h2>
-    <p class="login-subtitle">Crea una cuenta para continuar</p>
+    <h2 class="register-title">Registro</h2>
+    <p class="register-subtitle">Crea una cuenta para continuar</p>
 
-    <form class="login-form" (ngSubmit)="register()">
+    <form class="register-form" (ngSubmit)="register()">
 
       <ion-item class="form-item" lines="none">
         <ion-label position="floating" class="input-label">Nombre completo</ion-label>
@@ -63,7 +63,7 @@
 
       <div class="divider"></div>
 
-      <ion-button type="submit" expand="block" class="login-button" [disabled]="loading">
+      <ion-button type="submit" expand="block" class="register-button" [disabled]="loading">
         <ion-spinner *ngIf="loading" name="crescent" slot="start"></ion-spinner>
         {{ loading ? 'Registrando...' : 'REGISTRARSE' }}
       </ion-button>

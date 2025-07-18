@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { ApiService } from '../services/api.service';
@@ -9,7 +9,9 @@ import { ApiService } from '../services/api.service';
   styleUrls: ['./register.page.scss'],
   standalone: false
 })
-export class RegisterPage {
+
+export class RegisterPage implements OnInit {
+
   fullName: string = '';
   email: string = '';
   password: string = '';
@@ -23,6 +25,9 @@ export class RegisterPage {
     private loadingController: LoadingController,
     private router: Router
   ) {}
+
+  ngOnInit() {
+  }
 
   togglePassword() {
     this.showPassword = !this.showPassword;
@@ -59,7 +64,7 @@ export class RegisterPage {
       nombre: this.fullName,
       email: this.email,
       password: this.password,
-      rol: 'usuario'  // o lo que desees asignar por defecto
+      rol: 'usuario'  
     };
 
     this.apiService.register(registerData).subscribe({
@@ -99,6 +104,7 @@ export class RegisterPage {
   }
 
   navigateToLogin() {
-    this.router.navigate(['/inicio']);
+    this.router.navigate(['/login']);
   }
+  
 }

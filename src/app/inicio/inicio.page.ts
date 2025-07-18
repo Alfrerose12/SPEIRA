@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
-import { AlertController, LoadingController } from '@ionic/angular';
-import { Router } from '@angular/router';
-import { ApiService } from '../services/api.service';
-import { Auth, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
+import { Location } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Platform, PopoverController } from '@ionic/angular';
+import { PopoverMenuComponent } from '../components/popover-menu/popover-menu.component';
+
+declare var navigator: any;
 
 @Component({
   selector: 'app-inicio',
@@ -10,103 +12,99 @@ import { Auth, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
   styleUrls: ['./inicio.page.scss'],
   standalone: false
 })
-export class InicioPage {
-  nombre: string = '';
-  email: string = '';
-  password: string = '';
-  loading: boolean = false;
-  showPassword: boolean = false;
+export class InicioPage implements OnInit {
+
+  isAdmin = false;
+  estanqueSeleccionado: string = "";
 
   constructor(
-    private apiService: ApiService,
-    private alertController: AlertController,
-    private loadingController: LoadingController,
     private router: Router,
-    private auth: Auth
-  ) {}
+    private popover: PopoverController,
+    private route: ActivatedRoute,
+    private platform: Platform,
+    private location: Location
+  ) { }
 
-  togglePassword() {
-    this.showPassword = !this.showPassword;
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      const rol = params['rol'] || 'usuario';
+      this.isAdmin = rol === 'admin';
+    });
+
+    this.platform.backButton.subscribeWithPriority(10, () => {
+      this.exitApp();
+    });
+
+    window.onpopstate = () => {
+      history.pushState(null, '', location.href);
+    };
+    history.pushState(null, '', location.href);
   }
 
-  async login() {
-    if ((!this.email && !this.nombre) || !this.password) {
-      const alert = await this.alertController.create({
-        header: 'Campos vacíos',
-        message: 'Por favor, llena todos los campos.',
-        buttons: ['OK']
-      });
-      await alert.present();
+  exitApp() {
+    if (navigator && navigator.app && navigator.app.exitApp) {
+      navigator.app.exitApp();
+    } else {
+      window.close();
+    }
+  }
+
+  onSelectEstanque(tipo: string) {
+    this.estanqueSeleccionado = tipo;
+  }
+
+  async onImageClick(nombre: string, event: Event) {
+    if (!this.isAdmin) return;
+    const popover = await this.popover.create({
+      component: PopoverMenuComponent,
+      componentProps: { tipo: nombre },
+      event,
+      translucent: true,
+      showBackdrop: false,
+      side: 'top'
+    });
+    await popover.present();
+  }
+
+  navigateToReporte() {
+    if (!this.isAdmin && !this.estanqueSeleccionado) {
+      alert('Selecciona un estanque primero');
       return;
     }
-
-    const loading = await this.loadingController.create({
-      message: 'Iniciando sesión...'
-    });
-    await loading.present();
-    this.loading = true;
-
-    const loginData = this.email.includes('@')
-      ? { email: this.email, password: this.password }
-      : { nombre: this.email, password: this.password };
-
-    console.log('Datos enviados al backend:', loginData);
-
-    this.apiService.login(loginData).subscribe({
-      next: async (response: any) => {
-        console.log('Respuesta completa del servidor:', response); // Depura la respuesta completa
-        console.log('Rol recibido del servidor:', response.user?.rol); // Verifica el rol recibido
-        await loading.dismiss();
-        this.loading = false;
-
-        if (response.success) {
-          const rol = response.rol || 'usuario'; // Accede directamente a response.rol si no está en response.user
-          console.log(`Usuario con rol: ${rol}`);
-          this.router.navigate(['/home'], { queryParams: { rol } }); // Pasar el rol como parámetro
-        } else {
-          const alert = await this.alertController.create({
-            header: 'Error',
-            message: response.message || 'Credenciales incorrectas.',
-            buttons: ['OK']
-          });
-          await alert.present();
-        }
-      },
-      error: async (err: any) => {
-        console.error('Error recibido del servidor:', err);
-        await loading.dismiss();
-        this.loading = false;
-
-        const alert = await this.alertController.create({
-          header: err.status === 401 ? 'Acceso denegado' : 'Error',
-          message: err.status === 401
-            ? 'Correo, nombre o contraseña incorrectos.'
-            : 'No se pudo conectar con el servidor.',
-          buttons: ['OK']
-        });
-        await alert.present();
-      }
+    this.router.navigate(['/reporte'], {
+      queryParams: { estanque: this.estanqueSeleccionado }
     });
   }
 
-  async loginWithGoogle() {
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(this.auth, provider);
-      console.log('Usuario autenticado con Google:', result.user);
-      this.router.navigate(['/home']);
-    } catch (error) {
-      console.error('Error al iniciar sesión con Google:', error);
-      const alert = await this.alertController.create({
-        header: 'Error',
-        message: 'No se pudo iniciar sesión con Google.',
-        buttons: ['OK']
-      });
-      await alert.present();
-    }
+  goToEstanques() {
+    console.log('Navegando a estanques');
+    // this.router.navigate(['/estanques']);
   }
 
-  navigateToRegister() {
-    this.router.navigate(['/register']);
+  goToPiscinas() {
+    console.log('Navegando a piscinas');
+    // this.router.navigate(['/piscinas']);
+  }
+
+  goToCajas() {
+    console.log('Navegando a cajas');
+    // this.router.navigate(['/cajas']);
+  }
+
+  goToUsuario() {
+    this.router.navigate(['/ajustes']);
+  }
+
+  goToReporte() {
+    this.router.navigate(['/reporte']);
+  }
+
+  goToMonitoreo() {
+    this.router.navigate(['/sensor-monitoring']);
+  }
+
+  logout() {
+    this.router.navigate(['/login']);
+    this.location.replaceState('/login');
   }
 }

@@ -1,4 +1,4 @@
-ion-content.register-content {
+ion-content.login-content {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -8,7 +8,7 @@ ion-content.register-content {
   height: 100%;
 }
 
-.register-content {
+.login-content {
   --background: linear-gradient(135deg, #0e6d2d 0%, #005ea7 100%);
   display: flex;
   flex-direction: column;
@@ -20,7 +20,7 @@ ion-content.register-content {
   overflow-y: auto;
 }
 
-.register-card {
+.login-card {
   background: white;
   border-radius: 12px;
   padding: 30px 25px;
@@ -31,7 +31,7 @@ ion-content.register-content {
   animation: fadeIn 0.5s ease-out forwards;
 }
 
-.register-title {
+.login-title {
   font-size: 1.8rem;
   color: #0e6d2d;
   text-align: center;
@@ -39,7 +39,7 @@ ion-content.register-content {
   font-weight: 600;
 }
 
-.register-subtitle {
+.login-subtitle {
   color: #555;
   text-align: center;
   margin: 0 0 25px 0;
@@ -47,7 +47,7 @@ ion-content.register-content {
   line-height: 1.4;
 }
 
-.register-logo {
+.login-logo {
   display: block;
   margin: 0 auto 25px;
   max-height: 80px;
@@ -56,6 +56,7 @@ ion-content.register-content {
 
 .form-item {
   --background: #c2e9e5;
+
   border-radius: 8px;
   margin-bottom: 5px;
   --padding-start: 12px;
@@ -104,7 +105,7 @@ ion-content.register-content {
   width: 100%;
 }
 
-.register-button {
+.login-button {
   --background: linear-gradient(135deg, #0e6d2d 0%, #005ea7 100%);
   --background-activated: linear-gradient(135deg, #0a5823 0%, #004a8a 100%);
   --background-focused: linear-gradient(135deg, #0a5823 0%, #004a8a 100%);
@@ -120,7 +121,7 @@ ion-content.register-content {
   color: white;
 }
 
-.register-button:hover {
+.login-button:hover {
   --box-shadow: 0 6px 12px rgba(0, 94, 167, 0.3);
   transform: translateY(-2px);
 }
@@ -133,17 +134,17 @@ ion-content.register-content {
 }
 
 .google-icon-svg {
-  width: 25px;
-  height: 25px;
-  display: inline-block;
+width: 25px;
+height: 25px;
+display: inline-block;
 }
 
-.social-register {
+.social-login {
   text-align: center;
   color: black;
 }
 
-.social-register-text {
+.social-login-text {
   margin-bottom: 1px;
 }
 
@@ -152,39 +153,42 @@ ion-content.register-content {
   cursor: pointer;
 }
 
+
 /* Animación de entrada */
 @keyframes fadeIn {
   from {
-    opacity: 0;
-    transform: translateY(20px);
+      opacity: 0;
+      transform: translateY(20px);
   }
+
   to {
-    opacity: 1;
-    transform: translateY(0);
+      opacity: 1;
+      transform: translateY(0);
   }
 }
 
 /* Ajustes responsivos */
 @media (max-width: 480px) {
-  .register-card {
-    max-width: 90%;
-    padding: 20px 15px;
+  .login-card {
+      max-width: 90%;
+      padding: 20px 15px;
   }
 
-  .register-title {
-    font-size: 1.4rem;
+  .login-title {
+      font-size: 1.4rem;
   }
 
-  .register-subtitle {
-    font-size: 0.85rem;
+  .login-subtitle {
+      font-size: 0.85rem;
   }
 
   .form-input {
-    font-size: 0.95rem;
+      font-size: 0.95rem;
   }
 
-  .register-button {
-    font-size: 0.95rem;
-    height: 45px;
+  .login-button {
+      font-size: 0.95rem;
+      height: 45px;
   }
 }
+
