@@ -22,7 +22,7 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     HttpClientModule,
     FormsModule,
     SweetAlert2Module.forRoot(),
-    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.ServiceWorker }),
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.serviceWorker }),
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }

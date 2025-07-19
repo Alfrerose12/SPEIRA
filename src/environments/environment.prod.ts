@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  ServiceWorker: true,
+  serviceWorker: true,
   firebaseConfig: {
     apiKey: "AIzaSyCe1-ukYoXmUPeSQqqmmSL_bUnFsY_3hs0",
     authDomain: "speira-c84d5.firebaseapp.com",
