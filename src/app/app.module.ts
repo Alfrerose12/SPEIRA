@@ -10,6 +10,8 @@ import { AppComponent } from './app.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+import { environment } from 'src/environments/environment.prod';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
   declarations: [AppComponent],
@@ -19,7 +21,8 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
-    SweetAlert2Module.forRoot()
+    SweetAlert2Module.forRoot(),
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.ServiceWorker }),
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
