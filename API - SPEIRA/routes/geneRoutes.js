@@ -27,12 +27,10 @@ const {
 } = require('../controllers/usuarioController');
 
 const {
-  guardarSuscripcion,
   enviarNotificacion
 } = require('../controllers/notificationController');
 
-router.post('/suscripcion', guardarSuscripcion);
-router.post('/sendNotification', enviarNotificacion);
+router.post('/notificaciones', enviarNotificacion);
 
 router.post('/datos', crearDato);
 router.get('/datos/generales', obtenerDatosGenerales);
