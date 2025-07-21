@@ -1,6 +1,6 @@
 import { Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { Platform, PopoverController } from '@ionic/angular';
 import { PopoverMenuComponent } from '../components/popover-menu/popover-menu.component';
 
@@ -14,23 +14,26 @@ declare var navigator: any;
 })
 export class InicioPage implements OnInit {
 
-  isAdmin = false;
-  estanqueSeleccionado: string = "";
+  isAdmin: boolean = false;
+  estanqueSeleccionado: string = '';
+  userName: string = '';
 
   constructor(
     private router: Router,
     private popover: PopoverController,
-    private route: ActivatedRoute,
     private platform: Platform,
     private location: Location
   ) { }
 
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
-      const rol = params['rol'] || 'usuario';
-      this.isAdmin = rol === 'admin';
-    });
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    this.isAdmin = localStorage.getItem('userRole') === 'admin';
+    this.userName = userData.nombre || userData.email || 'Usuario';
 
+    this.configureBackButton();
+  }
+
+  configureBackButton() {
     this.platform.backButton.subscribeWithPriority(10, () => {
       this.exitApp();
     });
@@ -42,22 +45,22 @@ export class InicioPage implements OnInit {
   }
 
   exitApp() {
-    if (navigator && navigator.app && navigator.app.exitApp) {
+    if (navigator?.app?.exitApp) {
       navigator.app.exitApp();
     } else {
       window.close();
     }
   }
 
-  onSelectEstanque(tipo: string) {
-    this.estanqueSeleccionado = tipo;
+  onSelectEstanque(nombreEstanque: string) {
+    this.estanqueSeleccionado = nombreEstanque;
+    console.log(`Estanque seleccionado: ${this.estanqueSeleccionado}`);
   }
 
   async onImageClick(nombre: string, event: Event) {
-    if (!this.isAdmin) return;
     const popover = await this.popover.create({
       component: PopoverMenuComponent,
-      componentProps: { tipo: nombre },
+      componentProps: { tipo: nombre, isAdmin: this.isAdmin },
       event,
       translucent: true,
       showBackdrop: false,
@@ -76,27 +79,16 @@ export class InicioPage implements OnInit {
     });
   }
 
-  goToEstanques() {
-    console.log('Navegando a estanques');
-    // this.router.navigate(['/estanques']);
-  }
-
-  goToPiscinas() {
-    console.log('Navegando a piscinas');
-    // this.router.navigate(['/piscinas']);
-  }
-
-  goToCajas() {
-    console.log('Navegando a cajas');
-    // this.router.navigate(['/cajas']);
-  }
-
   goToUsuario() {
     this.router.navigate(['/ajustes']);
   }
 
-  goToReporte() {
-    this.router.navigate(['/reporte']);
+  goToReportes() {
+    if (this.isAdmin){
+      this.router.navigate(['/reporte']);
+    } else {
+      this.navigateToReporte();
+    }
   }
 
   goToMonitoreo() {
@@ -104,7 +96,12 @@ export class InicioPage implements OnInit {
   }
 
   logout() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
+    localStorage.removeItem('userRole');
+
     this.router.navigate(['/login']);
     this.location.replaceState('/login');
   }
+
 }

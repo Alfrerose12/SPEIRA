@@ -50,50 +50,44 @@ export class LoginPage implements OnInit {
       message: 'Iniciando sesión...'
     });
     await loading.present();
-    this.loading = true;
 
-    const loginData = this.email.includes('@')
-      ? { email: this.email, password: this.password }
-      : { nombre: this.email, password: this.password };
+    try {
+      const loginData = this.email.includes('@')
+        ? { email: this.email, password: this.password }
+        : { nombre: this.nombre || this.email, password: this.password };
 
-    console.log('Datos enviados al backend:', loginData);
+      this.apiService.login(loginData).subscribe({
+        next: async (response: any) => {
+          await loading.dismiss();
 
-    this.apiService.login(loginData).subscribe({
-      next: async (response: any) => {
-        console.log('Respuesta completa del servidor:', response);
-        console.log('Rol recibido del servidor:', response.user?.rol);
-        await loading.dismiss();
-        this.loading = false;
+          localStorage.setItem('authToken', response.token || '');
+          localStorage.setItem('userData', JSON.stringify(response.user || {}));
+          localStorage.setItem('userRole', response.user?.rol || 'user');
 
-        if (response.user?.nombre) {
-          localStorage.setItem('nombreUsuario', response.user.nombre);
-        }
-
-        if (response.user?.rol === 'admin') {
-          this.router.navigate(['/admin']);
-        } else if (response.user?.rol === 'user') {
-          this.router.navigate(['/user']);
-        } else {
-          const alert = await this.alertController.create({
-            header: 'Error',
-            message: 'Rol no reconocido.',
-            buttons: ['OK']
+          this.router.navigate(['/inicio'], {
+            state: { userData: response.user }
           });
-          await alert.present();
+        },
+        error: async (error) => {
+          await loading.dismiss();
+          console.error('Error en login:', error);
+          this.showErrorAlert(error.error?.message || 'Credenciales incorrectas');
         }
-      },
-      error: async (error) => {
-        console.error('Error al iniciar sesión:', error);
-        await loading.dismiss();
-        this.loading = false;
-        const alert = await this.alertController.create({
-          header: 'Error',
-          message: 'Credenciales incorrectas o error en el servidor.',
-          buttons: ['OK']
-        });
-        await alert.present();
-      }
+      });
+    } catch (error) {
+      await loading.dismiss();
+      console.error('Error inesperado:', error);
+      this.showErrorAlert('Error inesperado al iniciar sesión');
+    }
+  }
+
+  private async showErrorAlert(message: string) {
+    const alert = await this.alertController.create({
+      header: 'Error',
+      message,
+      buttons: ['OK']
     });
+    await alert.present();
   }
 
   async loginWithGoogle() {

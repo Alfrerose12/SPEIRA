@@ -1,58 +1,71 @@
-<ion-content id="main-content" class="home-content" [fullscreen]="true">
+<ion-header>
+  <ion-toolbar class="menu-bar">
+    <ion-title>Bienvenido, {{userName}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
 
+<ion-content>
   <div class="bubbles">
-    <span></span><span></span><span></span><span></span><span></span>
-    <span></span><span></span><span></span><span></span><span></span>
+    <span *ngFor="let bubble of [1,2,3,4,5,6,7,8,9,10]"></span>
   </div>
 
-  <div class="home-card">
-    <div class="dynamic-images">
-      <div class="image-block">
-        <p>Estanques</p>
-        <img
-          src="assets/images/estanque.png"
-          alt="Estanque"
-          (click)="onSelectEstanque('Estanque 1')"
-          [class.selected]="estanqueSeleccionado === 'Estanque 1'"
-          (dblclick)="onImageClick('Estanque 1', $event)"
-        />
-      </div>
-
-      <div class="image-block">
-        <p>Cajas</p>
-        <img
-          src="assets/images/caja_de_plastico.png"
-          alt="Caja"
-          (click)="onSelectEstanque('Caja de plástico')"
-          [class.selected]="estanqueSeleccionado === 'Caja de plástico'"
-          (dblclick)="onImageClick('Caja de plástico', $event)"
-        />
-      </div>
-
-      <div class="image-block">
-        <p>Piscinas</p>
-        <img
-          src="assets/images/tina_blanca.png"
-          alt="Piscina"
-          (click)="onSelectEstanque('Piscina')"
-          [class.selected]="estanqueSeleccionado === 'Piscina'"
-          (dblclick)="onImageClick('Piscina', $event)"
-        />
-      </div>
-    </div>
+  <div class="main-container">
+    <ion-grid>
+      <ion-row>
+        <!-- Estanques -->
+        <ion-col size="12" size-md="6" size-lg="4">
+          <ion-card (click)="onSelectEstanque('Estanque')" [class.selected]="estanqueSeleccionado === 'Estanque'">
+            <img src="assets/images/estanque.png" alt="Estanques" class="container-image"/>
+            <ion-card-header>
+              <ion-card-title>Estanques</ion-card-title>
+            </ion-card-header>
+          </ion-card>
+        </ion-col>
+        
+        <!-- Cajas -->
+        <ion-col size="12" size-md="6" size-lg="4">
+          <ion-card (click)="onSelectEstanque('Caja')" [class.selected]="estanqueSeleccionado === 'Caja'">
+            <img src="assets/images/caja_de_plastico.png" alt="Cajas" class="container-image"/>
+            <ion-card-header>
+              <ion-card-title>Cajas</ion-card-title>
+            </ion-card-header>
+          </ion-card>
+        </ion-col>
+        
+        <!-- Piscinas -->
+        <ion-col size="12" size-md="6" size-lg="4">
+          <ion-card (click)="onSelectEstanque('Piscina')" [class.selected]="estanqueSeleccionado === 'Piscina'">
+            <img src="assets/images/tina_blanca.png" alt="Piscinas" class="container-image"/>
+            <ion-card-header>
+              <ion-card-title>Piscinas</ion-card-title>
+            </ion-card-header>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </div>
 </ion-content>
 
 <ion-tabs>
-  <ion-tab-bar slot="bottom">
-    <ion-tab-button (click)="goToReporte()">
+  <ion-tab-bar>
+    <ion-tab-button *ngIf="isAdmin" (click)="goToReportes()">
       <ion-icon name="document-text-outline"></ion-icon>
       <ion-label>Generar reporte</ion-label>
     </ion-tab-button>
 
+    <ion-tab-button *ngIf="isAdmin" (click)="goToReportes()">
+      <ion-icon name="water-outline"></ion-icon>
+      <ion-label>Administrar</ion-label>
+    </ion-tab-button>
+
     <ion-tab-button (click)="goToMonitoreo()">
       <ion-icon name="analytics-outline"></ion-icon>
-      <ion-label>Monitoreo general</ion-label>
+      <ion-label>Monitoreo</ion-label>
     </ion-tab-button>
 
     <ion-tab-button (click)="goToUsuario()">
