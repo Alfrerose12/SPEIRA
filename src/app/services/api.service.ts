@@ -28,4 +28,7 @@ export class ApiService {
       responseType: 'blob' 
     });
   }
+  registrarToken(token: string) {
+    return this.http.post(`${this.baseUrl}/notificaciones/token`, { token });
+  }
 }

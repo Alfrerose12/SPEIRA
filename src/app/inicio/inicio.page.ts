@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Platform, PopoverController } from '@ionic/angular';
 import { PopoverMenuComponent } from '../components/popover-menu/popover-menu.component';
 import { ApiService } from '../services/api.service';
+import { FcmService } from '../services/fcm.services';
 
 declare var navigator: any;
 
@@ -25,7 +26,8 @@ export class InicioPage implements OnInit {
     private popover: PopoverController,
     private platform: Platform,
     private location: Location,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private fcmService: FcmService
   ) { }
 
   ngOnInit() {
@@ -36,7 +38,24 @@ export class InicioPage implements OnInit {
     this.isAdmin = true;
 
     this.configureBackButton();
-  }
+
+    this.initFcm();
+  
+    }
+    async initFcm() {
+      const token: string | null = await this.fcmService.getDeviceToken();
+      if (token) {
+        console.log('✅ Token listo:', token);
+    
+        this.apiService.registrarToken(token).subscribe({
+          next: () => console.log('📡 Token registrado en backend'),
+          error: (err) => console.error('❌ Error al registrar token:', err)
+        });
+      }
+    
+      this.fcmService.listenToForegroundMessages();
+    }
+  
 
   configureBackButton() {
     this.platform.backButton.subscribeWithPriority(10, () => {
