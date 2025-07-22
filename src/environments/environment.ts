@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  apiUrl: 'https://api.speira.site/api',
   firebaseConfig: {
     apiKey: "AIzaSyCe1-ukYoXmUPeSQqqmmSL_bUnFsY_3hs0",
     authDomain: "speira-c84d5.firebaseapp.com",

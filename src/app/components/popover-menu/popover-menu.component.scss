@@ -1,0 +1,56 @@
+/* Estilos base comunes */
+ion-list {
+  border-radius: 12px;
+  padding: 8px 0;
+  width: 280px;
+}
+
+.menu-item, .context-item {
+  --min-height: 48px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  
+  ion-icon {
+    margin-right: 12px;
+    font-size: 20px;
+  }
+}
+
+/* Menú Hamburguesa */
+.hamburger-menu {
+  --ion-item-background: var(--ion-color-light);
+  
+  .menu-item {
+    --background-hover: rgba(var(--ion-color-primary-rgb), 0.1);
+    
+    ion-icon {
+      color: var(--ion-color-primary);
+    }
+    
+    &.logout ion-icon {
+      color: var(--ion-color-danger);
+    }
+  }
+}
+
+/* Menú Contextual */
+.context-menu {
+  --ion-item-background: #fff;
+  
+  ion-list-header {
+    font-weight: bold;
+    color: var(--ion-color-dark);
+  }
+  
+  .context-item {
+    --background-hover: rgba(var(--ion-color-medium-rgb), 0.1);
+    
+    ion-icon {
+      color: var(--ion-color-medium);
+    }
+    
+    &.cancel ion-icon {
+      color: var(--ion-color-danger);
+    }
+  }
+}

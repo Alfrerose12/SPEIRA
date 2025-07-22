@@ -1,127 +1,112 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { NavController } from '@ionic/angular';
+import { Router } from '@angular/router';
+import { Location } from '@angular/common';
+import { ApiService } from '../services/api.service';
 
 @Component({
   selector: 'app-reporte',
   templateUrl: './reporte.page.html',
   styleUrls: ['./reporte.page.scss'],
-  standalone: false
+  standalone: false,
 })
 export class ReportePage implements OnInit {
 
-  reporte = {
-    periodo: '',
-    fecha: '',
-  };
+  estanque = '';
+  periodo = '';
+  fechaSeleccionada = '';
+  generando = false;
 
-  PERIODOS_VALIDOS = ['diario', 'semanal', 'mensual', 'anual'];
-
-  constructor(private http: HttpClient) {}
+  constructor( 
+    private apiService: ApiService,
+    private navCtrl: NavController,
+    private router: Router,
+    private location: Location
+  ) {}
 
   ngOnInit() {}
 
-  actualizarFecha() {
-    const hoy = new Date();
-    switch (this.reporte.periodo) {
-      case 'diario':
-        this.reporte.fecha = hoy.toISOString().split('T')[0];
-        break;
-      case 'semanal':
-        this.reporte.fecha = ''; // limpia para que seleccione un lunes
-        break;
-      case 'mensual':
-        const mes = hoy.getMonth() + 1;
-        const año = hoy.getFullYear();
-        this.reporte.fecha = `${año}-${mes.toString().padStart(2, '0')}`;
-        break;
-      case 'anual':
-        this.reporte.fecha = hoy.getFullYear().toString();
-        break;
-      default:
-        this.reporte.fecha = '';
-    }
+  navigateBack() {
+    this.navCtrl.back();
   }
 
-  validarLunes() {
-    if (!this.reporte.fecha) return;
-
-    // Extraer año-mes-día correctamente de la fecha ISO (YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss)
-    const fechaSolo = this.reporte.fecha.split('T')[0];
-    const partes = fechaSolo.split('-');
-    const year = Number(partes[0]);
-    const month = Number(partes[1]) - 1; // Mes en JS empieza en 0
-    const day = Number(partes[2]);
-
-    const date = new Date(year, month, day);
-    const diaSemana = date.getDay();
-
-    if (diaSemana !== 1) {
-      alert('❌ Debe seleccionar un día Lunes para el reporte semanal.');
-      this.reporte.fecha = '';
+  obtenerPresentacionFecha(): string {
+    switch (this.periodo) {
+      case 'diario': return 'date';
+      case 'semanal': return 'date'; 
+      case 'mensual': return 'month';
+      case 'anual': return 'year';
+      default: return 'date';
     }
   }
 
   generarReporte() {
-    const url = 'http://192.168.1.10:3000/api/datos/reportes';
+    if (!this.validarCampos()) return;
 
-    if (!this.PERIODOS_VALIDOS.includes(this.reporte.periodo)) {
-      alert(`❌ Período inválido. Opciones válidas: ${this.PERIODOS_VALIDOS.join(', ')}`);
-      return;
-    }
-
-    if (!this.reporte.fecha) {
-      alert('❌ La fecha no puede estar vacía. Actualiza la fecha antes de generar el reporte.');
-      return;
-    }
-
-    if (this.reporte.periodo === 'semanal') {
-      // Validar que la fecha sea lunes justo antes de enviar
-      const fechaSolo = this.reporte.fecha.split('T')[0];
-      const partes = fechaSolo.split('-');
-      const year = Number(partes[0]);
-      const month = Number(partes[1]) - 1;
-      const day = Number(partes[2]);
-      const date = new Date(year, month, day);
-      const diaSemana = date.getDay();
-
-      if (diaSemana !== 1) {
-        alert('❌ La fecha para reporte semanal debe ser un día lunes.');
-        return;
-      }
-    }
-
-    // Si el período es mensual, solo mandar año-mes
-    let fechaFinal = this.reporte.fecha.trim();
-    if (this.reporte.periodo === 'mensual') {
-      fechaFinal = fechaFinal.slice(0, 7); // YYYY-MM
-    }
+    this.generando = true;
 
     const body = {
-      periodo: this.reporte.periodo,
-      fecha: fechaFinal,
+      estanque: this.estanque,
+      periodo: this.periodo,
+      fecha: this.fechaSeleccionada
     };
 
-    console.log('📄 Generando reporte con body:', body);
+    this.apiService.generarReporte(body).subscribe({
+      next: (response) => this.descargarPDF(response),
+      error: (err) => this.manejarError(err),
+      complete: () => this.generando = false
+    });
+  }
 
-    this.http.post(url, body, { responseType: 'blob' }).subscribe({
-      next: (response) => {
-        console.log('✅ Reporte recibido correctamente. Generando descarga...');
-        const blob = new Blob([response], { type: 'application/pdf' });
-        const urlBlob = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = urlBlob;
-        a.download = `reporte_${this.reporte.periodo}_${fechaFinal}.pdf`;
-        a.click();
-        window.URL.revokeObjectURL(urlBlob);
+  private validarCampos(): boolean {
+    if (!this.estanque || !this.periodo || !this.fechaSeleccionada) {
+      alert('Completa todos los campos.');
+      return false;
+    }
+
+    if (this.periodo === 'semanal' && new Date(this.fechaSeleccionada).getDay() !== 1) {
+      alert('Para reportes semanales, la fecha debe comenzar en lunes.');
+      return false;
+    }
+
+    return true;
+  }
+
+  private descargarPDF(data: Blob) {
+    const blob = new Blob([data], { type: 'application/pdf' });
+    const urlBlob = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = urlBlob;
+    a.download = `reporte_${this.periodo}_${this.fechaSeleccionada}.pdf`;
+    a.click();
+    URL.revokeObjectURL(urlBlob);
+    this.generando = false;
+  }
+
+  private manejarError(err: any) {
+    this.generando = false;
+    console.error('Error al generar el reporte:', err);
+    alert('No se pudo generar el reporte. Intenta nuevamente.');
+  }
+
+   logout() {
+    this.apiService.logout().subscribe({
+      next: () => {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('userRole');
+        
+        this.router.navigate(['/login']);
+        this.location.replaceState('/login');
       },
       error: (err) => {
-        console.error('❌ Error al generar el reporte:', err);
-        if (err.status === 400) {
-          alert('❌ No hay datos para el período seleccionado, verifica los datos ingresados.');
-        } else {
-          alert('❌ Error al generar el reporte. Verifica los datos o la conexión.');
-        }
-      },
+        console.error('Error en logout:', err);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('userRole');
+        this.router.navigate(['/login']);
+      }
     });
   }
 }

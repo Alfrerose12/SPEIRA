@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Platform, PopoverController } from '@ionic/angular';
 import { PopoverMenuComponent } from '../components/popover-menu/popover-menu.component';
+import { ApiService } from '../services/api.service';
 
 declare var navigator: any;
 
@@ -15,20 +16,24 @@ declare var navigator: any;
 export class InicioPage implements OnInit {
 
   isAdmin: boolean = false;
-  estanqueSeleccionado: string = '';
+  estanqueSeleccionado: string | null = null;
   userName: string = '';
+  menuEvent: any;
 
   constructor(
     private router: Router,
     private popover: PopoverController,
     private platform: Platform,
-    private location: Location
+    private location: Location,
+    private apiService: ApiService
   ) { }
 
   ngOnInit() {
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    this.isAdmin = localStorage.getItem('userRole') === 'admin';
-    this.userName = userData.nombre || userData.email || 'Usuario';
+    // const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    // this.isAdmin = localStorage.getItem('userRole') === 'admin';
+    // this.userName = userData.nombre || userData.email || 'Usuario';
+
+    this.isAdmin = true;
 
     this.configureBackButton();
   }
@@ -52,9 +57,82 @@ export class InicioPage implements OnInit {
     }
   }
 
-  onSelectEstanque(nombreEstanque: string) {
-    this.estanqueSeleccionado = nombreEstanque;
-    console.log(`Estanque seleccionado: ${this.estanqueSeleccionado}`);
+  onSelectEstanque(opcion: string) {
+    if (this.estanqueSeleccionado === opcion) {
+      this.estanqueSeleccionado = null;
+    } else {
+      this.estanqueSeleccionado = opcion;
+    }
+  }
+
+  async openHamburgerMenu(event: any) {
+    const popover = await this.popover.create({
+      component: PopoverMenuComponent,
+      event: event,
+      componentProps: {
+        isAdmin: this.isAdmin
+      },
+      cssClass: 'custom-popover',
+      side: 'bottom', 
+      alignment: 'end', 
+      size: 'auto', 
+      arrow: false 
+    });
+
+    await popover.present();
+
+    const { data } = await popover.onDidDismiss();
+    if (data?.action) {
+      this.handleMenuAction(data.action);
+    }
+  }
+
+  private handleMenuAction(action: string) {
+    switch (action) {
+      case 'reportes':
+        this.goToReportes();
+        break;
+      case 'estanques':
+        this.goToEstanques();
+        break;
+      case 'monitoreo':
+        this.goToMonitoreo();
+        break;
+      case 'usuario':
+        this.goToUsuario();
+        break;
+      case 'logout':
+        this.logout();
+        break;
+    }
+  }
+
+  goToOption(option: string) {
+    switch (option) {
+      case 'Estanque':
+        this.goToEstanques();
+        break;
+      case 'Caja':
+        this.goToCajas();
+        break;
+      case 'Piscina':
+        this.goToPiscinas();
+        break;
+      default:
+        console.warn('Opción no reconocida');
+    }
+  }
+
+  goToEstanques() {
+    this.router.navigate(['/estanques']);
+  }
+
+  goToCajas() {
+    this.router.navigate(['/cajas']);
+  }
+
+  goToPiscinas() {
+    this.router.navigate(['/piscinas']);
   }
 
   async onImageClick(nombre: string, event: Event) {
@@ -84,7 +162,7 @@ export class InicioPage implements OnInit {
   }
 
   goToReportes() {
-    if (this.isAdmin){
+    if (this.isAdmin) {
       this.router.navigate(['/reporte']);
     } else {
       this.navigateToReporte();
@@ -95,13 +173,24 @@ export class InicioPage implements OnInit {
     this.router.navigate(['/sensor-monitoring']);
   }
 
-  logout() {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userData');
-    localStorage.removeItem('userRole');
-
-    this.router.navigate(['/login']);
-    this.location.replaceState('/login');
+   logout() {
+    this.apiService.logout().subscribe({
+      next: () => {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('userRole');
+        
+        this.router.navigate(['/login']);
+        this.location.replaceState('/login');
+      },
+      error: (err) => {
+        console.error('Error en logout:', err);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('userRole');
+        this.router.navigate(['/login']);
+      }
+    });
   }
 
 }
