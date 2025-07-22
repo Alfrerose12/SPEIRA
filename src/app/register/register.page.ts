@@ -73,6 +73,7 @@ export class RegisterPage implements OnInit {
         this.loading = false;
 
         if (response.success) {
+          console.log('✅ Respuesta exitosa:', response);
           const alert = await this.alertController.create({
             header: 'Registro exitoso',
             message: 'Tu cuenta ha sido creada correctamente.',
@@ -90,6 +91,7 @@ export class RegisterPage implements OnInit {
         }
       },
       error: async (err: any) => {
+        console.error('❌ Error recibido:', err);
         await loading.dismiss();
         this.loading = false;
 
