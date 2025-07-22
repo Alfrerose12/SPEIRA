@@ -12,8 +12,8 @@ const GeneRoutes = require('./routes/geneRoutes');
 const especificacionSwagger = require('./config/swagger');
 const verificarRol = require('./middleware/rolValidator');
 
-if (!process.env.MONGO_URI) throw new Error('❌ MONGO_URI no está definida en .env');
-if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) throw new Error('❌ Claves VAPID no están definidas en .env');
+if (!process.env.MONGO_URI) throw new Error('MONGO_URI no está definida en .env');
+if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) throw new Error('Claves VAPID no están definidas en .env');
 
 
 const app = express();
@@ -65,10 +65,10 @@ app.use((err, req, res, next) => {
 
 const server = app.listen(PORT, '0.0.0.0', () => {
   const localIP = os.networkInterfaces().eth0?.[0]?.address || '127.0.0.1';
-  console.log(`🚀 Servidor funcionando en:\n  📍 Local: http://localhost:${PORT}\n  🌐 Red Local: http://${localIP}:${PORT}\n  🌐 Dominio: https://api.speira.site`);
+  console.log(`Servidor funcionando en:\n  Local: http://localhost:${PORT}\n  Red Local: http://${localIP}:${PORT}\n  Dominio: https://api.speira.site`);
 });
 
 process.on('SIGTERM', () => {
-  console.log('🛑 Apagando servidor...');
+  console.log('Apagando servidor...');
   server.close(() => process.exit(0));
 });

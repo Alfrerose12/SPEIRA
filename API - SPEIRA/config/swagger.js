@@ -1,20 +1,3 @@
-const { request } = require('http');
-const os = require('os');
-
-// const getLocalIPAddress = () => {
-//   const interfaces = os.networkInterfaces();
-//   for (const name in interfaces) {
-//     for (const iface of interfaces[name]) {
-//       if (iface.family === 'IPv4' && !iface.internal) {
-//         return iface.address;
-//       }
-//     }
-//   }
-//   return '127.0.0.1';
-// };
-
-// const localIP = getLocalIPAddress();
-
 const swaggerDefination = {
   openapi: '3.0.0',
   info: {

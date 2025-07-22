@@ -27,9 +27,11 @@ const {
 } = require('../controllers/usuarioController');
 
 const {
+  guardarToken,
   enviarNotificacion
 } = require('../controllers/notificationController');
 
+router.post('/notificaciones/token', guardarToken);
 router.post('/notificaciones', enviarNotificacion);
 
 router.post('/datos', crearDato);

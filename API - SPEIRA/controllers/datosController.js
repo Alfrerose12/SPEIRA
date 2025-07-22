@@ -102,10 +102,9 @@ exports.crearDato = async (req, res) => {
 
 exports.obtenerDatosGenerales = async (req, res) => {
   try {
-    // Obtener todos los estanques
     const estanques = await Estanque.find().populate({
       path: 'datosSensores',
-      options: { sort: { fecha: -1 }, limit: 1 } // Solo el dato más reciente
+      options: { sort: { fecha: -1 }, limit: 1 } 
     });
 
     if (estanques.length === 0) {
@@ -256,7 +255,13 @@ exports.obtenerDatosPorNombreEstanque = async (req, res) => {
 
 exports.generarReporte = async (req, res) => {
   try {
-    const { periodo, fecha } = req.body;
+    const { periodo, fecha, estanque } = req.body;
+
+    if (!estanque || estanque.trim() === '') {
+      return res.status(400).json({
+        error: 'Nombre del estanque requerido'
+      });
+    }
 
     if (!PERIODOS_VALIDOS.includes(periodo)) {
       return res.status(400).json({
@@ -290,8 +295,8 @@ exports.generarReporte = async (req, res) => {
       });
     }
 
-    const rutaReporte = await generarReporte(periodo, fecha);
-    const nombreArchivo = `reporte_${periodo}_${fecha}.pdf`;
+    const rutaReporte = await generarReporte(periodo, fecha, estanque);
+    const nombreArchivo = `reporte_${estanque}_${periodo}_${fecha}.pdf`.replace(/\s+/g, '_');
 
     res.download(rutaReporte, nombreArchivo, err => {
       if (err) {

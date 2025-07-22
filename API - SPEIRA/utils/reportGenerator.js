@@ -10,7 +10,6 @@ const rutaLogo2 = path.join(__dirname, '../utils/assets/logo_speira.png');
 
 const ZONA_HORARIA = 'America/Mexico_City';
 
-// Función para agregar encabezado
 function agregarEncabezado(doc, periodo, fechaStr, fechaInicio, fechaFin) {
   try {
     const logo1Width = 140;
@@ -49,11 +48,9 @@ function agregarEncabezado(doc, periodo, fechaStr, fechaInicio, fechaFin) {
   }
 }
 
-// Función mejorada para calcular promedios
 function promedio(valores) {
   if (!valores || valores.length === 0) return 0;
   
-  // Filtrar valores no numéricos
   const valoresNumericos = valores.filter(v => typeof v === 'number' && !isNaN(v));
   
   if (valoresNumericos.length === 0) return 0;
@@ -61,13 +58,11 @@ function promedio(valores) {
   return valoresNumericos.reduce((a, b) => a + b, 0) / valoresNumericos.length;
 }
 
-// Función para validar y formatear datos
 function formatearDato(valor, decimales = 2) {
   if (typeof valor !== 'number' || isNaN(valor)) return 'N/A';
   return valor.toFixed(decimales);
 }
 
-// Función para sumar valores numéricos de forma segura
 function sumarSegura(acumulador, valor) {
   if (typeof valor !== 'number' || isNaN(valor)) return acumulador;
   return acumulador + valor;
@@ -77,7 +72,6 @@ function agruparPorDia(datos) {
   const datosAgrupados = {};
 
   datos.forEach(dato => {
-    // Validar que el dato tenga estanque asociado
     if (!dato.estanque) return;
 
     const hora = moment(dato.fecha).tz(ZONA_HORARIA).startOf('hour').format(); 
@@ -96,7 +90,6 @@ function agruparPorDia(datos) {
       };
     }
 
-    // Sumar solo valores válidos
     datosAgrupados[hora].ph = sumarSegura(datosAgrupados[hora].ph, dato.ph);
     datosAgrupados[hora].temperaturaAgua = sumarSegura(datosAgrupados[hora].temperaturaAgua, dato.temperaturaAgua);
     datosAgrupados[hora].temperaturaAmbiente = sumarSegura(datosAgrupados[hora].temperaturaAmbiente, dato.temperaturaAmbiente);
@@ -105,7 +98,6 @@ function agruparPorDia(datos) {
     datosAgrupados[hora].conductividadElectrica = sumarSegura(datosAgrupados[hora].conductividadElectrica, dato.conductividadElectrica);
     datosAgrupados[hora].co2 = sumarSegura(datosAgrupados[hora].co2, dato.co2);
     
-    // Incrementar contador solo si al menos un valor es válido
     if ([dato.ph, dato.temperaturaAgua, dato.temperaturaAmbiente, dato.humedad, 
          dato.luminosidad, dato.conductividadElectrica, dato.co2].some(v => typeof v === 'number' && !isNaN(v))) {
       datosAgrupados[hora].count++;
@@ -130,7 +122,6 @@ function agruparPorDia(datos) {
 function agruparPorSemana(datos) {
   const agrupados = {};
   datos.forEach(dato => {
-    // Validar que el dato tenga estanque asociado
     if (!dato.estanque) return;
 
     const fechaDato = moment(dato.fecha).tz(ZONA_HORARIA);
@@ -166,7 +157,6 @@ function agruparPorSemana(datos) {
 function agruparPorMes(datos) {
   const agrupados = {};
   datos.forEach(dato => {
-    // Validar que el dato tenga estanque asociado
     if (!dato.estanque) return;
 
     const dia = moment(dato.fecha).tz(ZONA_HORARIA).format('YYYY-MM-DD');
@@ -201,7 +191,6 @@ function agruparPorMes(datos) {
 function agruparPorAnio(datos) {
   const agrupados = {};
   datos.forEach(dato => {
-    // Validar que el dato tenga estanque asociado
     if (!dato.estanque) return;
 
     const mes = moment(dato.fecha).tz(ZONA_HORARIA).format('YYYY-MM');
@@ -260,9 +249,7 @@ exports.generarReporte = async (periodo, fechaStr) => {
       .sort({ 'estanque.nombre': 1, fecha: 1 })
       .cursor();
 
-    // Procesar datos en streaming
     for await (const dato of datosCursor) {
-      // Filtrar datos sin estanque
       if (!dato.estanque) {
         console.warn('Registro sin estanque encontrado:', dato._id);
         continue;
@@ -277,7 +264,6 @@ exports.generarReporte = async (periodo, fechaStr) => {
       datosPorEstanque[nombreEstanque].push(dato);
       contador++;
 
-      // Liberar el event loop periódicamente
       if (contador % BATCH_SIZE === 0) {
         await new Promise(resolve => setImmediate(resolve));
         console.log(`Procesados ${contador} registros... Memoria: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
@@ -291,7 +277,6 @@ exports.generarReporte = async (periodo, fechaStr) => {
     console.log(`Total de registros procesados: ${contador}`);
     console.log(`Estanques con datos: ${Object.keys(datosPorEstanque).join(', ')}`);
 
-    // 2. Procesar cada estanque según el período
     const reportesPorEstanque = {};
     for (const nombreEstanque in datosPorEstanque) {
       let datosEstanque = datosPorEstanque[nombreEstanque];
@@ -331,7 +316,6 @@ exports.generarReporte = async (periodo, fechaStr) => {
 
         doc.pipe(stream);
 
-        // Configuración de columnas
         const configColumnas = [
           {
             key: 'fecha',
@@ -411,7 +395,6 @@ exports.generarReporte = async (periodo, fechaStr) => {
           };
         });
 
-        // 3. Función optimizada para generar tablas por trozos
         const generarTablas = async () => {
           const nombresEstanques = Object.keys(reportesPorEstanque).sort((a, b) => {
             const numA = parseInt(a.match(/\d+/) || 0);
@@ -420,13 +403,11 @@ exports.generarReporte = async (periodo, fechaStr) => {
           });
 
           for (const nombreEstanque of nombresEstanques) {
-            // Verificar espacio en página
             if (doc.y + 200 > doc.page.height - doc.page.margins.bottom) {
               doc.addPage();
               agregarEncabezado(doc, periodo, fechaStr, fechaInicio, fechaFin);
             }
 
-            // Agregar título del estanque
             doc.moveDown(2);
             doc.fontSize(14).text(`${nombreEstanque}`, {
               align: 'left',
@@ -434,7 +415,6 @@ exports.generarReporte = async (periodo, fechaStr) => {
             });
             doc.moveDown(0.5);
 
-            // Procesar datos en trozos
             const datosEstanque = reportesPorEstanque[nombreEstanque];
             const CHUNK_SIZE = 50;
 
@@ -458,7 +438,6 @@ exports.generarReporte = async (periodo, fechaStr) => {
                 headerAlign: 'center'
               });
 
-              // Liberar memoria entre chunks
               if (i + CHUNK_SIZE < datosEstanque.length) {
                 await new Promise(resolve => setImmediate(resolve));
                 console.log(`Procesando chunk ${i}-${i+CHUNK_SIZE} de ${datosEstanque.length}...`);
@@ -467,10 +446,8 @@ exports.generarReporte = async (periodo, fechaStr) => {
           }
         };
 
-        // Agregar encabezado inicial
         agregarEncabezado(doc, periodo, fechaStr, fechaInicio, fechaFin);
 
-        // Generar las tablas
         generarTablas()
           .then(() => {
             console.log('Finalizando documento PDF...');
