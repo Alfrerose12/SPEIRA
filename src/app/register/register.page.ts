@@ -64,7 +64,7 @@ export class RegisterPage implements OnInit {
       nombre: this.fullName,
       email: this.email,
       password: this.password,
-      rol: 'usuario'  
+      rol: 'user'  
     };
 
     this.apiService.register(registerData).subscribe({
