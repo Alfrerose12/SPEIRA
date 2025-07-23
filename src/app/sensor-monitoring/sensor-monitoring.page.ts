@@ -1,273 +1,137 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
-import { interval, Subscription, throwError } from 'rxjs';
-import { switchMap, catchError, tap, throttleTime } from 'rxjs/operators';
-import { Chart, ChartConfiguration, registerables } from 'chart.js';
+import { Component, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
+import { IonContent } from '@ionic/angular';
+import { Chart, registerables } from 'chart.js';
+import { interval, Subscription } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { ApiService } from '../services/api.service';
-import { MenuController, IonContent } from '@ionic/angular';
 
-interface SensorData {
-  id: number;
-  name: string;
-  displayName: string;
-  value: number;
-  unit: string;
-  timestamp: Date;  
-}
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-sensor-monitoring',
   templateUrl: './sensor-monitoring.page.html',
   styleUrls: ['./sensor-monitoring.page.scss'],
-  standalone: false
 })
-export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
+export class SensorMonitoringPage implements AfterViewInit, OnDestroy {
   @ViewChild(IonContent, { static: false }) content!: IonContent;
-  private scrollY = 0;
 
-  sensorData: SensorData[] = [];
-  loading = true;
-  error: string | null = null;
+  sensorCharts: { [key: string]: Chart } = {};
+  sensorData: { [key: string]: number[] } = {
+    temperatura: [],
+    ph: [],
+    humedad: [],
+    luminosidad: [],
+  };
+  sensorRanges: { [key: string]: { min: number; max: number } } = {
+    temperatura: { min: 30, max: 35 },
+    ph: { min: 9, max: 11 },
+    humedad: { min: 40, max: 70 },
+    luminosidad: { min: 35, max: 690 },
+  };
 
-  selectedSensorFilter: string = '';
-  availableSensors: string[] = [
-    'pH',
-    'Temperatura del Agua',
-    'Temperatura Ambiente',
-    'Humedad',
-    'Luminosidad',
-    'Conductividad',
-    'CO₂'
-  ];
+  labels: string[] = [];
+  maxDataPoints: number = 20;
+  refreshInterval = 1000; // 1 segundo
+  dataSubscription!: Subscription;
 
-  sortColumn: keyof SensorData = 'displayName';
-  sortDirection: 'asc' | 'desc' = 'asc';
-
-  private dataSubscription!: Subscription;
-  private charts: Map<string, Chart> = new Map();
-  private readonly UPDATE_INTERVAL = 500;
-
-  constructor(private apiService: ApiService, private menuCtrl: MenuController) {
-    Chart.register(...registerables);
-  }
-
-  ngOnInit() {
-    this.initializeDataStream();
-  }
+  constructor(private apiService: ApiService) {}
 
   ngAfterViewInit() {
-    this.initializeCharts();
+    this.initCharts();
+    this.startDataUpdates();
   }
 
   ngOnDestroy() {
-    this.cleanup();
-  }
-
-  openMenu() {
-    this.menuCtrl.open('filter-menu');
-  }
-
-  onHeaderClick(column: keyof SensorData) {
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
-    }
-
-    this.sensorData.sort((a, b) => {
-      const valA = a[column];
-      const valB = b[column];
-
-      if (typeof valA === 'string' && typeof valB === 'string') {
-        return this.sortDirection === 'asc'
-          ? valA.localeCompare(valB)
-          : valB.localeCompare(valA);
-      }
-
-      if (typeof valA === 'number' && typeof valB === 'number') {
-        return this.sortDirection === 'asc' ? valA - valB : valB - valA;
-      }
-
-      return 0;
-    });
-  }
-
-  private initializeDataStream(): void {
-    this.dataSubscription = interval(this.UPDATE_INTERVAL).pipe(
-      throttleTime(1000),
-      tap(() => {
-        this.saveScroll();
-        this.loading = true;
-      }),
-      switchMap(() => this.fetchSensorData()),
-      catchError(error => {
-        this.error = 'Error al conectar con el servidor';
-        this.loading = false;
-        return throwError(() => new Error(error));
-      })
-    ).subscribe({
-      complete: () => {
-        this.restoreScroll();
-        this.loading = false;
-      }
-    });
-  }
-
-  private fetchSensorData() {
-    return this.apiService.getSensorGeneralData().pipe(
-      tap(res => {
-        const resumen = res.resumen;
-
-        const estanqueConDatos = resumen.find((e: any) => e.datos !== null);
-        if (!estanqueConDatos) {
-          this.error = 'No hay datos disponibles';
-          this.loading = false;
-          return;
-        }
-
-        const datos = estanqueConDatos.datos;
-        const timestamp = new Date(estanqueConDatos.fecha);
-
-        const newData: SensorData[] = [
-          { id: 1, name: 'ph', displayName: 'pH', value: datos.ph, unit: '', timestamp },
-          { id: 2, name: 'tempWater', displayName: 'Temperatura del Agua', value: datos.temperaturaAgua, unit: '°C', timestamp },
-          { id: 3, name: 'tempAmbient', displayName: 'Temperatura Ambiente', value: datos.temperaturaAmbiente, unit: '°C', timestamp },
-          { id: 4, name: 'humidity', displayName: 'Humedad', value: datos.humedad, unit: '%', timestamp },
-          { id: 5, name: 'light', displayName: 'Luminosidad', value: datos.luminosidad, unit: 'lux', timestamp },
-          { id: 6, name: 'conductivity', displayName: 'Conductividad', value: datos.conductividadElectrica, unit: 'µS/cm', timestamp },
-          { id: 7, name: 'co2', displayName: 'CO₂', value: datos.co2, unit: 'ppm', timestamp }
-        ];
-
-        this.sensorData = newData.sort((a, b) => {
-          const col = this.sortColumn;
-          const dir = this.sortDirection;
-
-          const valA = a[col];
-          const valB = b[col];
-
-          if (typeof valA === 'string' && typeof valB === 'string') {
-            return dir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
-          }
-
-          if (typeof valA === 'number' && typeof valB === 'number') {
-            return dir === 'asc' ? valA - valB : valB - valA;
-          }
-
-          return 0;
-        });
-
-        this.updateCharts(this.sensorData);
-        this.error = null;
-        this.loading = false;
-      }),
-      tap(() => this.restoreScroll()),
-      catchError(error => {
-        this.error = 'Error al obtener datos del sensor';
-        this.loading = false;
-        return throwError(() => new Error(error));
-      })
-    );
-  }
-
-  private initializeCharts(): void {
-    const chartConfigs = [
-      { id: 'phChart', label: 'pH', color: 'rgba(75, 192, 192, 1)' },
-      { id: 'tempWaterChart', label: 'Temperatura del Agua (°C)', color: 'rgba(255, 99, 132, 1)' },
-      { id: 'tempAmbientChart', label: 'Temperatura Ambiental (°C)', color: 'rgba(54, 162, 235, 1)' },
-      { id: 'humidityChart', label: 'Humedad (%)', color: 'rgba(153, 102, 255, 1)' },
-      { id: 'lightChart', label: 'Luminosidad (lux)', color: 'rgba(255, 206, 86, 1)' },
-      { id: 'conductivityChart', label: 'Conductividad Eléctrica (µS/cm)', color: 'rgba(255, 159, 64, 1)' },
-      { id: 'co2Chart', label: 'CO₂ (ppm)', color: 'rgba(100, 100, 100, 1)' }
-    ];
-
-    chartConfigs.forEach(config => {
-      const ctx = document.getElementById(config.id) as HTMLCanvasElement;
-      if (ctx) {
-        const chart = new Chart(ctx, this.getChartConfig(config.label, config.color));
-        this.charts.set(config.id, chart);
-      }
-    });
-  }
-
-  private getChartConfig(label: string, borderColor: string): ChartConfiguration {
-    return {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [{
-          label,
-          data: [],
-          borderColor,
-          backgroundColor: borderColor.replace('1)', '0.2)'),
-          borderWidth: 2,
-          tension: 0.4,
-          fill: true
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: { duration: 0 },
-        scales: { y: { beginAtZero: false } },
-        plugins: {
-          legend: { display: true },
-          tooltip: { mode: 'index', intersect: false }
-        }
-      }
-    };
-  }
-
-  private updateCharts(data: SensorData[]): void {
-    this.charts.forEach((chart, chartId) => {
-      const sensorType = chartId.replace('Chart', '');
-      const sensorDatum = data.find(d => d.name === sensorType);
-      if (!sensorDatum) return;
-
-      const labels = chart.data.labels || [];
-      const dataPoints = chart.data.datasets[0].data || [];
-
-      const timestamp = new Date(sensorDatum.timestamp).toLocaleTimeString();
-
-      labels.push(timestamp);
-      dataPoints.push(sensorDatum.value);
-
-      if (labels.length > 20) {
-        labels.shift();
-        dataPoints.shift();
-      }
-
-      chart.data.labels = labels;
-      chart.data.datasets[0].data = dataPoints;
-      chart.update();
-    });
-  }
-
-  private saveScroll() {
-    this.content?.getScrollElement().then(el => {
-      this.scrollY = el.scrollTop;
-    });
-  }
-
-  private restoreScroll() {
-    this.content?.getScrollElement().then(el => {
-      el.scrollTo(0, this.scrollY);
-    });
-  }
-
-  private cleanup(): void {
     if (this.dataSubscription) {
       this.dataSubscription.unsubscribe();
     }
-    this.charts.forEach(chart => chart.destroy());
-    this.charts.clear();
   }
 
-  refreshData() {
-    this.loading = true;
-    this.fetchSensorData().subscribe();
+  initCharts() {
+    Object.keys(this.sensorData).forEach(sensor => {
+      const canvas = document.getElementById(`${sensor}-chart`) as HTMLCanvasElement;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          this.sensorCharts[sensor] = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: this.labels,
+              datasets: [
+                {
+                  label: sensor.toUpperCase(),
+                  data: [],
+                  borderColor: this.getSensorColor(sensor),
+                  backgroundColor: 'rgba(0, 0, 0, 0)',
+                  tension: 0.3,
+                  pointRadius: 0,
+                  borderWidth: 2,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              animation: false,
+              scales: {
+                y: {
+                  min: this.sensorRanges[sensor].min,
+                  max: this.sensorRanges[sensor].max,
+                },
+              },
+              plugins: {
+                legend: {
+                  display: true,
+                },
+              },
+            },
+          });
+        }
+      }
+    });
   }
 
-  shouldDisplaySensor(sensorName: string): boolean {
-    return !this.selectedSensorFilter || this.selectedSensorFilter === sensorName;
+  startDataUpdates() {
+    this.dataSubscription = interval(this.refreshInterval)
+      .pipe(
+        switchMap(() => this.apiService.getSensorGeneralData())
+      )
+      .subscribe((data: any) => {
+        const now = new Date().toLocaleTimeString();
+        this.labels.push(now);
+        if (this.labels.length > this.maxDataPoints) {
+          this.labels.shift();
+        }
+
+        Object.keys(this.sensorData).forEach(sensor => {
+          const newValue = data[sensor];
+          this.sensorData[sensor].push(newValue);
+
+          if (this.sensorData[sensor].length > this.maxDataPoints) {
+            this.sensorData[sensor].shift();
+          }
+
+          const chart = this.sensorCharts[sensor];
+          if (chart) {
+            chart.data.labels = [...this.labels];
+            chart.data.datasets[0].data = [...this.sensorData[sensor]];
+            chart.update('none');
+          }
+        });
+      });
+  }
+
+  getSensorColor(sensor: string): string {
+    switch (sensor) {
+      case 'temperatura':
+        return 'rgb(255, 99, 132)';
+      case 'ph':
+        return 'rgb(54, 162, 235)';
+      case 'humedad':
+        return 'rgb(75, 192, 192)';
+      case 'luminosidad':
+        return 'rgb(255, 205, 86)';
+      default:
+        return 'rgb(201, 203, 207)';
+    }
   }
 }
