@@ -11,7 +11,7 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  register(data: { nombre: string; email: string; password: string, rol: string}): Observable<any> {
+  register(data: { nombre: string; email: string; password: string; rol: string }): Observable<any> {
     return this.http.post(`${this.baseUrl}/usuario/registro`, data, { withCredentials: true });
   }
 
@@ -22,13 +22,18 @@ export class ApiService {
   logout(): Observable<any> {
     return this.http.post(`${this.baseUrl}/usuario/cerrar-sesion`, {}, { withCredentials: true });
   }
-  
+
   generarReporte(body: { estanque: string; periodo: string; fecha: string }): Observable<Blob> {
-    return this.http.post(`${this.baseUrl}/datos/reportes`, body, { 
-      responseType: 'blob' 
+    return this.http.post(`${this.baseUrl}/datos/reportes`, body, {
+      responseType: 'blob'
     });
   }
-  registrarToken(token: string) {
+
+  registrarToken(token: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/notificaciones/token`, { token });
+  }
+
+  getSensorGeneralData(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/datos/generales`);
   }
 }

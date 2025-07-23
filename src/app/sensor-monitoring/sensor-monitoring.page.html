@@ -1,38 +1,41 @@
-<ion-header></ion-header>
+<ion-menu side="start" menuId="filter-menu" contentId="main-content">
+  <ion-header>
+    <ion-toolbar color="primary">
+      <ion-title>Filtro de Sensores</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content>
+    <ion-segment [(ngModel)]="selectedSensorFilter" color="primary">
+      <ion-segment-button value="">
+        <ion-label>Todos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button *ngFor="let sensor of availableSensors" [value]="sensor">
+        <ion-label>{{ sensor }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-content>
+</ion-menu>
 
-<ion-content class="monitoring-content">
+<ion-content id="main-content" class="monitoring-content">
+  <div class="filter-button-wrapper">
+    <ion-button (click)="openMenu()" fill="solid" class="filter-button" title="Filtro de Sensores">
+      <ion-icon slot="start" name="options-outline"></ion-icon>
+      Filtrado   de Sensores
+    </ion-button>
+  </div>
+
   <!-- Error State -->
- <!--<div *ngIf="error" class="error-message">
+  <!--<div *ngIf="error" class="error-message">
     <ion-icon name="warning-outline"></ion-icon>
     <p>{{ error }}</p>
     <ion-button (click)="refreshData()" fill="clear">Reintentar</ion-button>
-  </div>--> 
+  </div>-->
 
   <!-- Burbujas de fondo -->
   <div class="bubbles">
     <span *ngFor="let bubble of [1,2,3,4,5,6,7,8,9,10]"></span>
   </div>
 
-  <!-- Filtro -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>
-        <ion-icon name="options-outline"></ion-icon> Filtro de Sensor
-      </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-segment [(ngModel)]="selectedSensorFilter" color="primary">
-        <ion-segment-button value="">
-          <ion-label>Todos</ion-label>
-        </ion-segment-button>
-        <ion-segment-button *ngFor="let sensor of availableSensors" [value]="sensor">
-          <ion-label>{{ sensor }}</ion-label>
-        </ion-segment-button>
-      </ion-segment>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Contenido principal -->
   <div class="content-wrapper">
     <!-- Tarjeta de datos en tiempo real -->
     <ion-card>

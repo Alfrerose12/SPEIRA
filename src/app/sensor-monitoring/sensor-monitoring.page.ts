@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { interval, Subscription, throwError } from 'rxjs';
 import { switchMap, catchError, tap, throttleTime } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
+import { ApiService } from '../services/api.service';
+import { MenuController } from '@ionic/angular';
 
 interface SensorData {
   id: number;
@@ -35,12 +36,14 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
     'CO₂'
   ];
 
+  sortColumn: keyof SensorData = 'displayName';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
   private dataSubscription!: Subscription;
   private charts: Map<string, Chart> = new Map();
-  private readonly API_URL = 'http://192.168.1.101:3000/api/datos/generales';
   private readonly UPDATE_INTERVAL = 1000;
 
-  constructor(private http: HttpClient) {
+  constructor(private apiService: ApiService, private menuCtrl: MenuController) {
     Chart.register(...registerables);
   }
 
@@ -54,6 +57,36 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnDestroy() {
     this.cleanup();
+  }
+
+  openMenu() {
+    this.menuCtrl.open('filter-menu');
+  }
+
+  onHeaderClick(column: keyof SensorData) {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+
+    this.sensorData.sort((a, b) => {
+      const valA = a[column];
+      const valB = b[column];
+
+      if (typeof valA === 'string' && typeof valB === 'string') {
+        return this.sortDirection === 'asc'
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA);
+      }
+
+      if (typeof valA === 'number' && typeof valB === 'number') {
+        return this.sortDirection === 'asc' ? valA - valB : valB - valA;
+      }
+
+      return 0;
+    });
   }
 
   private initializeDataStream(): void {
@@ -72,7 +105,7 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private fetchSensorData() {
-    return this.http.get<any>(this.API_URL).pipe(
+    return this.apiService.getSensorGeneralData().pipe(
       tap(res => {
         const resumen = res.resumen;
 
@@ -86,7 +119,7 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
         const datos = estanqueConDatos.datos;
         const timestamp = new Date(estanqueConDatos.fecha);
 
-        this.sensorData = [
+        const newData: SensorData[] = [
           { id: 1, name: 'ph', displayName: 'pH', value: datos.ph, unit: '', timestamp },
           { id: 2, name: 'tempWater', displayName: 'Temperatura del Agua', value: datos.temperaturaAgua, unit: '°C', timestamp },
           { id: 3, name: 'tempAmbient', displayName: 'Temperatura Ambiente', value: datos.temperaturaAmbiente, unit: '°C', timestamp },
@@ -95,6 +128,25 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
           { id: 6, name: 'conductivity', displayName: 'Conductividad', value: datos.conductividadElectrica, unit: 'µS/cm', timestamp },
           { id: 7, name: 'co2', displayName: 'CO₂', value: datos.co2, unit: 'ppm', timestamp }
         ];
+
+        // Aplica el orden actual
+        this.sensorData = newData.sort((a, b) => {
+          const col = this.sortColumn;
+          const dir = this.sortDirection;
+
+          const valA = a[col];
+          const valB = b[col];
+
+          if (typeof valA === 'string' && typeof valB === 'string') {
+            return dir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+          }
+
+          if (typeof valA === 'number' && typeof valB === 'number') {
+            return dir === 'asc' ? valA - valB : valB - valA;
+          }
+
+          return 0;
+        });
 
         this.updateCharts(this.sensorData);
         this.error = null;
