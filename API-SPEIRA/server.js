@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const auth = require('./middleware/auth');
+const path = require('path');
 const swaggerUI = require('swagger-ui-express');
 const conectarDB = require('./config/db');
 const GeneRoutes = require('./routes/geneRoutes');

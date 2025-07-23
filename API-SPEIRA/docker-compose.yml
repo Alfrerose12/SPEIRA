@@ -1,16 +1,13 @@
+version: "3.8"
+
 services:
   app:
-    container_name: api-speira-app 
+    container_name: api-speira-app
     build: .
     ports:
       - "${PORT}:${PORT}"
     env_file:
       - .env
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-      - ./reportes:/usr/src/app/reportes
-      - ./utils/assets:/usr/src/app/utils/assets
     depends_on:
       - mongo
     networks:
@@ -19,7 +16,7 @@ services:
           - api-speira-app
 
   mongo:
-    container_name: api-speira-mongo 
+    container_name: api-speira-mongo
     image: mongo:6
     ports:
       - "27017:27017"
@@ -33,10 +30,10 @@ services:
 
 volumes:
   mongo-data:
-    name: speira-mongo-data 
-    external: true 
+    name: speira-mongo-data
+    external: true
 
 networks:
   speira-network:
     driver: bridge
-    name: speira-network 
+    name: speira-network

@@ -2,13 +2,13 @@ FROM node:18-bookworm
 
 WORKDIR /usr/src/app
 
-# Primero actualizamos el sistema base
+# Instalación del sistema base
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-# Luego instalamos las dependencias necesarias
+# Instalación de dependencias necesarias para módulos nativos
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     python3 \
@@ -20,12 +20,18 @@ RUN apt-get update && \
     libpango1.0-dev \
     libgif-dev \
     libjpeg-dev \
-    librsvg2-dev \
-    && rm -rf /var/lib/apt/lists/*
+    librsvg2-dev && \
+    rm -rf /var/lib/apt/lists/*
 
+# Copiar dependencias primero para usar cache de Docker
 COPY package*.json ./
 RUN npm install
 
+# Copiar el resto del código, incluyendo reportes y assets
 COPY . .
-EXPOSE 3000
+
+# Exponer el puerto que uses (controlado por variable de entorno .env)
+EXPOSE ${PORT}
+
+# Comando de inicio
 CMD ["node", "server.js"]
