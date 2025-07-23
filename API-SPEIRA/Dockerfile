@@ -26,6 +26,7 @@ RUN apt-get update && \
 # Copiar dependencias primero para usar cache de Docker
 COPY package*.json ./
 RUN npm install
+RUN npm install -g pm2
 
 # Copiar el resto del código, incluyendo reportes y assets
 COPY . .
@@ -34,4 +35,4 @@ COPY . .
 EXPOSE ${PORT}
 
 # Comando de inicio
-CMD ["node", "server.js"]
+CMD ["pm2-runtime", "server.js"]
