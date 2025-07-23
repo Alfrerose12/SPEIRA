@@ -11,7 +11,7 @@ interface SensorData {
   displayName: string;
   value: number;
   unit: string;
-  timestamp: Date;
+  timestamp: Date;  
 }
 
 @Component({
@@ -209,23 +209,31 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private updateCharts(data: SensorData[]): void {
-    const dataBySensor = data.reduce((acc, item) => {
-      if (!acc[item.name]) acc[item.name] = [];
-      acc[item.name].push(item);
-      return acc;
-    }, {} as Record<string, SensorData[]>);
-
+    // Aquí usamos los datos reales de la API para actualizar las gráficas
     this.charts.forEach((chart, chartId) => {
+      // Extraemos el nombre del sensor (sin 'Chart')
       const sensorType = chartId.replace('Chart', '');
-      const sensorData = dataBySensor[sensorType] || [];
 
-      if (sensorData.length > 0) {
-        chart.data.labels = sensorData.map(d =>
-          new Date(d.timestamp).toLocaleTimeString()
-        );
-        chart.data.datasets[0].data = sensorData.map(d => d.value);
-        chart.update();
+      // Buscamos el dato actual para ese sensor
+      const sensorDatum = data.find(d => d.name === sensorType);
+      if (!sensorDatum) return;
+
+      const labels = chart.data.labels || [];
+      const dataPoints = chart.data.datasets[0].data || [];
+
+      const timestamp = new Date(sensorDatum.timestamp).toLocaleTimeString();
+
+      labels.push(timestamp);
+      dataPoints.push(sensorDatum.value);
+
+      if (labels.length > 20) {
+        labels.shift();
+        dataPoints.shift();
       }
+
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = dataPoints;
+      chart.update();
     });
   }
 
