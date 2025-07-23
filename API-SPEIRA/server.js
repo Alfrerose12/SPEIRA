@@ -5,17 +5,13 @@ const express = require('express');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
-const auth = require('./middleware/auth');
-const path = require('path');
 const swaggerUI = require('swagger-ui-express');
 const conectarDB = require('./config/db');
-const GeneRoutes = require('./routes/geneRoutes');
-const especificacionSwagger = require('./config/swagger');
 const verificarRol = require('./middleware/rolValidator');
+const especificacionSwagger = require('./config/swagger');
 
 if (!process.env.MONGO_URI) throw new Error('MONGO_URI no está definida en .env');
 if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) throw new Error('Claves VAPID no están definidas en .env');
-
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -56,21 +52,33 @@ app.use(
   })
 );
 
-conectarDB();
-require('./jobs/cronJobs');
-app.use('/api', GeneRoutes);
-
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-const server = app.listen(PORT, '0.0.0.0', () => {
-  const localIP = os.networkInterfaces().eth0?.[0]?.address || '127.0.0.1';
-  console.log(`Servidor funcionando en:\n  Local: http://localhost:${PORT}\n  Red Local: http://${localIP}:${PORT}\n  Dominio: https://api.speira.site`);
-});
+const startServer = async () => {
+  try {
+    await conectarDB();
 
-process.on('SIGTERM', () => {
-  console.log('Apagando servidor...');
-  server.close(() => process.exit(0));
-});
+    require('./jobs/cronJobs');
+    const GeneRoutes = require('./routes/geneRoutes');
+    app.use('/api', GeneRoutes);
+
+    const server = app.listen(PORT, '0.0.0.0', () => {
+      const localIP = os.networkInterfaces().eth0?.[0]?.address || '127.0.0.1';
+      console.log(`Servidor funcionando en:\n  Local: http://localhost:${PORT}\n  Red Local: http://${localIP}:${PORT}\n  Dominio: https://api.speira.site`);
+    });
+
+    process.on('SIGTERM', () => {
+      console.log('Apagando servidor...');
+      server.close(() => process.exit(0));
+    });
+
+  } catch (err) {
+    console.error('Error al iniciar el servidor:', err.message);
+    process.exit(1);
+  }
+};
+
+startServer();

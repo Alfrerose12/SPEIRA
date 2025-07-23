@@ -1,6 +1,6 @@
 const cron = require('node-cron');
 const moment = require('moment-timezone');
-const Estanques = require('../models/estanquesModel');
+const Estanques = require('../models/estanqueModel');
 const calcularPromedioYGuardar = require('../services/promedioService');
 
 const ZONA_HORARIA = 'America/Mexico_City';
