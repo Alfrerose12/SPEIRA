@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
 import { interval, Subscription, throwError } from 'rxjs';
 import { switchMap, catchError, tap, throttleTime } from 'rxjs/operators';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { ApiService } from '../services/api.service';
-import { MenuController } from '@ionic/angular';
+import { MenuController, IonContent } from '@ionic/angular';
 
 interface SensorData {
   id: number;
@@ -21,6 +21,9 @@ interface SensorData {
   standalone: false
 })
 export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild(IonContent, { static: false }) content!: IonContent;
+  private scrollY = 0;
+
   sensorData: SensorData[] = [];
   loading = true;
   error: string | null = null;
@@ -41,7 +44,7 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
 
   private dataSubscription!: Subscription;
   private charts: Map<string, Chart> = new Map();
-  private readonly UPDATE_INTERVAL = 100;
+  private readonly UPDATE_INTERVAL = 500;
 
   constructor(private apiService: ApiService, private menuCtrl: MenuController) {
     Chart.register(...registerables);
@@ -92,7 +95,10 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
   private initializeDataStream(): void {
     this.dataSubscription = interval(this.UPDATE_INTERVAL).pipe(
       throttleTime(1000),
-      tap(() => this.loading = true),
+      tap(() => {
+        this.saveScroll();
+        this.loading = true;
+      }),
       switchMap(() => this.fetchSensorData()),
       catchError(error => {
         this.error = 'Error al conectar con el servidor';
@@ -100,7 +106,10 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
         return throwError(() => new Error(error));
       })
     ).subscribe({
-      complete: () => this.loading = false
+      complete: () => {
+        this.restoreScroll();
+        this.loading = false;
+      }
     });
   }
 
@@ -129,7 +138,6 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
           { id: 7, name: 'co2', displayName: 'CO₂', value: datos.co2, unit: 'ppm', timestamp }
         ];
 
-        // Aplica el orden actual
         this.sensorData = newData.sort((a, b) => {
           const col = this.sortColumn;
           const dir = this.sortDirection;
@@ -152,6 +160,7 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
         this.error = null;
         this.loading = false;
       }),
+      tap(() => this.restoreScroll()),
       catchError(error => {
         this.error = 'Error al obtener datos del sensor';
         this.loading = false;
@@ -191,7 +200,7 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
           borderColor,
           backgroundColor: borderColor.replace('1)', '0.2)'),
           borderWidth: 2,
-          tension: 0.1,
+          tension: 0.4,
           fill: true
         }]
       },
@@ -209,12 +218,8 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private updateCharts(data: SensorData[]): void {
-    // Aquí usamos los datos reales de la API para actualizar las gráficas
     this.charts.forEach((chart, chartId) => {
-      // Extraemos el nombre del sensor (sin 'Chart')
       const sensorType = chartId.replace('Chart', '');
-
-      // Buscamos el dato actual para ese sensor
       const sensorDatum = data.find(d => d.name === sensorType);
       if (!sensorDatum) return;
 
@@ -234,6 +239,18 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
       chart.data.labels = labels;
       chart.data.datasets[0].data = dataPoints;
       chart.update();
+    });
+  }
+
+  private saveScroll() {
+    this.content?.getScrollElement().then(el => {
+      this.scrollY = el.scrollTop;
+    });
+  }
+
+  private restoreScroll() {
+    this.content?.getScrollElement().then(el => {
+      el.scrollTo(0, this.scrollY);
     });
   }
 
