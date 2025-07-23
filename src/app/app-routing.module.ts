@@ -20,10 +20,6 @@ const routes: Routes = [
   {
     path: 'inicio',
     loadChildren: () => import('./inicio/inicio.module').then(m => m.InicioPageModule),
-<<<<<<< HEAD
-=======
-    // canActivate: [AuthGuard]
->>>>>>> 225dc05cebeb11308f95b3b5f730424a95b1c288
   },
   {
     path: 'reporte',
