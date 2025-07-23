@@ -11,6 +11,7 @@ Chart.register(...registerables);
   selector: 'app-sensor-monitoring',
   templateUrl: './sensor-monitoring.page.html',
   styleUrls: ['./sensor-monitoring.page.scss'],
+  standalone: false,
 })
 export class SensorMonitoringPage implements AfterViewInit, OnDestroy {
   @ViewChild(IonContent, { static: false }) content!: IonContent;
