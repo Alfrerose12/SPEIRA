@@ -56,7 +56,7 @@ app.use(
 );
 
 conectarDB();
-requiere('./jobs/cronJobs');
+require('./jobs/cronJobs');
 app.use('/api', GeneRoutes);
 
 app.use((err, req, res, next) => {
