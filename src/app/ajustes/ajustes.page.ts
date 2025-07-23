@@ -4,6 +4,7 @@ import { Component, OnInit } from '@angular/core';
   selector: 'app-ajustes',
   templateUrl: './ajustes.page.html',
   styleUrls: ['./ajustes.page.scss'],
+  standalone: false
 })
 export class AjustesPage implements OnInit {
 
