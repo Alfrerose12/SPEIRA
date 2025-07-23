@@ -41,7 +41,7 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
 
   private dataSubscription!: Subscription;
   private charts: Map<string, Chart> = new Map();
-  private readonly UPDATE_INTERVAL = 1000;
+  private readonly UPDATE_INTERVAL = 100;
 
   constructor(private apiService: ApiService, private menuCtrl: MenuController) {
     Chart.register(...registerables);
