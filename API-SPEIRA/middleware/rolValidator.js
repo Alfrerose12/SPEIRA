@@ -1,40 +1,40 @@
 const jwt = require('jsonwebtoken');
 
+const extractToken = (req) => {
+  return req.cookies?.token || 
+         req.headers?.authorization?.replace('Bearer ', '') || 
+         req.query?.token;
+};
+
 const verificarRol = (rolPermitido) => {
-  return (req, res, next) => {
-    const token = req.cookies?.token;
-
-    if (!token) {
-      if (req.accepts('html')) {
-        return res.redirect('/login.html');
-      } else {
-        return res.status(401).json({ error: 'No autorizado - token requerido' });
-      }
-    }
-
+  return async (req, res, next) => {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secreto');
-      console.log(decoded);
+      const token = extractToken(req);
+      
+      if (!token) {
+        return handleAuthError(req, res, 'No autorizado - token requerido');
+      }
 
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secreto');
+      
       if (decoded.rol !== rolPermitido) {
-        if (req.accepts('html')) {
-          return res.status(403).redirect('/login.html');
-        } else {
-          return res.status(403).json({ error: 'Acceso denegado - rol insuficiente' });
-        }
+        return handleAuthError(req, res, 'Acceso denegado - rol insuficiente', 403);
       }
 
       req.usuario = decoded;
       next();
-    } catch {
+    } catch (error) {
       res.clearCookie('token');
-      if (req.accepts('html')) {
-        return res.redirect('/login.html');
-      } else {
-        return res.status(401).json({ error: 'Token inválido o expirado' });
-      }
+      return handleAuthError(req, res, 'Token inválido o expirado');
     }
   };
+};
+
+const handleAuthError = (req, res, message, status = 401) => {
+  if (req.accepts('html')) {
+    return res.status(status).redirect('/login.html');
+  }
+  return res.status(status).json({ error: message });
 };
 
 module.exports = verificarRol;
