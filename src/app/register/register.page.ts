@@ -72,7 +72,7 @@ export class RegisterPage implements OnInit {
         await loading.dismiss();
         this.loading = false;
 
-        if (response.success) {
+        if (response?.usuario || response?.id || response?.message?.toLowerCase().includes('registrado')) {
           const alert = await this.alertController.create({
             header: 'Registro exitoso',
             message: 'Tu cuenta ha sido creada correctamente.',
