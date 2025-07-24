@@ -40,7 +40,7 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
 
   selectedSensorFilter: string = '';
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) { }
 
   ngOnInit() {
     this.dataSubscription = interval(this.refreshInterval).pipe(
@@ -137,7 +137,9 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
           backgroundColor: color + '55',
           fill: true,
           tension: 0.3,
-          pointRadius: 0
+          pointRadius: 3,
+          pointBackgroundColor: color,
+          pointHoverRadius: 5,
         }]
       },
       options: {
