@@ -19,6 +19,7 @@ Chart.register(...registerables);
   selector: 'app-estanques',
   templateUrl: './estanques.page.html',
   styleUrls: ['./estanques.page.scss'],
+  standalone: false
 })
 export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
