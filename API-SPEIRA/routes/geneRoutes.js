@@ -39,8 +39,8 @@ router.post('/datos', crearDato);
 router.get('/datos/generales', obtenerDatosGenerales);
 router.get('/datos/estanque/:nombre', obtenerDatosPorNombreEstanque);
 router.get('/datos/:periodo/:fecha', obtenerDatosPorPeriodo);
-router.post('/datos/reportes', generarReporte);
 router.post('/datos/reportes/estanque', generarReporteporEstanque);
+router.post('/datos/reportes', generarReporte);
 
 router.post('/estanque', crearEstanque);
 router.put('/estanque/:nombre', editarEstanque);
