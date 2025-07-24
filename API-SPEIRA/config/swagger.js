@@ -303,56 +303,55 @@ const swaggerDefination = {
                 required: ['periodo', 'fecha', 'estanque']
               }
             }
-          },
-          responses: {
-            200: {
-              description: 'PDF generado exitosamente',
-              content: {
-                'application/pdf': {
-                  schema: {
-                    type: 'string',
-                    format: 'binary'
-                  },
-                  example: 'data:application/pdf;base64,...'
-                }
+          }
+        },
+        responses: {
+          200: {
+            description: 'PDF generado exitosamente',
+            content: {
+              'application/pdf': {
+                schema: {
+                  type: 'string',
+                  format: 'binary'
+                },
+                example: 'data:application/pdf;base64,...'
               }
             }
-          },
-          400: {
-            description: 'Error en parámetros',
-            content: {
-              'application/json': {
-                examples: {
-                  formatoInvalido: {
-                    value: {
-                      error: "Formato de fecha inválido",
-                      detalles: "Revise el formato requerido para el período seleccionado"
-                    }
-                  },
-                  fechaNoLunes: {
-                    value: {
-                      error: "Fecha inválida para reporte semanal",
-                      detalles: "Para reportes semanales debe proporcionar un lunes"
-                    }
+          }
+        },
+        400: {
+          description: 'Error en parámetros',
+          content: {
+            'application/json': {
+              examples: {
+                formatoInvalido: {
+                  value: {
+                    error: "Formato de fecha inválido",
+                    detalles: "Revise el formato requerido para el período seleccionado"
+                  }
+                },
+                fechaNoLunes: {
+                  value: {
+                    error: "Fecha inválida para reporte semanal",
+                    detalles: "Para reportes semanales debe proporcionar un lunes"
                   }
                 }
               }
             }
-          },
-          404: {
-            description: 'No hay datos para el período seleccionado',
-            content: {
-              'application/json': {
-                example: {
-                  error: "No hay datos para el período seleccionado"
-                }
+          }
+        },
+        404: {
+          description: 'No hay datos para el período seleccionado',
+          content: {
+            'application/json': {
+              example: {
+                error: "No hay datos para el período seleccionado"
               }
             }
           }
         }
       }
     },
-
     '/datos/reportes': {
       post: {
         tags: ['Datos'],
