@@ -257,7 +257,11 @@ const swaggerDefination = {
       post: {
         tags: ['Datos'],
         summary: 'Generar reporte PDF por estanque',
-        description: 'Genera un reporte PDF según el estanque y periodo especificado',
+        description: 'Genera un reporte PDF según el período especificado. Formatos de fecha requeridos:<br>' +
+          '- Diario: YYYY-MM-DD (ej: 2025-01-01)<br>' +
+          '- Semanal: YYYY-MM-DD (debe ser lunes, ej: 2025-01-06)<br>' +
+          '- Mensual: YYYY-MM (ej: 2025-01)<br>' +
+          '- Anual: YYYY (ej: 2025)',
         requestBody: {
           required: true,
           content: {
@@ -280,23 +284,23 @@ const swaggerDefination = {
                     oneOf: [
                       {
                         pattern: '^\\d{4}-\\d{2}-\\d{2}$',
-                        description: 'Formato para diario o semanal (YYYY-MM-DD)',
+                        description: 'Formato para diario/semanal',
                         example: '2025-01-01'
                       },
                       {
                         pattern: '^\\d{4}-\\d{2}$',
-                        description: 'Formato para mensual (YYYY-MM)',
+                        description: 'Formato para mensual',
                         example: '2025-01'
                       },
                       {
                         pattern: '^\\d{4}$',
-                        description: 'Formato para anual (YYYY)',
+                        description: 'Formato para anual',
                         example: '2025'
                       }
                     ]
                   }
                 },
-                required: ['periodo', 'fecha', 'estanque']
+                required: ['periodo', 'fecha']
               }
             }
           }
@@ -315,33 +319,32 @@ const swaggerDefination = {
             }
           },
           400: {
-            description: 'Solicitud inválida',
+            description: 'Error en parámetros',
             content: {
               'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    error: {
-                      type: 'string',
-                      example: 'Parámetros inválidos'
+                examples: {
+                  formatoInvalido: {
+                    value: {
+                      error: "Formato de fecha inválido",
+                      detalles: "Revise el formato requerido para el período seleccionado"
+                    }
+                  },
+                  fechaNoLunes: {
+                    value: {
+                      error: "Fecha inválida para reporte semanal",
+                      detalles: "Para reportes semanales debe proporcionar un lunes"
                     }
                   }
                 }
               }
             }
           },
-          500: {
-            description: 'Error interno del servidor',
+          404: {
+            description: 'No hay datos para el período seleccionado',
             content: {
               'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    error: {
-                      type: 'string',
-                      example: 'Error al generar el PDF'
-                    }
-                  }
+                example: {
+                  error: "No hay datos para el período seleccionado"
                 }
               }
             }
@@ -349,7 +352,100 @@ const swaggerDefination = {
         }
       }
     },
-
+    '/datos/reportes': {
+      post: {
+        tags: ['Datos'],
+        summary: 'Generar reporte PDF general',
+        description: 'Genera un reporte PDF según el período especificado. Formatos de fecha requeridos:<br>' +
+          '- Diario: YYYY-MM-DD (ej: 2025-01-01)<br>' +
+          '- Semanal: YYYY-MM-DD (debe ser lunes, ej: 2025-01-06)<br>' +
+          '- Mensual: YYYY-MM (ej: 2025-01)<br>' +
+          '- Anual: YYYY (ej: 2025)',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  periodo: {
+                    type: 'string',
+                    enum: ['diario', 'semanal', 'mensual', 'anual'],
+                    description: 'Período del reporte'
+                  },
+                  fecha: {
+                    type: 'string',
+                    oneOf: [
+                      {
+                        pattern: '^\\d{4}-\\d{2}-\\d{2}$',
+                        description: 'Formato para diario/semanal',
+                        example: '2025-01-01'
+                      },
+                      {
+                        pattern: '^\\d{4}-\\d{2}$',
+                        description: 'Formato para mensual',
+                        example: '2025-01'
+                      },
+                      {
+                        pattern: '^\\d{4}$',
+                        description: 'Formato para anual',
+                        example: '2025'
+                      }
+                    ]
+                  }
+                },
+                required: ['periodo', 'fecha']
+              }
+            }
+          }
+        },
+        responses: {
+          200: {
+            description: 'PDF generado exitosamente',
+            content: {
+              'application/pdf': {
+                schema: {
+                  type: 'string',
+                  format: 'binary'
+                },
+                example: 'data:application/pdf;base64,...'
+              }
+            }
+          },
+          400: {
+            description: 'Error en parámetros',
+            content: {
+              'application/json': {
+                examples: {
+                  formatoInvalido: {
+                    value: {
+                      error: "Formato de fecha inválido",
+                      detalles: "Revise el formato requerido para el período seleccionado"
+                    }
+                  },
+                  fechaNoLunes: {
+                    value: {
+                      error: "Fecha inválida para reporte semanal",
+                      detalles: "Para reportes semanales debe proporcionar un lunes"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          404: {
+            description: 'No hay datos para el período seleccionado',
+            content: {
+              'application/json': {
+                example: {
+                  error: "No hay datos para el período seleccionado"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     '/estanque': {
       post: {
         tags: ['Estanque'],
