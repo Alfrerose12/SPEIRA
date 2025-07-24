@@ -1,4 +1,4 @@
-const swaggerDefination = {
+const swaggerDefinition = {
   openapi: '3.0.3',
   info: {
     title: 'API de Speira',
@@ -1030,4 +1030,4 @@ const swaggerDefination = {
   }
 };
 
-module.exports = swaggerDefination;
+module.exports = swaggerDefinition;
