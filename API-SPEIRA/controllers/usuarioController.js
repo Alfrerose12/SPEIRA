@@ -112,12 +112,12 @@ exports.iniciarSesion = async (req, res) => {
         rol: usuario.rol 
       },
       process.env.JWT_SECRET || 'secreto',
-      { expiresIn: '1min' }
+      { expiresIn: '15min' }
     );
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: false,
+      secure: true,
       sameSite: 'lax',
       maxAge: 60 * 1000
     });

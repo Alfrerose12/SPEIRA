@@ -39,28 +39,28 @@ router.post('/notificaciones/token', guardarToken);
 router.post('/notificaciones', enviarNotificacion);
 
 // Datos
-router.post('/datos', verificarRol('admin'), crearDato);
-router.get('/datos/generales', verificarRol('admin'), obtenerDatosGenerales);
-router.get('/datos/estanque/:nombre', verificarRol('admin'), obtenerDatosPorNombreEstanque);
-router.get('/datos/:periodo/:fecha', verificarRol('admin'), obtenerDatosPorPeriodo);
-router.post('/datos/reportes/estanque', verificarRol('admin'), generarReporteporEstanque);
-router.post('/datos/reportes', verificarRol('admin'), generarReporte);
+router.post('/datos', verificarRol(['admin']), crearDato);
+router.get('/datos/generales', verificarRol(['admin']), obtenerDatosGenerales);
+router.get('/datos/estanque/:nombre', verificarRol(['admin']), obtenerDatosPorNombreEstanque);
+router.get('/datos/:periodo/:fecha', verificarRol(['admin']), obtenerDatosPorPeriodo);
+router.post('/datos/reportes/estanque', verificarRol(['admin']), generarReporteporEstanque);
+router.post('/datos/reportes', verificarRol(['admin']), generarReporte);
 
 // Estanques (solo admin)
-router.post('/estanque', verificarRol('admin'), crearEstanque);
-router.put('/estanque/:nombre', verificarRol('admin'), editarEstanque);
-router.delete('/estanque/:nombre', verificarRol('admin'), eliminarEstanque);
-router.get('/estanques', verificarRol('admin'), obtenerEstanques);
+router.post('/estanque', verificarRol(['admin']), crearEstanque);
+router.put('/estanque/:nombre', verificarRol(['admin']), editarEstanque);
+router.delete('/estanque/:nombre', verificarRol(['admin']), eliminarEstanque);
+router.get('/estanques', verificarRol(['admin']), obtenerEstanques);
 
 // Usuarios
-router.post('/usuario/registro', registrarUsuario);  // público para crear usuario
-router.post('/usuario/iniciar-sesion', iniciarSesion);  // público para login
-router.get('/usuario/cerrar-sesion', cerrarSesion);  // podría protegerse si quieres
+router.post('/usuario/registro', registrarUsuario);
+router.post('/usuario/iniciar-sesion', iniciarSesion);
+router.get('/usuario/cerrar-sesion', cerrarSesion);
 
 // Rutas protegidas para admin
-router.put('/usuario/:id', verificarRol('admin'), editarUsuario);
-router.delete('/usuario/:id', verificarRol('admin'), eliminarUsuario);
-router.get('/usuarios', verificarRol('admin'), obtenerUsuarios);
-router.get('/usuarios/:nombre', verificarRol('admin'), obtenerUsuariosPorNombre);
+router.put('/usuario/:id', verificarRol(['admin']), editarUsuario);
+router.delete('/usuario/:id', verificarRol(['admin']), eliminarUsuario);
+router.get('/usuarios', verificarRol(['admin']), obtenerUsuarios);
+router.get('/usuarios/:nombre', verificarRol(['admin']), obtenerUsuariosPorNombre);
 
 module.exports = router;
