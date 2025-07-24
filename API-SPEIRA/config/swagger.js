@@ -269,6 +269,11 @@ const swaggerDefination = {
               schema: {
                 type: 'object',
                 properties: {
+                  nombre: {
+                    type: 'string',
+                    description: 'Nombre del estanque para el reporte',
+                    example: 'Estanque 1'
+                  },
                   periodo: {
                     type: 'string',
                     enum: ['diario', 'semanal', 'mensual', 'anual'],
