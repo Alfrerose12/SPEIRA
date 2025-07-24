@@ -35,7 +35,7 @@ export class SensorMonitoringPage implements AfterViewInit, OnDestroy {
     { key: 'co2', displayName: 'CO₂', unit: 'ppm', chartId: 'co2Chart' },
   ];
 
-  sensorData: { displayName: string; value: number; unit: string }[] = [];
+  sensorData: { key: string; displayName: string; value: number; unit: string }[] = [];
   sensorCharts: { [key: string]: Chart } = {};
   sensorHistory: { [key: string]: number[] } = {};
 
@@ -45,7 +45,7 @@ export class SensorMonitoringPage implements AfterViewInit, OnDestroy {
   dataSubscription!: Subscription;
 
   selectedSensorFilter: string = '';
-  availableSensors = this.sensors.map(s => s.key);
+  availableSensors = this.sensors;
 
   autoScroll = true;
 
@@ -108,6 +108,7 @@ export class SensorMonitoringPage implements AfterViewInit, OnDestroy {
       if (this.labels.length > this.maxDataPoints) this.labels.shift();
 
       this.sensorData = this.sensors.map(sensor => ({
+        key: sensor.key,
         displayName: sensor.displayName,
         value: data[sensor.key],
         unit: sensor.unit
@@ -155,11 +156,9 @@ export class SensorMonitoringPage implements AfterViewInit, OnDestroy {
     this.menuCtrl.open('filter-menu');
   }
 
-  shouldDisplaySensor(displayName: string): boolean {
+  shouldDisplaySensor(sensorKey: string): boolean {
     if (!this.selectedSensorFilter) return true;
-    const filterSensor = this.sensors.find(s => s.key === this.selectedSensorFilter);
-    if (!filterSensor) return true;
-    return filterSensor.displayName === displayName;
+    return sensorKey === this.selectedSensorFilter;
   }
 
   toggleAutoScroll() {
