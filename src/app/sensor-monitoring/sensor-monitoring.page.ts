@@ -173,4 +173,9 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
   onFilterChange(value: string) {
     this.selectedSensorFilter = value;
   }
+
+  shouldDisplaySensor(sensorKey: string): boolean {
+    const allowedKeys = this.availableSensors.map(sensor => sensor.key);
+    return allowedKeys.includes(sensorKey);
+  }
 }
