@@ -32,7 +32,7 @@ export class SensorMonitoringPage implements AfterViewInit, OnDestroy {
 
   labels: string[] = [];
   maxDataPoints: number = 20;
-  refreshInterval = 1000; // 1 segundo
+  refreshInterval = 1000;
   dataSubscription!: Subscription;
 
   constructor(private apiService: ApiService) {}
@@ -93,9 +93,7 @@ export class SensorMonitoringPage implements AfterViewInit, OnDestroy {
 
   startDataUpdates() {
     this.dataSubscription = interval(this.refreshInterval)
-      .pipe(
-        switchMap(() => this.apiService.getSensorGeneralData())
-      )
+      .pipe(switchMap(() => this.apiService.getSensorGeneralData()))
       .subscribe((data: any) => {
         const now = new Date().toLocaleTimeString();
         this.labels.push(now);
@@ -106,7 +104,6 @@ export class SensorMonitoringPage implements AfterViewInit, OnDestroy {
         Object.keys(this.sensorData).forEach(sensor => {
           const newValue = data[sensor];
           this.sensorData[sensor].push(newValue);
-
           if (this.sensorData[sensor].length > this.maxDataPoints) {
             this.sensorData[sensor].shift();
           }
