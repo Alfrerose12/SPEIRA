@@ -40,30 +40,53 @@ export class SensorMonitoringPage implements OnInit, OnDestroy {
 
   selectedSensorFilter: string = '';
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) { }
 
   ngOnInit() {
-    setTimeout(() => {
-      this.availableSensors.forEach(sensor => {
-        this.createChart(sensor.canvasId, sensor.name, sensor.color);
-      });
-    }, 300);
-
     this.dataSubscription = interval(this.refreshInterval).pipe(
       switchMap(() => this.apiService.getSensorGeneralData())
     ).subscribe(
-      (data: any[]) => {
-        console.log('Datos crudos recibidos de la API:', data);
-        if (!Array.isArray(data)) {
-          console.warn('La respuesta no es un arreglo:', data);
+      (response: any) => {
+        const rawData = response?.resumen?.[0]; 
+
+        if (!rawData || !rawData.datos) {
+          console.warn('No hay datos válidos:', response);
           return;
         }
-        this.sensorData = this.normalizeSensorData(data);
-        console.log('Datos normalizados:', this.sensorData);
+
+        const timestamp = new Date().toISOString(); 
+
+        const flatData: any[] = Object.entries(rawData.datos).map(([key, value]) => {
+          let name = '';
+          let unit = '';
+
+          switch (key) {
+            case 'ph': name = 'pH'; unit = 'pH'; break;
+            case 'temperaturaAgua': name = 'Temperatura del agua'; unit = '°C'; break;
+            case 'temperaturaAmbiente': name = 'Temperatura ambiente'; unit = '°C'; break;
+            case 'humedad': name = 'Humedad'; unit = '%'; break;
+            case 'luminosidad': name = 'Luminosidad'; unit = 'lux'; break;
+            case 'conductividadElectrica': name = 'Conductividad eléctrica'; unit = 'µS/cm'; break;
+            case 'co2': name = 'CO₂'; unit = 'ppm'; break;
+            default: name = key; unit = ''; break;
+          }
+
+          return {
+            id: 0,
+            name,
+            value: Number(value),
+            unit,
+            timestamp,
+            key
+          };
+        });
+
+        this.sensorData = this.normalizeSensorData(flatData);
         this.updateCharts();
       },
       err => console.error('Error obteniendo datos de sensores:', err)
     );
+
   }
 
   ngOnDestroy() {
