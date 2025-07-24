@@ -41,7 +41,7 @@ export class SensorMonitoringPage implements AfterViewInit, OnDestroy {
 
   labels: string[] = [];
   maxDataPoints = 20;
-  refreshInterval = 1000;
+  refreshInterval = 1000; // milisegundos
   dataSubscription!: Subscription;
 
   selectedSensorFilter: string = '';
@@ -103,6 +103,8 @@ export class SensorMonitoringPage implements AfterViewInit, OnDestroy {
     this.dataSubscription = interval(this.refreshInterval).pipe(
       switchMap(() => this.apiService.getSensorGeneralData())
     ).subscribe(data => {
+      console.log('Datos recibidos:', data);
+
       const now = new Date().toLocaleTimeString();
       this.labels.push(now);
       if (this.labels.length > this.maxDataPoints) this.labels.shift();
