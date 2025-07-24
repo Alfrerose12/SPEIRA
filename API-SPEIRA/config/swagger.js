@@ -257,11 +257,7 @@ const swaggerDefination = {
       post: {
         tags: ['Datos'],
         summary: 'Generar reporte PDF por estanque',
-        description: 'Genera un reporte PDF de un estanque específico según el período y fecha especificados. Formatos de fecha requeridos:<br>' +
-          '- Diario: YYYY-MM-DD (ej: 2025-01-01)<br>' +
-          '- Semanal: YYYY-MM-DD (debe ser lunes, ej: 2025-01-06)<br>' +
-          '- Mensual: YYYY-MM (ej: 2025-01)<br>' +
-          '- Anual: YYYY (ej: 2025)',
+        description: 'Genera un reporte PDF...',
         requestBody: {
           required: true,
           content: {
@@ -282,21 +278,9 @@ const swaggerDefination = {
                   fecha: {
                     type: 'string',
                     oneOf: [
-                      {
-                        pattern: '^\\d{4}-\\d{2}-\\d{2}$',
-                        description: 'Formato para diario/semanal',
-                        example: '2025-01-01'
-                      },
-                      {
-                        pattern: '^\\d{4}-\\d{2}$',
-                        description: 'Formato para mensual',
-                        example: '2025-01'
-                      },
-                      {
-                        pattern: '^\\d{4}$',
-                        description: 'Formato para anual',
-                        example: '2025'
-                      }
+                      { pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'Formato diario/semanal', example: '2025-01-01' },
+                      { pattern: '^\\d{4}-\\d{2}$', description: 'Formato mensual', example: '2025-01' },
+                      { pattern: '^\\d{4}$', description: 'Formato anual', example: '2025' }
                     ]
                   }
                 },
@@ -317,41 +301,42 @@ const swaggerDefination = {
                 example: 'data:application/pdf;base64,...'
               }
             }
-          }
-        },
-        400: {
-          description: 'Error en parámetros',
-          content: {
-            'application/json': {
-              examples: {
-                formatoInvalido: {
-                  value: {
-                    error: "Formato de fecha inválido",
-                    detalles: "Revise el formato requerido para el período seleccionado"
-                  }
-                },
-                fechaNoLunes: {
-                  value: {
-                    error: "Fecha inválida para reporte semanal",
-                    detalles: "Para reportes semanales debe proporcionar un lunes"
+          },
+          400: {
+            description: 'Error en parámetros',
+            content: {
+              'application/json': {
+                examples: {
+                  formatoInvalido: {
+                    value: {
+                      error: "Formato de fecha inválido",
+                      detalles: "Revise el formato requerido para el período seleccionado"
+                    }
+                  },
+                  fechaNoLunes: {
+                    value: {
+                      error: "Fecha inválida para reporte semanal",
+                      detalles: "Para reportes semanales debe proporcionar un lunes"
+                    }
                   }
                 }
               }
             }
-          }
-        },
-        404: {
-          description: 'No hay datos para el período seleccionado',
-          content: {
-            'application/json': {
-              example: {
-                error: "No hay datos para el período seleccionado"
+          },
+          404: {
+            description: 'No hay datos para el período seleccionado',
+            content: {
+              'application/json': {
+                example: {
+                  error: "No hay datos para el período seleccionado"
+                }
               }
             }
-          }
+          },
         }
       }
     },
+
     '/datos/reportes': {
       post: {
         tags: ['Datos'],
