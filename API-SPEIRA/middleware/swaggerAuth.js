@@ -1,21 +1,19 @@
 const verificarRol = require('./rolValidator');
-const { extractToken } = require('./authUtils'); 
 
 const swaggerAuth = (rolPermitido = 'admin') => {
   return (req, res, next) => {
-    const publicRoutes = [
+    const publicRoutePrefixes = [
       '/api-docs',
       '/api-docs-json',
-      '/swagger-ui',
       '/favicon.ico'
     ];
 
-    if (publicRoutes.some(route => req.path.startsWith(route))) {
+    if (publicRoutePrefixes.some(prefix => req.path.startsWith(prefix))) {
       return next();
     }
 
     const isFromSwagger = req.headers.referer?.includes('/api-docs');
-    
+
     if (isFromSwagger) {
       if (req.method !== 'GET') {
         return res.status(403).json({
@@ -23,7 +21,6 @@ const swaggerAuth = (rolPermitido = 'admin') => {
           solution: 'Use herramientas como Postman para pruebas'
         });
       }
-      
       return next();
     }
 

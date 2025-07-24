@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
+const verificarRol = require('../middlewares/rolValidator');
+
 const {
   crearDato,
   obtenerDatosPorPeriodo,
@@ -32,27 +34,33 @@ const {
   enviarNotificacion
 } = require('../controllers/notificationController');
 
+// Notificaciones - públicas
 router.post('/notificaciones/token', guardarToken);
 router.post('/notificaciones', enviarNotificacion);
 
-router.post('/datos', crearDato);
-router.get('/datos/generales', obtenerDatosGenerales);
-router.get('/datos/estanque/:nombre', obtenerDatosPorNombreEstanque);
-router.get('/datos/:periodo/:fecha', obtenerDatosPorPeriodo);
-router.post('/datos/reportes/estanque', generarReporteporEstanque);
-router.post('/datos/reportes', generarReporte);
+// Datos
+router.post('/datos', verificarRol('admin'), crearDato);
+router.get('/datos/generales', verificarRol('admin'), obtenerDatosGenerales);
+router.get('/datos/estanque/:nombre', verificarRol('admin'), obtenerDatosPorNombreEstanque);
+router.get('/datos/:periodo/:fecha', verificarRol('admin'), obtenerDatosPorPeriodo);
+router.post('/datos/reportes/estanque', verificarRol('admin'), generarReporteporEstanque);
+router.post('/datos/reportes', verificarRol('admin'), generarReporte);
 
-router.post('/estanque', crearEstanque);
-router.put('/estanque/:nombre', editarEstanque);
-router.delete('/estanque/:nombre', eliminarEstanque);
-router.get('/estanques', obtenerEstanques);
+// Estanques (solo admin)
+router.post('/estanque', verificarRol('admin'), crearEstanque);
+router.put('/estanque/:nombre', verificarRol('admin'), editarEstanque);
+router.delete('/estanque/:nombre', verificarRol('admin'), eliminarEstanque);
+router.get('/estanques', verificarRol('admin'), obtenerEstanques);
 
-router.post('/usuario/registro', registrarUsuario);
-router.put('/usuario/:id', editarUsuario);
-router.delete('/usuario/:id', eliminarUsuario);
-router.post('/usuario/iniciar-sesion', iniciarSesion);
-router.get('/usuario/cerrar-sesion', cerrarSesion);
-router.get('/usuarios', obtenerUsuarios);
-router.get('/usuarios/:nombre', obtenerUsuariosPorNombre);
+// Usuarios
+router.post('/usuario/registro', registrarUsuario);  // público para crear usuario
+router.post('/usuario/iniciar-sesion', iniciarSesion);  // público para login
+router.get('/usuario/cerrar-sesion', cerrarSesion);  // podría protegerse si quieres
+
+// Rutas protegidas para admin
+router.put('/usuario/:id', verificarRol('admin'), editarUsuario);
+router.delete('/usuario/:id', verificarRol('admin'), eliminarUsuario);
+router.get('/usuarios', verificarRol('admin'), obtenerUsuarios);
+router.get('/usuarios/:nombre', verificarRol('admin'), obtenerUsuariosPorNombre);
 
 module.exports = router;
