@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const verificarRol = require('../middlewares/rolValidator');
+const verificarRol = require('../middleware/rolValidator');
 
 const {
   crearDato,
