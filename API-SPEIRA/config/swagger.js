@@ -1,5 +1,5 @@
 const swaggerDefination = {
-  openapi: '3.0.0',
+  openapi: '3.0.3',
   info: {
     title: 'API de Speira',
     version: '1.0.0',
