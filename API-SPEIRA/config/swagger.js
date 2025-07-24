@@ -300,7 +300,7 @@ const swaggerDefinition = {
                     ]
                   }
                 },
-                required: [ 'estanque', 'periodo', 'fecha']
+                required: ['estanque', 'periodo', 'fecha']
               }
             }
           }
