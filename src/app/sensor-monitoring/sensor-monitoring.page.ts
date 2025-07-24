@@ -1,19 +1,8 @@
-import { Component, ViewChild, ViewChildren, QueryList, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
-import { IonContent, MenuController } from '@ionic/angular';
-import { Chart, registerables } from 'chart.js';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Chart, ChartConfiguration, ChartTypeRegistry } from 'chart.js';
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { ApiService } from '../services/api.service';
-
-Chart.register(...registerables);
-
-interface Sensor {
-  key: string;
-  displayName: string;
-  unit: string;
-  chartId: string;
-  range?: { min: number; max: number };
-}
 
 @Component({
   selector: 'app-sensor-monitoring',
@@ -21,149 +10,105 @@ interface Sensor {
   styleUrls: ['./sensor-monitoring.page.scss'],
   standalone: false
 })
-export class SensorMonitoringPage implements AfterViewInit, OnDestroy {
-  @ViewChild(IonContent, { static: false }) content!: IonContent;
-  @ViewChildren('scrollWrapper') scrollWrappers!: QueryList<ElementRef>;
+export class SensorMonitoringPage implements OnInit, OnDestroy {
+  sensorData: any = {};
+  dataSubscription!: Subscription;
+  refreshInterval = 1000; // cada segundo
+  sensorCharts: {
+    [key: string]: Chart<keyof ChartTypeRegistry, (number | [number, number] | import('chart.js').Point | import('chart.js').BubbleDataPoint | null)[], unknown>;
+  } = {};
 
-  sensors: Sensor[] = [
-    { key: 'ph', displayName: 'pH', unit: '', chartId: 'phChart', range: { min: 9, max: 11 } },
-    { key: 'tempWater', displayName: 'Temperatura del Agua', unit: '°C', chartId: 'tempWaterChart', range: { min: 30, max: 35 } },
-    { key: 'tempAmbient', displayName: 'Temperatura Ambiente', unit: '°C', chartId: 'tempAmbientChart', range: { min: 20, max: 40 } },
-    { key: 'humidity', displayName: 'Humedad', unit: '%', chartId: 'humidityChart', range: { min: 40, max: 70 } },
-    { key: 'luminosity', displayName: 'Luminosidad', unit: 'lux', chartId: 'lightChart', range: { min: 35, max: 690 } },
-    { key: 'conductivity', displayName: 'Conductividad', unit: 'µS/cm', chartId: 'conductivityChart' },
-    { key: 'co2', displayName: 'CO₂', unit: 'ppm', chartId: 'co2Chart' },
+  availableSensors = [
+    { key: 'ph', name: 'pH', unit: 'pH' },
+    { key: 'tempWater', name: 'Temperatura del agua', unit: '°C' },
+    { key: 'tempAmb', name: 'Temperatura ambiente', unit: '°C' },
+    { key: 'oxigen', name: 'Oxígeno disuelto', unit: 'mg/L' }
   ];
 
-  sensorData: { key: string; displayName: string; value: number; unit: string }[] = [];
-  sensorCharts: { [key: string]: Chart } = {};
-  sensorHistory: { [key: string]: number[] } = {};
+  selectedSensorKeys: string[] = ['ph', 'tempWater', 'tempAmb', 'oxigen'];
 
-  labels: string[] = [];
-  maxDataPoints = 20;
-  refreshInterval = 1000; // milisegundos
-  dataSubscription!: Subscription;
+  constructor(private apiService: ApiService) {}
 
-  selectedSensorFilter: string = '';
-  availableSensors = this.sensors;
-
-  autoScroll = true;
-
-  constructor(private apiService: ApiService, private menuCtrl: MenuController) {}
-
-  ngAfterViewInit() {
-    this.initCharts();
-    this.startDataUpdates();
-  }
-
-  ngOnDestroy() {
-    this.dataSubscription?.unsubscribe();
-  }
-
-  initCharts() {
-    this.sensors.forEach(sensor => {
-      const canvas = document.getElementById(sensor.chartId) as HTMLCanvasElement;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      this.sensorCharts[sensor.key] = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: this.labels,
-          datasets: [{
-            label: sensor.displayName,
-            data: [],
-            borderColor: this.getSensorColor(sensor.key),
-            backgroundColor: 'rgba(0, 0, 0, 0)',
-            tension: 0.3,
-            pointRadius: 0,
-            borderWidth: 2,
-          }]
-        },
-        options: {
-          responsive: true,
-          animation: false,
-          scales: {
-            y: {
-              min: sensor.range?.min,
-              max: sensor.range?.max,
-            }
-          },
-          plugins: {
-            legend: { display: true }
-          }
-        }
-      });
-      this.sensorHistory[sensor.key] = [];
-    });
-  }
-
-  startDataUpdates() {
+  ngOnInit() {
     this.dataSubscription = interval(this.refreshInterval).pipe(
       switchMap(() => this.apiService.getSensorGeneralData())
     ).subscribe(data => {
-      console.log('Datos recibidos:', data);
+      console.log('DATA:', data);
+      this.sensorData = data;
+      this.updateCharts();
+    });
+  }
 
-      const now = new Date().toLocaleTimeString();
-      this.labels.push(now);
-      if (this.labels.length > this.maxDataPoints) this.labels.shift();
+  ngOnDestroy() {
+    if (this.dataSubscription) {
+      this.dataSubscription.unsubscribe();
+    }
+  }
 
-      this.sensorData = this.sensors.map(sensor => ({
-        key: sensor.key,
-        displayName: sensor.displayName,
-        value: data[sensor.key],
-        unit: sensor.unit
-      }));
+  get filteredSensors() {
+    return this.availableSensors.filter(sensor => this.selectedSensorKeys.includes(sensor.key));
+  }
 
-      this.sensors.forEach(sensor => {
-        const val = data[sensor.key];
-        this.sensorHistory[sensor.key].push(val);
-        if (this.sensorHistory[sensor.key].length > this.maxDataPoints)
-          this.sensorHistory[sensor.key].shift();
+  updateCharts() {
+    this.filteredSensors.forEach(sensor => {
+      const key = sensor.key;
+      const value = this.sensorData[key];
 
-        const chart = this.sensorCharts[sensor.key];
-        if (chart) {
-          chart.data.labels = [...this.labels];
-          chart.data.datasets[0].data = [...this.sensorHistory[sensor.key]];
-          chart.update('none');
+      if (this.sensorCharts[key]) {
+        const chart = this.sensorCharts[key];
+        const chartData = chart.data.datasets[0].data as number[];
+
+        chartData.push(value);
+        if (chartData.length > 10) {
+          chartData.shift();
         }
-      });
 
-      if (this.autoScroll) {
-        setTimeout(() => {
-          this.scrollWrappers.forEach(el => {
-            const nativeEl = el.nativeElement as HTMLElement;
-            nativeEl.scrollLeft = nativeEl.scrollWidth;
-          });
-        }, 50);
+        chart.update();
       }
     });
   }
 
-  getSensorColor(sensorKey: string): string {
-    switch (sensorKey) {
-      case 'tempWater': return 'rgb(255, 99, 132)';
-      case 'ph': return 'rgb(54, 162, 235)';
-      case 'tempAmbient': return 'rgb(75, 192, 192)';
-      case 'humidity': return 'rgb(255, 205, 86)';
-      case 'luminosity': return 'rgb(201, 203, 207)';
-      case 'conductivity': return 'rgb(150, 150, 150)';
-      case 'co2': return 'rgb(100, 100, 255)';
-      default: return 'rgb(0,0,0)';
+  createChart(canvasId: string, label: string, color: string) {
+    const ctx = (document.getElementById(canvasId) as HTMLCanvasElement).getContext('2d');
+    if (!ctx) return;
+
+    this.sensorCharts[canvasId] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: Array(10).fill(''),
+        datasets: [{
+          label,
+          data: [],
+          borderColor: color,
+          backgroundColor: color,
+          fill: false,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        animation: false,
+        scales: {
+          x: {
+            display: false
+          },
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+
+  isSelected(sensorKey: string): boolean {
+    return this.selectedSensorKeys.includes(sensorKey);
+  }
+
+  toggleSensor(sensorKey: string) {
+    if (this.isSelected(sensorKey)) {
+      this.selectedSensorKeys = this.selectedSensorKeys.filter(key => key !== sensorKey);
+    } else {
+      this.selectedSensorKeys.push(sensorKey);
     }
-  }
-
-  openMenu() {
-    this.menuCtrl.open('filter-menu');
-  }
-
-  shouldDisplaySensor(sensorKey: string): boolean {
-    if (!this.selectedSensorFilter) return true;
-    return sensorKey === this.selectedSensorFilter;
-  }
-
-  toggleAutoScroll() {
-    this.autoScroll = !this.autoScroll;
   }
 }
