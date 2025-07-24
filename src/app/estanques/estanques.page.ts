@@ -18,8 +18,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-estanques',
   templateUrl: './estanques.page.html',
-  styleUrls: ['./estanques.page.scss'],
-  standalone: false
+  styleUrls: ['./estanques.page.scss']
 })
 export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
@@ -199,4 +198,10 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     return allowedKeys.includes(sensorKey);
   }
 
+  openMenu() {
+    const menu = document.querySelector('ion-menu#filter-menu');
+    if (menu && typeof (menu as any).open === 'function') {
+      (menu as any).open();
+    }
+  }
 }
