@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { Subscription, interval } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -21,7 +21,7 @@ Chart.register(...registerables);
   styleUrls: ['./sensor-monitoring.page.scss'],
   standalone: false
 })
-export class SensorMonitoringPage implements OnInit, OnDestroy {
+export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
 
   sensorData: SensorEntry[] = [];
   dataSubscription!: Subscription;
@@ -40,35 +40,36 @@ export class SensorMonitoringPage implements OnInit, OnDestroy {
 
   selectedSensorFilter: string = '';
 
-  constructor(private apiService: ApiService) { }
+  constructor(private apiService: ApiService) {}
 
   ngOnInit() {
     this.dataSubscription = interval(this.refreshInterval).pipe(
       switchMap(() => this.apiService.getSensorGeneralData())
     ).subscribe(
       (response: any) => {
-        const rawData = response?.resumen?.[0]; 
+        const rawData = response?.resumen?.[0];
 
         if (!rawData || !rawData.datos) {
           console.warn('No hay datos válidos:', response);
           return;
         }
 
-        const timestamp = new Date().toISOString(); 
+        const timestamp = new Date().toISOString();
 
-        const flatData: any[] = Object.entries(rawData.datos).map(([key, value]) => {
+        const flatData: SensorEntry[] = Object.entries(rawData.datos).map(([key, value]) => {
           let name = '';
           let unit = '';
+          let finalKey = '';
 
           switch (key) {
-            case 'ph': name = 'pH'; unit = 'pH'; break;
-            case 'temperaturaAgua': name = 'Temperatura del agua'; unit = '°C'; break;
-            case 'temperaturaAmbiente': name = 'Temperatura ambiente'; unit = '°C'; break;
-            case 'humedad': name = 'Humedad'; unit = '%'; break;
-            case 'luminosidad': name = 'Luminosidad'; unit = 'lux'; break;
-            case 'conductividadElectrica': name = 'Conductividad eléctrica'; unit = 'µS/cm'; break;
-            case 'co2': name = 'CO₂'; unit = 'ppm'; break;
-            default: name = key; unit = ''; break;
+            case 'ph': name = 'pH'; unit = 'pH'; finalKey = 'ph'; break;
+            case 'temperaturaAgua': name = 'Temperatura del agua'; unit = '°C'; finalKey = 'tempWater'; break;
+            case 'temperaturaAmbiente': name = 'Temperatura ambiente'; unit = '°C'; finalKey = 'tempAmbient'; break;
+            case 'humedad': name = 'Humedad'; unit = '%'; finalKey = 'humidity'; break;
+            case 'luminosidad': name = 'Luminosidad'; unit = 'lux'; finalKey = 'luminosity'; break;
+            case 'conductividadElectrica': name = 'Conductividad eléctrica'; unit = 'µS/cm'; finalKey = 'conductivity'; break;
+            case 'co2': name = 'CO₂'; unit = 'ppm'; finalKey = 'co2'; break;
+            default: name = key; finalKey = key; unit = ''; break;
           }
 
           return {
@@ -77,50 +78,26 @@ export class SensorMonitoringPage implements OnInit, OnDestroy {
             value: Number(value),
             unit,
             timestamp,
-            key
+            key: finalKey
           };
         });
 
-        this.sensorData = this.normalizeSensorData(flatData);
+        this.sensorData = flatData;
         this.updateCharts();
       },
       err => console.error('Error obteniendo datos de sensores:', err)
     );
+  }
 
+  ngAfterViewInit() {
+    this.availableSensors.forEach(sensor => {
+      this.createChart(sensor.canvasId, sensor.name, sensor.color);
+    });
   }
 
   ngOnDestroy() {
     if (this.dataSubscription) this.dataSubscription.unsubscribe();
     Object.values(this.sensorCharts).forEach(chart => chart.destroy());
-  }
-
-  normalizeSensorData(data: any[]): SensorEntry[] {
-    return data.map(item => {
-      let key = '';
-      switch (item.name.toLowerCase()) {
-        case 'ph': key = 'ph'; break;
-        case 'temperatura del agua': key = 'tempWater'; break;
-        case 'temperatura ambiente': key = 'tempAmbient'; break;
-        case 'humedad': key = 'humidity'; break;
-        case 'luminosidad': key = 'luminosity'; break;
-        case 'conductividad eléctrica': key = 'conductivity'; break;
-        case 'co₂':
-        case 'co2': key = 'co2'; break;
-        default: key = item.name.toLowerCase().replace(/\s+/g, ''); break;
-      }
-      return {
-        id: item.id,
-        name: item.name,
-        value: Number(item.value),
-        unit: item.unit,
-        timestamp: item.timestamp,
-        key
-      };
-    });
-  }
-
-  shouldDisplaySensor(key: string): boolean {
-    return !this.selectedSensorFilter || this.selectedSensorFilter === key;
   }
 
   updateCharts() {
