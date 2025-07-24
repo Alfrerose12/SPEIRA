@@ -255,7 +255,7 @@ const swaggerDefinition = {
     },
     '/datos/reportes/estanque': {
       post: {
-        tags: ['Datos'],
+        tags: ['Reportes'],
         summary: 'Generar reporte PDF por estanque',
         description: 'Genera un reporte PDF según el período especificado. Formatos de fecha requeridos:<br>' +
           '- Diario: YYYY-MM-DD (ej: 2025-01-01)<br>' +
