@@ -53,8 +53,13 @@ export class SensorMonitoringPage implements OnInit, OnDestroy {
       switchMap(() => this.apiService.getSensorGeneralData())
     ).subscribe(
       (data: any[]) => {
-        if (!Array.isArray(data)) return;
+        console.log('Datos crudos recibidos de la API:', data);
+        if (!Array.isArray(data)) {
+          console.warn('La respuesta no es un arreglo:', data);
+          return;
+        }
         this.sensorData = this.normalizeSensorData(data);
+        console.log('Datos normalizados:', this.sensorData);
         this.updateCharts();
       },
       err => console.error('Error obteniendo datos de sensores:', err)
