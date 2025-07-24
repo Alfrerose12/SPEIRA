@@ -209,6 +209,25 @@ ion-content.monitoring-content {
         position: relative;
         height: 200px;
         width: 100%;
+
+        overflow-x: auto;     /* Habilita scroll horizontal */
+        white-space: nowrap;  /* Evita quiebre de línea */
+
+        /* Opcional: estilos para el scrollbar */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+
+        /* Para navegadores Webkit (Chrome, Safari) */
+        &::-webkit-scrollbar {
+          height: 8px;
+        }
+        &::-webkit-scrollbar-thumb {
+          background-color: rgba(0, 0, 0, 0.3);
+          border-radius: 4px;
+        }
+        &::-webkit-scrollbar-track {
+          background: transparent;
+        }
       }
     }
   }
