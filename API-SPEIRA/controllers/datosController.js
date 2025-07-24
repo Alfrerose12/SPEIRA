@@ -253,15 +253,9 @@ exports.obtenerDatosPorNombreEstanque = async (req, res) => {
   }
 };
 
-exports.generarReporte = async (req, res) => {
+exports.generarReporteporEstanque = async (req, res) => {
   try {
     const { periodo, fecha, estanque } = req.body;
-
-    if (!estanque || estanque.trim() === '') {
-      return res.status(400).json({
-        error: 'Nombre del estanque requerido'
-      });
-    }
 
     if (!PERIODOS_VALIDOS.includes(periodo)) {
       return res.status(400).json({
@@ -297,6 +291,60 @@ exports.generarReporte = async (req, res) => {
 
     const rutaReporte = await generarReporte(periodo, fecha, estanque);
     const nombreArchivo = `reporte_${estanque}_${periodo}_${fecha}.pdf`.replace(/\s+/g, '_');
+
+    res.download(rutaReporte, nombreArchivo, err => {
+      if (err) {
+        console.error('Error al descargar reporte:', err);
+        res.status(500).json({ error: 'Error al generar el reporte' });
+      }
+    });
+
+  } catch (error) {
+    res.status(400).json({
+      error: 'Error al generar reporte',
+      detalles: error.message
+    });
+  }
+};
+
+exports.generarReporte = async (req, res) => {
+  try {
+    const { periodo, fecha } = req.body;
+
+    if (!PERIODOS_VALIDOS.includes(periodo)) {
+      return res.status(400).json({
+        error: 'Período inválido',
+        opciones_validas: PERIODOS_VALIDOS
+      });
+    }
+
+    const formatos = {
+      diario: 'YYYY-MM-DD',
+      semanal: 'YYYY-MM-DD',
+      mensual: 'YYYY-MM',
+      anual: 'YYYY'
+    };
+
+    if (!moment(fecha, formatos[periodo], true).isValid()) {
+      return res.status(400).json({
+        error: 'Formato de fecha inválido',
+        formato_requerido: formatos[periodo],
+        ejemplo: periodo === 'diario' ? '2024-05-04' :
+          periodo === 'semanal' ? '2024-05-06 (debe ser lunes)' :
+            periodo === 'mensual' ? '2024-05' : '2024'
+      });
+    }
+
+    if (periodo === 'semanal' && moment(fecha).day() !== 1) {
+      return res.status(400).json({
+        error: 'Fecha inválida para reporte semanal',
+        detalles: 'Debe proporcionar una fecha que sea día lunes',
+        ejemplo: moment().startOf('isoWeek').format('YYYY-MM-DD')
+      });
+    }
+
+    const rutaReporte = await generarReporte(periodo, fecha);
+    const nombreArchivo = `reporte_${periodo}_${fecha}.pdf`.replace(/\s+/g, '_');
 
     res.download(rutaReporte, nombreArchivo, err => {
       if (err) {
