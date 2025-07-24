@@ -36,4 +36,12 @@ export class ApiService {
   getSensorGeneralData(): Observable<any> {
     return this.http.get(`${this.baseUrl}/datos/generales`);
   }
+
+  getEstanqueData(nombre: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/datos/estanque/${nombre}`);
+  }
+
+  getEstanquesDisponibles(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseUrl}/estanques`);
+  }
 }

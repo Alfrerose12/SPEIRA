@@ -32,7 +32,11 @@ const routes: Routes = [
   {
     path: 'ajustes',
     loadChildren: () => import('./ajustes/ajustes.module').then( m => m.AjustesPageModule)
+  },  {
+    path: 'estanques',
+    loadChildren: () => import('./estanques/estanques.module').then( m => m.EstanquesPageModule)
   },
+
 
 
 

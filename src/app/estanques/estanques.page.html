@@ -1,0 +1,104 @@
+<ion-menu side="start" menuId="filter-menu" contentId="main-content">
+  <ion-header>
+    <ion-toolbar color="primary">
+      <ion-title>Seleccionar Estanque</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content>
+    <ion-list>
+      <ion-radio-group [(ngModel)]="selectedEstanque" (ionChange)="onEstanqueChange($event.detail.value)">
+        <ion-item *ngFor="let estanque of estanquesDisponibles">
+          <ion-label>{{ estanque }}</ion-label>
+          <ion-radio slot="start" [value]="estanque"></ion-radio>
+        </ion-item>
+      </ion-radio-group>
+    </ion-list>
+  </ion-content>
+</ion-menu>
+
+<ion-content id="main-content" class="monitoring-content">
+  <!-- Botón flotante para abrir el selector de estanque -->
+  <div class="filter-button-wrapper">
+    <ion-button (click)="openMenu()" fill="solid" class="filter-button" title="Seleccionar Estanque">
+      <ion-icon slot="start" name="options-outline"></ion-icon>
+      Estanque: {{ selectedEstanque || 'Ninguno' }}
+    </ion-button>
+  </div>
+
+  <!-- Burbujas decorativas -->
+  <div class="bubbles">
+    <span *ngFor="let bubble of [1,2,3,4,5,6,7,8,9,10]"></span>
+  </div>
+
+  <div class="content-wrapper">
+    <!-- Tabla de datos en tiempo real -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="time-outline"></ion-icon> Datos en Tiempo Real - {{ selectedEstanque }}
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row class="table-header">
+            <ion-col size="4"><strong>Nombre</strong></ion-col>
+            <ion-col size="4"><strong>Valor</strong></ion-col>
+            <ion-col size="4"><strong>Unidad</strong></ion-col>
+          </ion-row>
+          <ion-row *ngFor="let sensor of sensorData" [hidden]="!shouldDisplaySensor(sensor.key)">
+            <ion-col size="4">{{ sensor.name }}</ion-col>
+            <ion-col size="4">{{ sensor.value | number:'1.2-2' }}</ion-col>
+            <ion-col size="4">{{ sensor.unit }}</ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Sección de gráficos -->
+    <ion-card class="charts-card" *ngIf="sensorData.length > 0">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="bar-chart-outline"></ion-icon> Histórico de Sensores
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="chart-grid">
+          <div class="chart-container" *ngIf="shouldDisplaySensor('ph')">
+            <div class="chart-header"><h3>pH</h3></div>
+            <div class="chart-wrapper"><canvas id="phChart"></canvas></div>
+          </div>
+
+          <div class="chart-container" *ngIf="shouldDisplaySensor('tempWater')">
+            <div class="chart-header"><h3>Temperatura del Agua (°C)</h3></div>
+            <div class="chart-wrapper"><canvas id="tempWaterChart"></canvas></div>
+          </div>
+
+          <div class="chart-container" *ngIf="shouldDisplaySensor('tempAmbient')">
+            <div class="chart-header"><h3>Temperatura Ambiental (°C)</h3></div>
+            <div class="chart-wrapper"><canvas id="tempAmbientChart"></canvas></div>
+          </div>
+
+          <div class="chart-container" *ngIf="shouldDisplaySensor('humidity')">
+            <div class="chart-header"><h3>Humedad (%)</h3></div>
+            <div class="chart-wrapper"><canvas id="humidityChart"></canvas></div>
+          </div>
+
+          <div class="chart-container" *ngIf="shouldDisplaySensor('luminosity')">
+            <div class="chart-header"><h3>Luminosidad (lux)</h3></div>
+            <div class="chart-wrapper"><canvas id="lightChart"></canvas></div>
+          </div>
+
+          <div class="chart-container" *ngIf="shouldDisplaySensor('conductivity')">
+            <div class="chart-header"><h3>Conductividad Eléctrica (µS/cm)</h3></div>
+            <div class="chart-wrapper"><canvas id="conductivityChart"></canvas></div>
+          </div>
+
+          <div class="chart-container" *ngIf="shouldDisplaySensor('co2')">
+            <div class="chart-header"><h3>CO₂ (ppm)</h3></div>
+            <div class="chart-wrapper"><canvas id="co2Chart"></canvas></div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

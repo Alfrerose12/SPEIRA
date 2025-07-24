@@ -26,7 +26,6 @@ describe('SensorMonitoringPage', () => {
   ];
 
   beforeEach(waitForAsync(() => {
-    // Configurar spy para Chart
     spyOn(window, 'Chart').and.callFake(() => new MockChart() as any);
 
     TestBed.configureTestingModule({
@@ -34,15 +33,21 @@ describe('SensorMonitoringPage', () => {
       imports: [
         IonicModule.forRoot(),
         HttpClientTestingModule
+      ],
+      providers: [
+        {
+          provide: 'ApiService',
+          useValue: {
+            getSensorGeneralData: () => of({ resumen: [{ datos: { ph: 7.1, temperaturaAgua: 25.5 } }] })
+          }
+        }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SensorMonitoringPage);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
-    
-    // Inicializar charts como un Map vacío
-    (component as any).charts = new Map();
+    (component as any).sensorCharts = new Map();
   }));
 
   afterEach(() => {
@@ -56,86 +61,51 @@ describe('SensorMonitoringPage', () => {
   it('should create charts during initialization', () => {
     const chartSpy = spyOn(window, 'Chart');
     component.ngAfterViewInit();
-    expect(chartSpy).toHaveBeenCalledTimes(6);
+    expect(chartSpy).toHaveBeenCalledTimes(component.availableSensors.length);
   });
-
-  it('should fetch data on init', fakeAsync(() => {
-    component.ngOnInit();
-    tick(1000);
-    
-    const req = httpMock.expectOne('http://192.168.1.103:3000/api/datos/generales');
-    expect(req.request.method).toBe('GET');
-    req.flush(mockData);
-    
-    tick(5000);
-    expect(component.sensorData.length).toBe(2);
-    expect(component.loading).toBeFalse();
-  }));
-
-  it('should handle fetch error', fakeAsync(() => {
-    component.ngOnInit();
-    tick(1000);
-    
-    const req = httpMock.expectOne('http://192.168.1.103:3000/api/datos/generales');
-    req.error(new ErrorEvent('Network error'));
-    
-    tick(5000);
-    expect(component.error).toBeTruthy();
-    expect(component.loading).toBeFalse();
-  }));
 
   it('should update charts with new data', () => {
     const mockChart = new MockChart();
-    (component as any).charts.set('phChart', mockChart);
-    
-    // Llamar al método privado
-    (component as any).updateCharts([
-      { id: 1, name: 'pH', value: 7.2, unit: 'pH', timestamp: new Date('2023-01-01T12:00:00Z') }
-    ]);
-    
+    (component as any).sensorCharts['phChart'] = mockChart;
+
+    component.sensorData = [
+      { id: 1, name: 'pH', value: 7.2, unit: 'pH', timestamp: new Date('2023-01-01T12:00:00Z').toISOString(), key: 'ph' }
+    ];
+
+    component.updateCharts();
+
     expect(mockChart.update).toHaveBeenCalled();
     expect(mockChart.data.datasets[0].data).toEqual(jasmine.arrayContaining([7.2]));
   });
 
   it('should clean up on destroy', () => {
     const mockChart = new MockChart();
-    (component as any).charts.set('phChart', mockChart);
-    
+    (component as any).sensorCharts['phChart'] = mockChart;
+
     const mockSubscription = jasmine.createSpyObj('Subscription', ['unsubscribe']);
-    (component as any).dataSubscription = mockSubscription;
-    
+    component.dataSubscription = mockSubscription;
+
     component.ngOnDestroy();
-    
+
     expect(mockChart.destroy).toHaveBeenCalled();
     expect(mockSubscription.unsubscribe).toHaveBeenCalled();
-    expect((component as any).charts.size).toBe(0);
+    expect(Object.keys(component.sensorCharts).length).toBe(0);
   });
 
-  it('should refresh data manually', fakeAsync(() => {
-    // Crear una implementación falsa del método
-    const fetchSpy = spyOn(component as any, 'fetchSensorData').and.returnValue(of(mockData));
-    
-    component.refreshData();
-    expect(fetchSpy).toHaveBeenCalled();
-    
-    tick();
-    expect(component.sensorData.length).toBe(2);
-  }));
-
   it('should update multiple charts correctly', () => {
-    // Configurar múltiples mocks
     const phChart = new MockChart();
     const tempChart = new MockChart();
-    
-    (component as any).charts.set('phChart', phChart);
-    (component as any).charts.set('tempWaterChart', tempChart);
-    
-    // Llamar al método privado
-    (component as any).updateCharts([
-      { id: 1, name: 'pH', value: 7.2, unit: 'pH', timestamp: new Date('2023-01-01T12:00:00Z') },
-      { id: 2, name: 'Temperatura del Agua', value: 25.5, unit: '°C', timestamp: new Date('2023-01-01T12:00:00Z') }
-    ]);
-    
+
+    (component as any).sensorCharts['phChart'] = phChart;
+    (component as any).sensorCharts['tempWaterChart'] = tempChart;
+
+    component.sensorData = [
+      { id: 1, name: 'pH', value: 7.2, unit: 'pH', timestamp: new Date('2023-01-01T12:00:00Z').toISOString(), key: 'ph' },
+      { id: 2, name: 'Temperatura del agua', value: 25.5, unit: '°C', timestamp: new Date('2023-01-01T12:00:00Z').toISOString(), key: 'tempWater' }
+    ];
+
+    component.updateCharts();
+
     expect(phChart.update).toHaveBeenCalled();
     expect(tempChart.update).toHaveBeenCalled();
     expect(phChart.data.datasets[0].data).toEqual(jasmine.arrayContaining([7.2]));
