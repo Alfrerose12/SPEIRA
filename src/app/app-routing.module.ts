@@ -36,6 +36,14 @@ const routes: Routes = [
     path: 'estanques',
     loadChildren: () => import('./estanques/estanques.module').then( m => m.EstanquesPageModule)
   },
+  {
+    path: 'cajas',
+    loadChildren: () => import('./cajas/cajas.module').then( m => m.CajasPageModule)
+  },
+  {
+    path: 'piscinas',
+    loadChildren: () => import('./piscinas/piscinas.module').then( m => m.PiscinasPageModule)
+  },
 
 
 
