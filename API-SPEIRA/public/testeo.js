@@ -2,13 +2,13 @@ const maxPoints = 10;
 const labels = [];
 
 const limits = {
-  ph: { min: 9, max: 11 },
-  temperaturaAgua: { min: 30, max: 35 },
-  temperaturaAmbiente: { min: 30, max: 35 },
-  humedad: { min: 50, max: 70 },
-  luminosidad: { min: 35, max: 690 },
-  conductividadElectrica: { min: 0.5, max: 1.5 },
-  co2: { min: 0.5, max: 1.5 },
+  ph: { min: 6, max: 9 },
+  temperaturaAgua: { min: 20, max: 35 },
+  temperaturaAmbiente: { min: 15, max: 35 },
+  humedad: { min: 40, max: 80 },
+  luminosidad: { min: 0, max: 1000 },
+  conductividadElectrica: { min: 1000, max: 2000 },
+  co2: { min: 300, max: 600 }
 };
 
 const createChart = (ctx, label, color, minY, maxY) => {
