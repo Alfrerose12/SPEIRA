@@ -1,12 +1,3 @@
-function getCurrentTime12h() {
-  const now = new Date();
-  let h = now.getHours();
-  const m = now.getMinutes().toString().padStart(2, '0');
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  h = h % 12 || 12;
-  return `${h}:${m} ${ampm}`;
-}
-
 const maxPoints = 10;
 const labels = [];
 
@@ -17,7 +8,7 @@ const limits = {
   humidity: { min: 50, max: 70 },
   lightning: { min: 35, max: 690 },
   conductivity: { min: 0.5, max: 1.5 },
-  co2: { min: 0.5, max: 1.5 }, 
+  co2: { min: 0.5, max: 1.5 },
 };
 
 const createChart = (ctx, label, color, minY, maxY) => {
@@ -65,14 +56,8 @@ const createChart = (ctx, label, color, minY, maxY) => {
         }
       },
       plugins: {
-        legend: {
-          display: false,
-          labels: { color: '#000' }
-        },
-        tooltip: {
-          mode: 'index',
-          intersect: false
-        }
+        legend: { display: false },
+        tooltip: { mode: 'index', intersect: false }
       },
       interaction: {
         mode: 'nearest',
@@ -92,14 +77,23 @@ const co2Chart = createChart(document.getElementById('co2Chart'), 'CO2 (ppm)', '
 const conductivityChart = createChart(document.getElementById('conductivityChart'), 'Conductividad (mS/cm)', '#f44336', limits.conductivity.min, limits.conductivity.max);
 
 const prevValues = {
-  ph: true,
-  tempi: true,
-  tempa: true,
-  humidity: true,
-  lightning: true,
-  conductivity: true,
-  co2: true
+  ph: null,
+  tempi: null,
+  tempa: null,
+  humidity: null,
+  lightning: null,
+  conductivity: null,
+  co2: null
 };
+
+function getCurrentTime12h() {
+  const now = new Date();
+  let h = now.getHours();
+  const m = now.getMinutes().toString().padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${h}:${m} ${ampm}`;
+}
 
 function formatValueWithArrow(newVal, prevVal, unit = '') {
   let symbolHtml = '';
@@ -111,63 +105,59 @@ function formatValueWithArrow(newVal, prevVal, unit = '') {
   return newVal.toFixed(2) + unit + symbolHtml;
 }
 
-function updateData() {
-  const time = getCurrentTime12h();
+async function updateData() {
+  try {
+    const response = await fetch('https://api.speira.site/api/datos/generales');
+    const data = await response.json();
 
-  const ph = limits.ph.min + Math.random() * (limits.ph.max - limits.ph.min);
-  const tempI = limits.tempi.min + Math.random() * (limits.tempi.max - limits.tempi.min);
-  const tempA = limits.tempa.min + Math.random() * (limits.tempa.max - limits.tempa.min);
-  const lightning = limits.lightning.min + Math.random() * (limits.lightning.max - limits.lightning.min);
-  const humidity = limits.humidity.min + Math.random() * (limits.humidity.max - limits.humidity.min);
-  const co2 = limits.co2.min + Math.random() * (limits.co2.max - limits.co2.min);
-  const conductivity = limits.conductivity.min + Math.random() * (limits.conductivity.max - limits.conductivity.min);
+    const time = getCurrentTime12h();
 
-  document.getElementById('ph-value').innerHTML = formatValueWithArrow(ph, prevValues.ph);
-  document.getElementById('temp-interna-value').innerHTML = formatValueWithArrow(tempI, prevValues.tempi, ' °C');
-  document.getElementById('temp-ambiente-value').innerHTML = formatValueWithArrow(tempA, prevValues.tempa, ' °C');
-  document.getElementById('lightning-value').innerHTML = formatValueWithArrow(lightning, prevValues.lightning, ' μmol/m²s');
-  document.getElementById('humidity-value').innerHTML = formatValueWithArrow(humidity, prevValues.humidity, ' %');
-  document.getElementById('co2-value').innerHTML = formatValueWithArrow(co2, prevValues.co2, ' ppm');
-  document.getElementById('conductivity-value').innerHTML = formatValueWithArrow(conductivity, prevValues.conductivity, ' mS/cm');
+    const { ph, tempi, tempa, lightning, humidity, co2, conductivity } = data;
 
-  document.getElementById('update-time').textContent = time;
+    document.getElementById('ph-value').innerHTML = formatValueWithArrow(ph, prevValues.ph);
+    document.getElementById('temp-interna-value').innerHTML = formatValueWithArrow(tempi, prevValues.tempi, ' °C');
+    document.getElementById('temp-ambiente-value').innerHTML = formatValueWithArrow(tempa, prevValues.tempa, ' °C');
+    document.getElementById('lightning-value').innerHTML = formatValueWithArrow(lightning, prevValues.lightning, ' μmol/m²s');
+    document.getElementById('humidity-value').innerHTML = formatValueWithArrow(humidity, prevValues.humidity, ' %');
+    document.getElementById('co2-value').innerHTML = formatValueWithArrow(co2, prevValues.co2, ' ppm');
+    document.getElementById('conductivity-value').innerHTML = formatValueWithArrow(conductivity, prevValues.conductivity, ' mS/cm');
+    document.getElementById('update-time').textContent = time;
 
-  prevValues.ph = ph;
-  prevValues.tempi = tempI;
-  prevValues.tempa = tempA;
-  prevValues.lightning = lightning;
-  prevValues.humidity = humidity;
-  prevValues.co2 = co2;
-  prevValues.conductivity = conductivity;
+    prevValues.ph = ph;
+    prevValues.tempi = tempi;
+    prevValues.tempa = tempa;
+    prevValues.lightning = lightning;
+    prevValues.humidity = humidity;
+    prevValues.co2 = co2;
+    prevValues.conductivity = conductivity;
 
-  if (labels.length >= maxPoints) labels.shift();
-  labels.push(time);
+    if (labels.length >= maxPoints) labels.shift();
+    labels.push(time);
 
-  [phChart, tempIChart, tempAChart, lightningChart, humidityChart, co2Chart, conductivityChart].forEach(chart => {
-    if (chart.data.datasets[0].data.length >= maxPoints) chart.data.datasets[0].data.shift();
-  });
+    [phChart, tempIChart, tempAChart, lightningChart, humidityChart, co2Chart, conductivityChart].forEach(chart => {
+      if (chart.data.datasets[0].data.length >= maxPoints) chart.data.datasets[0].data.shift();
+    });
 
-  phChart.data.datasets[0].data.push(Number(ph.toFixed(2)));
-  tempIChart.data.datasets[0].data.push(Number(tempI.toFixed(1)));
-  tempAChart.data.datasets[0].data.push(Number(tempA.toFixed(1)));
-  lightningChart.data.datasets[0].data.push(Number(lightning.toFixed(1)));
-  humidityChart.data.datasets[0].data.push(Number(humidity.toFixed(1)));
-  co2Chart.data.datasets[0].data.push(Number(co2.toFixed(1)));
-  conductivityChart.data.datasets[0].data.push(Number(conductivity.toFixed(1)));
+    phChart.data.datasets[0].data.push(ph);
+    tempIChart.data.datasets[0].data.push(tempi);
+    tempAChart.data.datasets[0].data.push(tempa);
+    lightningChart.data.datasets[0].data.push(lightning);
+    humidityChart.data.datasets[0].data.push(humidity);
+    co2Chart.data.datasets[0].data.push(co2);
+    conductivityChart.data.datasets[0].data.push(conductivity);
 
-  phChart.update();
-  tempIChart.update();
-  tempAChart.update();
-  lightningChart.update();
-  humidityChart.update();
-  co2Chart.update();
-  conductivityChart.update();
+    phChart.update();
+    tempIChart.update();
+    tempAChart.update();
+    lightningChart.update();
+    humidityChart.update();
+    co2Chart.update();
+    conductivityChart.update();
+
+  } catch (error) {
+    console.error('Error al obtener datos:', error);
+  }
 }
 
 updateData();
-
-// Para pruebas rápidas, actualiza cada minuto
-// setInterval(updateData, 60000);
-
-// Para pruebas rápidas, actualiza cada segundo
 setInterval(updateData, 1000);
