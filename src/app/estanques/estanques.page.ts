@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
-import { Subscription, interval } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Subscription, interval, switchMap, of } from 'rxjs';
 import { ApiService } from '../services/api.service';
 
 interface SensorEntry {
@@ -24,7 +23,8 @@ Chart.register(...registerables);
 export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   estanquesDisponibles: string[] = [];
-  selectedEstanque: string = '';
+  estanqueSeleccionado: string = '';
+
   sensorData: SensorEntry[] = [];
   dataSubscription!: Subscription;
   refreshInterval = 1000;
@@ -43,16 +43,13 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
   constructor(private apiService: ApiService) {}
 
   ngOnInit() {
-    this.cargarEstanquesDisponibles();
-  }
-
-  cargarEstanquesDisponibles() {
+    // Cargar lista de estanques
     this.apiService.getEstanquesDisponibles().subscribe({
-      next: (estanques: string[]) => {
+      next: (estanques) => {
         this.estanquesDisponibles = estanques;
         if (estanques.length > 0) {
-          this.selectedEstanque = estanques[0];
-          this.iniciarActualizacionDatos();
+          this.estanqueSeleccionado = estanques[0];
+          this.iniciarMonitorEstanque();
         }
       },
       error: (err) => {
@@ -61,23 +58,27 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  iniciarActualizacionDatos() {
-    if (this.dataSubscription) {
-      this.dataSubscription.unsubscribe();
-    }
+  iniciarMonitorEstanque() {
+    if (this.dataSubscription) this.dataSubscription.unsubscribe();
 
     this.dataSubscription = interval(this.refreshInterval).pipe(
-      switchMap(() => this.apiService.getEstanqueData(this.selectedEstanque))
-    ).subscribe({
-      next: (datos: any) => {
-        if (!datos || typeof datos !== 'object') {
-          console.warn('No hay datos válidos para el estanque:', datos);
+      switchMap(() => {
+        return this.estanqueSeleccionado
+          ? this.apiService.getEstanqueData(this.estanqueSeleccionado)
+          : of(null);
+      })
+    ).subscribe(
+      (response: any) => {
+        const rawData = response?.resumen?.[0];
+
+        if (!rawData || !rawData.datos) {
+          console.warn('No hay datos válidos para el estanque:', this.estanqueSeleccionado);
           return;
         }
 
         const timestamp = new Date().toISOString();
 
-        const flatData: SensorEntry[] = Object.entries(datos).map(([key, value]) => {
+        const flatData: SensorEntry[] = Object.entries(rawData.datos).map(([key, value]) => {
           let name = '';
           let unit = '';
           let finalKey = '';
@@ -106,10 +107,8 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
         this.sensorData = flatData;
         this.updateCharts();
       },
-      error: (err) => {
-        console.error('Error al obtener datos del estanque:', err);
-      }
-    });
+      err => console.error('Error obteniendo datos del estanque:', err)
+    );
   }
 
   ngAfterViewInit() {
@@ -121,6 +120,10 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy() {
     if (this.dataSubscription) this.dataSubscription.unsubscribe();
     Object.values(this.sensorCharts).forEach(chart => chart.destroy());
+  }
+
+  onEstanqueChange() {
+    this.iniciarMonitorEstanque();
   }
 
   updateCharts() {
@@ -186,23 +189,5 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.sensorCharts[canvasId] = chart;
-  }
-
-  onEstanqueChange(estanque: string) {
-    if (estanque === this.selectedEstanque) return;
-    this.selectedEstanque = estanque;
-    this.iniciarActualizacionDatos();
-  }
-
-  shouldDisplaySensor(sensorKey: string): boolean {
-    const allowedKeys = this.availableSensors.map(sensor => sensor.key);
-    return allowedKeys.includes(sensorKey);
-  }
-
-  openMenu() {
-    const menu = document.querySelector('ion-menu#filter-menu');
-    if (menu && typeof (menu as any).open === 'function') {
-      (menu as any).open();
-    }
   }
 }
