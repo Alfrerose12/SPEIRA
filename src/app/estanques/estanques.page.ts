@@ -31,7 +31,6 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
   refreshInterval = 1000;
   sensorCharts: { [key: string]: Chart } = {};
 
-  // Aquí agregamos la propiedad para el filtro
   selectedSensorFilter: string = '';
 
   availableSensors = [
@@ -47,7 +46,6 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
   constructor(private apiService: ApiService, private menuCtrl: MenuController) {}
 
   ngOnInit() {
-    // Cargar lista de estanques
     this.apiService.getEstanquesDisponibles().subscribe({
       next: (estanques) => {
         this.estanquesDisponibles = estanques;
@@ -68,7 +66,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     this.dataSubscription = interval(this.refreshInterval).pipe(
       switchMap(() => {
         return this.estanqueSeleccionado
-          ? this.apiService.getEstanqueData(this.estanqueSeleccionado)
+          ? this.apiService.getEstanqueData(this.estanqueSeleccionado) // Aquí sin ".nombre"
           : of(null);
       })
     ).subscribe(
@@ -195,7 +193,6 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     this.sensorCharts[canvasId] = chart;
   }
 
-  // Función para controlar el filtro del sensor desde el segment en HTML
   shouldDisplaySensor(key: string): boolean {
     return this.selectedSensorFilter === '' || this.selectedSensorFilter === key;
   }

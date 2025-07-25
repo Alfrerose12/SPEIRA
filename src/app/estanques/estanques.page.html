@@ -25,6 +25,16 @@
     </ion-button>
   </div>
 
+  <!-- Selector de estanque -->
+  <ion-item>
+    <ion-label>Seleccionar Estanque</ion-label>
+    <ion-select [(ngModel)]="estanqueSeleccionado" (ionChange)="onEstanqueChange()">
+      <ion-select-option *ngFor="let estanque of estanquesDisponibles" [value]="estanque">
+        {{ estanque }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
   <!-- Burbujas decorativas -->
   <div class="bubbles">
     <span *ngFor="let bubble of [1,2,3,4,5,6,7,8,9,10]"></span>
