@@ -1,27 +1,27 @@
 <ion-menu side="start" menuId="filter-menu" contentId="main-content">
   <ion-header>
     <ion-toolbar color="primary">
-      <ion-title>Seleccionar Estanque</ion-title>
+      <ion-title>Filtro de Sensores</ion-title>
     </ion-toolbar>
   </ion-header>
   <ion-content>
-    <ion-list>
-      <ion-radio-group [(ngModel)]="selectedEstanque" (ionChange)="onEstanqueChange($event.detail.value)">
-        <ion-item *ngFor="let estanque of estanquesDisponibles">
-          <ion-label>{{ estanque }}</ion-label>
-          <ion-radio slot="start" [value]="estanque"></ion-radio>
-        </ion-item>
-      </ion-radio-group>
-    </ion-list>
+    <ion-segment [(ngModel)]="selectedSensorFilter" color="primary">
+      <ion-segment-button value="">
+        <ion-label>Todos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button *ngFor="let sensor of availableSensors" [value]="sensor.key">
+        <ion-label>{{ sensor.name }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
   </ion-content>
 </ion-menu>
 
-<ion-content id="main-content" class="monitoring-content">
-  <!-- Botón flotante para abrir el selector de estanque -->
+<ion-content id="main-content" class="estanques-content">
+  <!-- Botón flotante para abrir el filtro -->
   <div class="filter-button-wrapper">
-    <ion-button (click)="openMenu()" fill="solid" class="filter-button" title="Seleccionar Estanque">
+    <ion-button (click)="openMenu()" fill="solid" class="filter-button" title="Filtro de Sensores">
       <ion-icon slot="start" name="options-outline"></ion-icon>
-      Estanque: {{ selectedEstanque || 'Ninguno' }}
+      Filtrado de Sensores
     </ion-button>
   </div>
 
@@ -35,7 +35,7 @@
     <ion-card>
       <ion-card-header>
         <ion-card-title>
-          <ion-icon name="time-outline"></ion-icon> Datos en Tiempo Real - {{ selectedEstanque }}
+          <ion-icon name="time-outline"></ion-icon> Datos en Tiempo Real
         </ion-card-title>
       </ion-card-header>
       <ion-card-content>
@@ -55,7 +55,7 @@
     </ion-card>
 
     <!-- Sección de gráficos -->
-    <ion-card class="charts-card" *ngIf="sensorData.length > 0">
+    <ion-card class="charts-card">
       <ion-card-header>
         <ion-card-title>
           <ion-icon name="bar-chart-outline"></ion-icon> Histórico de Sensores

@@ -1,6 +1,6 @@
 @use "sass:math";
 
-ion-content.monitoring-content {
+ion-content.estanques-content {
   --background: linear-gradient(135deg, #0e6d2d 0%, #005ea7 100%);
   position: relative;
   overflow: hidden;
@@ -48,7 +48,7 @@ ion-content.monitoring-content {
   .content-wrapper {
     position: relative;
     z-index: 1;
-    padding: 16px 16px 80px; /* Abajo más espacio para evitar overlap con botón */
+    padding: 16px;
     height: 100%;
   }
 
@@ -124,7 +124,6 @@ ion-content.monitoring-content {
     }
   }
 
-  /* Botón selector fijo arriba a la izquierda */
   .filter-button-wrapper {
     position: fixed;
     top: 16px;
@@ -140,10 +139,8 @@ ion-content.monitoring-content {
     display: flex;
     align-items: center;
     gap: 8px;
-    white-space: nowrap;
   }
 
-  /* Tabla de datos en tiempo real con scroll horizontal */
   .table-responsive {
     overflow-x: auto;
 
@@ -210,15 +207,12 @@ ion-content.monitoring-content {
         position: relative;
         height: 200px;
         width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
 
-        overflow-x: auto;     /* Habilita scroll horizontal */
-        white-space: nowrap;  /* Evita quiebre de línea */
-
-        /* Opcional: estilos para el scrollbar */
         scrollbar-width: thin;
         scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 
-        /* Para navegadores Webkit (Chrome, Safari) */
         &::-webkit-scrollbar {
           height: 8px;
         }
