@@ -29,8 +29,8 @@
   <ion-item>
     <ion-label>Seleccionar Estanque</ion-label>
     <ion-select [(ngModel)]="estanqueSeleccionado" (ionChange)="onEstanqueChange()">
-      <ion-select-option *ngFor="let estanque of estanquesDisponibles" [value]="estanque">
-        {{ estanque }}
+      <ion-select-option *ngFor="let estanque of estanquesDisponibles" [value]="estanque.nombre">
+        {{ estanque.nombre }}
       </ion-select-option>
     </ion-select>
   </ion-item>
