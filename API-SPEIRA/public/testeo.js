@@ -112,24 +112,25 @@ async function updateData() {
 
     const time = getCurrentTime12h();
 
-    const { ph, tempi, tempa, lightning, humidity, co2, conductivity } = data;
+    const estanque = data.resumen[0];
+    const { ph, temperaturaAgua, temperaturaAmbiente, humedad, luminosidad, conductividadElectrica, co2 } = estanque.datos;
 
     document.getElementById('ph-value').innerHTML = formatValueWithArrow(ph, prevValues.ph);
-    document.getElementById('temp-interna-value').innerHTML = formatValueWithArrow(tempi, prevValues.tempi, ' °C');
-    document.getElementById('temp-ambiente-value').innerHTML = formatValueWithArrow(tempa, prevValues.tempa, ' °C');
-    document.getElementById('lightning-value').innerHTML = formatValueWithArrow(lightning, prevValues.lightning, ' μmol/m²s');
-    document.getElementById('humidity-value').innerHTML = formatValueWithArrow(humidity, prevValues.humidity, ' %');
+    document.getElementById('temp-interna-value').innerHTML = formatValueWithArrow(temperaturaAgua, prevValues.temperaturaAgua, ' °C');
+    document.getElementById('temp-ambiente-value').innerHTML = formatValueWithArrow(temperaturaAmbiente, prevValues.temperaturaAmbiente, ' °C');
+    document.getElementById('lightning-value').innerHTML = formatValueWithArrow(luminosidad, prevValues.luminosidad, ' μmol/m²s');
+    document.getElementById('humidity-value').innerHTML = formatValueWithArrow(humedad, prevValues.humedad, ' %');
     document.getElementById('co2-value').innerHTML = formatValueWithArrow(co2, prevValues.co2, ' ppm');
-    document.getElementById('conductivity-value').innerHTML = formatValueWithArrow(conductivity, prevValues.conductivity, ' mS/cm');
+    document.getElementById('conductivity-value').innerHTML = formatValueWithArrow(conductividadElectrica, prevValues.conductividadElectrica, ' mS/cm');
     document.getElementById('update-time').textContent = time;
 
     prevValues.ph = ph;
-    prevValues.tempi = tempi;
-    prevValues.tempa = tempa;
-    prevValues.lightning = lightning;
-    prevValues.humidity = humidity;
+    prevValues.temperaturaAgua = temperaturaAgua;
+    prevValues.temperaturaAmbiente = temperaturaAmbiente;
+    prevValues.luminosidad = luminosidad;
+    prevValues.humedad = humedad;
     prevValues.co2 = co2;
-    prevValues.conductivity = conductivity;
+    prevValues.conductividadElectrica = conductividadElectrica;
 
     if (labels.length >= maxPoints) labels.shift();
     labels.push(time);
@@ -139,12 +140,12 @@ async function updateData() {
     });
 
     phChart.data.datasets[0].data.push(ph);
-    tempIChart.data.datasets[0].data.push(tempi);
-    tempAChart.data.datasets[0].data.push(tempa);
-    lightningChart.data.datasets[0].data.push(lightning);
-    humidityChart.data.datasets[0].data.push(humidity);
+    tempIChart.data.datasets[0].data.push(temperaturaAgua);
+    tempAChart.data.datasets[0].data.push(temperaturaAmbiente);
+    lightningChart.data.datasets[0].data.push(luminosidad);
+    humidityChart.data.datasets[0].data.push(humedad);
     co2Chart.data.datasets[0].data.push(co2);
-    conductivityChart.data.datasets[0].data.push(conductivity);
+    conductivityChart.data.datasets[0].data.push(conductividadElectrica);
 
     phChart.update();
     tempIChart.update();
@@ -156,8 +157,10 @@ async function updateData() {
 
   } catch (error) {
     console.error('Error al obtener datos:', error);
+    document.getElementById('update-time').textContent = 'Error al obtener datos';
   }
 }
+
 
 updateData();
 setInterval(updateData, 1000);
