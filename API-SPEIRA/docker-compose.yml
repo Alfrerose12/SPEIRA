@@ -45,6 +45,24 @@ services:
         aliases:
           - api-speira-mongo
 
+  mongo-backup:
+    container_name: mongo-backup
+    image: mongo:6.0.24
+    depends_on:
+      - mongo
+    volumes:
+      - ./mongo-backups:/backups
+    entrypoint: >
+      bash -c "while true; do
+        mongodump --host mongo --port 27017 --out /backups/backup_$(date +%Y-%m-%d_%H-%M-%S);
+        find /backups -maxdepth 1 -type d -mtime +7 -exec rm -rf {} \;;
+        sleep 86400;
+      done"
+    networks:
+      speira-network:
+        aliases:
+          - mongo-backup
+
 volumes:
   mongo-data:
 
