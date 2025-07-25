@@ -4,6 +4,7 @@ import { Component, OnInit } from '@angular/core';
   selector: 'app-cajas',
   templateUrl: './cajas.page.html',
   styleUrls: ['./cajas.page.scss'],
+  standalone: false
 })
 export class CajasPage implements OnInit {
 
