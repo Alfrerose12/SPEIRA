@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { Subscription, interval, switchMap, of } from 'rxjs';
 import { ApiService } from '../services/api.service';
+import { MenuController } from '@ionic/angular';
 
 interface SensorEntry {
   id: number;
@@ -30,6 +31,9 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
   refreshInterval = 1000;
   sensorCharts: { [key: string]: Chart } = {};
 
+  // Aquí agregamos la propiedad para el filtro
+  selectedSensorFilter: string = '';
+
   availableSensors = [
     { key: 'ph', name: 'pH', unit: 'pH', canvasId: 'phChart', color: '#4caf50' },
     { key: 'tempWater', name: 'Temperatura del agua', unit: '°C', canvasId: 'tempWaterChart', color: '#2196f3' },
@@ -40,7 +44,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     { key: 'co2', name: 'CO₂', unit: 'ppm', canvasId: 'co2Chart', color: '#009688' }
   ];
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private menuCtrl: MenuController) {}
 
   ngOnInit() {
     // Cargar lista de estanques
@@ -190,4 +194,14 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
     this.sensorCharts[canvasId] = chart;
   }
+
+  // Función para controlar el filtro del sensor desde el segment en HTML
+  shouldDisplaySensor(key: string): boolean {
+    return this.selectedSensorFilter === '' || this.selectedSensorFilter === key;
+  }
+
+  openMenu() {
+    this.menuCtrl.open('filter-menu');
+  }
+
 }
