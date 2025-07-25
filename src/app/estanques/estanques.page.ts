@@ -48,9 +48,10 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit() {
     this.apiService.getEstanquesDisponibles().subscribe({
       next: (estanques) => {
+        console.log('Estanques disponibles:', estanques);
         this.estanquesDisponibles = estanques;
         if (estanques.length > 0) {
-          this.estanqueSeleccionado = estanques[0];
+          this.estanqueSeleccionado = typeof estanques[0] === 'string' ? estanques[0] : (estanques[0] as { nombre: string }).nombre;
           this.iniciarMonitorEstanque();
         }
       },
@@ -59,6 +60,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
       }
     });
   }
+  
 
   iniciarMonitorEstanque() {
     if (this.dataSubscription) this.dataSubscription.unsubscribe();
