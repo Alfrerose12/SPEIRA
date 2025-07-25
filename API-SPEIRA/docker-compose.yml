@@ -30,8 +30,8 @@ services:
 
 volumes:
   mongo-data:
-    name: speira-mongo-data
     external: true
+    name: speira-mongo-data
 
 networks:
   speira-network:
