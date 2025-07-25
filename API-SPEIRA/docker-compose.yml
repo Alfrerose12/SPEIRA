@@ -61,6 +61,7 @@ services:
 
 volumes:
   mongo-data:
+    external: true
 
 networks:
   speira-network:
