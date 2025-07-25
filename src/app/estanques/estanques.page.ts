@@ -51,7 +51,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
         console.log('Estanques disponibles:', estanques);
         this.estanquesDisponibles = estanques;
         if (estanques.length > 0) {
-          this.estanqueSeleccionado = typeof estanques[0] === 'string' ? estanques[0] : (estanques[0] as { nombre: string }).nombre;
+          this.estanqueSeleccionado = estanques[0];
           this.iniciarMonitorEstanque();
         }
       },
@@ -61,14 +61,13 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     });
   }
   
-
   iniciarMonitorEstanque() {
     if (this.dataSubscription) this.dataSubscription.unsubscribe();
 
     this.dataSubscription = interval(this.refreshInterval).pipe(
       switchMap(() => {
         return this.estanqueSeleccionado
-          ? this.apiService.getEstanqueData(this.estanqueSeleccionado) // Aquí sin ".nombre"
+          ? this.apiService.getEstanqueData(this.estanqueSeleccionado)
           : of(null);
       })
     ).subscribe(

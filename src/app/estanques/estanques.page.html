@@ -17,31 +17,42 @@
 </ion-menu>
 
 <ion-content id="main-content" class="estanques-content">
-  <!-- Botón flotante para abrir el filtro -->
+
+  <!-- Botón flotante para filtro -->
   <div class="filter-button-wrapper">
-    <ion-button (click)="openMenu()" fill="solid" class="filter-button" title="Filtro de Sensores">
+    <ion-button (click)="openMenu()" fill="solid" class="filter-button" title="Filtrar sensores">
       <ion-icon slot="start" name="options-outline"></ion-icon>
       Filtrado de Sensores
     </ion-button>
   </div>
 
-  <!-- Selector de estanque -->
-  <ion-item>
-    <ion-label>Seleccionar Estanque</ion-label>
-    <ion-select [(ngModel)]="estanqueSeleccionado" (ionChange)="onEstanqueChange()">
-      <ion-select-option *ngFor="let estanque of estanquesDisponibles" [value]="estanque.nombre">
-        {{ estanque.nombre }}
-      </ion-select-option>
-    </ion-select>
-  </ion-item>
+  <!-- Card: Selector de Estanque -->
+  <ion-card class="estanque-selector-card">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="water-outline"></ion-icon> Selección de Estanque
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item lines="none">
+        <ion-label position="stacked">Estanque</ion-label>
+        <ion-select [(ngModel)]="estanqueSeleccionado" (ionChange)="onEstanqueChange()" interface="popover">
+          <ion-select-option *ngFor="let estanque of estanquesDisponibles" [value]="estanque">
+            {{ estanque }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
 
-  <!-- Burbujas decorativas -->
+  <!-- Decoración: burbujas -->
   <div class="bubbles">
     <span *ngFor="let bubble of [1,2,3,4,5,6,7,8,9,10]"></span>
   </div>
 
   <div class="content-wrapper">
-    <!-- Tabla de datos en tiempo real -->
+
+    <!-- Card: Tabla de sensores en tiempo real -->
     <ion-card>
       <ion-card-header>
         <ion-card-title>
@@ -64,7 +75,7 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Sección de gráficos -->
+    <!-- Card: Gráficos históricos -->
     <ion-card class="charts-card">
       <ion-card-header>
         <ion-card-title>
@@ -73,6 +84,7 @@
       </ion-card-header>
       <ion-card-content>
         <div class="chart-grid">
+
           <div class="chart-container" *ngIf="shouldDisplaySensor('ph')">
             <div class="chart-header"><h3>pH</h3></div>
             <div class="chart-wrapper"><canvas id="phChart"></canvas></div>
@@ -107,6 +119,7 @@
             <div class="chart-header"><h3>CO₂ (ppm)</h3></div>
             <div class="chart-wrapper"><canvas id="co2Chart"></canvas></div>
           </div>
+
         </div>
       </ion-card-content>
     </ion-card>
