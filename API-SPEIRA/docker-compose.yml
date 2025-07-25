@@ -5,12 +5,11 @@ services:
     container_name: api-speira-app
     build: .
     ports:
-      - "${PORT}:${PORT}"
+      - "${PORT:-3000}:${PORT:-3000}"
     env_file:
       - .env
     depends_on:
-      mongo:
-        condition: service_healthy  
+      - mongo
     networks:
       speira-network:
         aliases:
@@ -18,30 +17,29 @@ services:
 
   mongo:
     container_name: api-speira-mongo
-    image: mongo:6.0.24  
+    image: mongo:6.0.24
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
-      - ./mongo-backups:/backups  
+      - ./mongo-backups:/backups
     environment:
-      - MONGO_INITDB_OPLOG_SIZE=1024  
-      - DISABLE_OOM_KILLER=true  
+      - MONGO_INITDB_OPLOG_SIZE=1024
     command: >
       mongod --noauth
       --bind_ip_all
       --journal
-      --wiredTigerCacheSizeGB 1  # Limita RAM usada por WT (ajusta según tu servidor)
-      --syncdelay 300  # 300 segundos entre flushes a disco (balance entre rendimiento y seguridad)
-      --notablescan  # Bloquea queries sin índice que consuman muchos recursos
-      --logpath=/data/db/mongod.log  # Guarda logs persistentes
+      --wiredTigerCacheSizeGB 1
+      --syncdelay 300
+      --notablescan
+      --logpath=/data/db/mongod.log
       --logappend
     healthcheck:
-      test: mongosh --eval "db.adminCommand('ping')" 
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s  
+      start_period: 40s
     networks:
       speira-network:
         aliases:
@@ -49,12 +47,6 @@ services:
 
 volumes:
   mongo-data:
-    name: speira-mongo-data  
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /mnt/volumes/mongo-data  
 
 networks:
   speira-network:
