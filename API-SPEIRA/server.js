@@ -13,6 +13,33 @@ const especificacionSwagger = require('./config/swagger');
 if (!process.env.MONGO_URI) throw new Error('MONGO_URI no está definida en .env');
 if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) throw new Error('Claves VAPID no están definidas en .env');
 
+// Herramientas de diagnóstico de memoria
+const memwatch = require('memwatch-next');
+const heapdump = require('heapdump');
+
+// Detectar fugas automáticamente
+memwatch.on('leak', (info) => {
+  console.error('⚠️ Memory leak detectada:', info);
+});
+
+// Mostrar estadísticas de uso de memoria
+memwatch.on('stats', (stats) => {
+  console.log('📊 Estadísticas de memoria:', stats);
+});
+
+// Guardar un snapshot del heap cada 5 minutos
+setInterval(() => {
+  const filename = `/usr/src/app/heap-${Date.now()}.heapsnapshot`;
+  heapdump.writeSnapshot(filename, (err, filename) => {
+    if (err) {
+      console.error('Error al guardar snapshot:', err);
+    } else {
+      console.log('Snapshot de heap guardado en:', filename);
+    }
+  });
+}, 5 * 60 * 1000); // 5 minutos
+
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
