@@ -99,34 +99,35 @@ exports.crearDato = async (req, res) => {
 
 exports.obtenerDatosGenerales = async (req, res) => {
   try {
-    const estanques = await Estanque.find().populate({
-      path: 'datosSensores',
-      options: { sort: { fecha: -1 }, limit: 1 } 
-    });
+    const estanques = await Estanque.find();
 
     if (estanques.length === 0) {
       return res.status(404).json({ mensaje: 'No hay estanques registrados' });
     }
 
-    const resumen = estanques.map(estanque => {
-      const ultimoDato = estanque.datosSensores[0];
-      return {
-        estanqueId: estanque._id,
-        nombre: estanque.nombre,
-        fecha: ultimoDato ? moment(ultimoDato.fecha).tz(ZONA_HORARIA).format('YYYY-MM-DD HH:mm') : null,
-        datos: ultimoDato
-          ? {
-              ph: ultimoDato.ph,
-              temperaturaAgua: ultimoDato.temperaturaAgua,
-              temperaturaAmbiente: ultimoDato.temperaturaAmbiente,
-              humedad: ultimoDato.humedad,
-              luminosidad: ultimoDato.luminosidad,
-              conductividadElectrica: ultimoDato.conductividadElectrica,
-              co2: ultimoDato.co2
-            }
-          : null
-      };
-    });
+    const resumen = await Promise.all(
+      estanques.map(async (estanque) => {
+        const ultimoDato = await DatosSensor.findOne({ estanque: estanque._id })
+          .sort({ fecha: -1 });
+
+        return {
+          estanqueId: estanque._id,
+          nombre: estanque.nombre,
+          fecha: ultimoDato ? moment(ultimoDato.fecha).tz(ZONA_HORARIA).format('YYYY-MM-DD HH:mm') : null,
+          datos: ultimoDato
+            ? {
+                ph: ultimoDato.ph,
+                temperaturaAgua: ultimoDato.temperaturaAgua,
+                temperaturaAmbiente: ultimoDato.temperaturaAmbiente,
+                humedad: ultimoDato.humedad,
+                luminosidad: ultimoDato.luminosidad,
+                conductividadElectrica: ultimoDato.conductividadElectrica,
+                co2: ultimoDato.co2
+              }
+            : null
+        };
+      })
+    );
 
     res.json({
       zona_horaria: ZONA_HORARIA,
@@ -141,6 +142,7 @@ exports.obtenerDatosGenerales = async (req, res) => {
     });
   }
 };
+
 
 
 exports.obtenerDatosPorPeriodo = async (req, res) => {
