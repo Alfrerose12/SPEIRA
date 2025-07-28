@@ -41,7 +41,7 @@
       return this.http.get(`${this.baseUrl}/datos/estanque/${encodeURIComponent(nombre)}`);
     }
 
-    getEstanquesDisponibles(): Observable<string[]> {
-      return this.http.get<string[]>(`${this.baseUrl}/estanques`);
+    getEstanquesDisponibles(): Observable<{ nombre: string }[]> {
+      return this.http.get<{ nombre: string }[]>(`${this.baseUrl}/estanques`);
     }
   }

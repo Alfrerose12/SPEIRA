@@ -3,7 +3,6 @@ import { Chart, registerables } from 'chart.js';
 import { Subscription, interval, switchMap, of } from 'rxjs';
 import { ApiService } from '../services/api.service';
 import { MenuController } from '@ionic/angular';
-import { response } from 'express';
 
 interface SensorEntry {
   id: number;
@@ -48,11 +47,11 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit() {
     this.apiService.getEstanquesDisponibles().subscribe({
-      next: (estanques: string[]) => {
+      next: (estanques: { nombre: string }[]) => {
         console.log('Estanques disponibles:', estanques);
-        this.estanquesDisponibles = estanques;
         if (estanques.length > 0) {
-          this.estanqueSeleccionado = estanques[0]; // ← CORREGIDO
+          this.estanquesDisponibles = estanques.map(e => e.nombre);
+          this.estanqueSeleccionado = this.estanquesDisponibles[0];
           this.iniciarMonitorEstanque();
         }
       },
