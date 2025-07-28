@@ -63,7 +63,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
   
   iniciarMonitorEstanque() {
     if (this.dataSubscription) this.dataSubscription.unsubscribe();
-
+  
     this.dataSubscription = interval(this.refreshInterval).pipe(
       switchMap(() => {
         return this.estanqueSeleccionado
@@ -72,50 +72,36 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
       })
     ).subscribe(
       (response: any) => {    
-        
-        console.log('Respuesta API estanque:', response);  // <=== Aquí
-
-        const rawData = response?.resumen?.[0];
-
-        if (!rawData || !rawData.datos) {
+        console.log('Respuesta API estanque:', response);
+  
+        const datos = response?.datos;
+  
+        if (!datos || datos.length === 0) {
           console.warn('No hay datos válidos para el estanque:', this.estanqueSeleccionado);
           return;
         }
-
-        const timestamp = new Date().toISOString();
-
-        const flatData: SensorEntry[] = Object.entries(rawData.datos).map(([key, value]) => {
-          let name = '';
-          let unit = '';
-          let finalKey = '';
-
-          switch (key) {
-            case 'ph': name = 'pH'; unit = 'pH'; finalKey = 'ph'; break;
-            case 'temperaturaAgua': name = 'Temperatura del agua'; unit = '°C'; finalKey = 'tempWater'; break;
-            case 'temperaturaAmbiente': name = 'Temperatura ambiente'; unit = '°C'; finalKey = 'tempAmbient'; break;
-            case 'humedad': name = 'Humedad'; unit = '%'; finalKey = 'humidity'; break;
-            case 'luminosidad': name = 'Luminosidad'; unit = 'lux'; finalKey = 'luminosity'; break;
-            case 'conductividadElectrica': name = 'Conductividad eléctrica'; unit = 'µS/cm'; finalKey = 'conductivity'; break;
-            case 'co2': name = 'CO₂'; unit = 'ppm'; finalKey = 'co2'; break;
-            default: name = key; finalKey = key; unit = ''; break;
-          }
-
+  
+        const entry = datos[datos.length - 1];
+  
+        const flatData: SensorEntry[] = this.availableSensors.map(sensor => {
+          const lastValid = [...datos].reverse().find(d => typeof d[sensor.key] !== 'undefined' && d[sensor.key] !== null);
           return {
             id: 0,
-            name,
-            value: Number(value),
-            unit,
-            timestamp,
-            key: finalKey
+            name: sensor.name,
+            value: lastValid ? Number(lastValid[sensor.key]) : 0,
+            unit: sensor.unit,
+            timestamp: lastValid ? lastValid.timestamp : new Date().toISOString(),
+            key: sensor.key
           };
         });
-
+  
         this.sensorData = flatData;
         this.updateCharts();
       },
       err => console.error('Error obteniendo datos del estanque:', err)
     );
   }
+  
 
   ngAfterViewInit() {
     this.availableSensors.forEach(sensor => {
