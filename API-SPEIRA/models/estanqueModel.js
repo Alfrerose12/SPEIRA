@@ -7,10 +7,6 @@ const EstanqueSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    datosSensores: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'DatosSensor'
-    }],
     createdAt: {
         type: Date,
         default: () => moment().tz('America/Mexico_City').toDate(),
