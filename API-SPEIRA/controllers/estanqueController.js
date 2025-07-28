@@ -46,12 +46,13 @@ exports.crearEstanque = async (req, res) => {
 
 exports.obtenerEstanques = async (req, res) => {
   try {
-    const estanques = await Estanques.find().populate('datosSensores');
+    const estanques = await Estanques.find();
     res.json(estanques);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 exports.editarEstanque = async (req, res) => {
   try {
