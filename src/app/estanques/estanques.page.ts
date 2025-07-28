@@ -71,7 +71,10 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
           : of(null);
       })
     ).subscribe(
-      (response: any) => {
+      (response: any) => {    
+        
+        console.log('Respuesta API estanque:', response);  // <=== Aquí
+
         const rawData = response?.resumen?.[0];
 
         if (!rawData || !rawData.datos) {
