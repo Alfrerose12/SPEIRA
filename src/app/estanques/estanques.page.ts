@@ -3,6 +3,7 @@ import { Chart, registerables } from 'chart.js';
 import { Subscription, interval, switchMap, of } from 'rxjs';
 import { ApiService } from '../services/api.service';
 import { MenuController } from '@ionic/angular';
+import { response } from 'express';
 
 interface SensorEntry {
   id: number;
@@ -28,7 +29,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   sensorData: SensorEntry[] = [];
   dataSubscription!: Subscription;
-  refreshInterval = 1000;
+  refreshInterval = 10000;
   sensorCharts: { [key: string]: Chart } = {};
 
   selectedSensorFilter: string = '';
@@ -47,11 +48,11 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit() {
     this.apiService.getEstanquesDisponibles().subscribe({
-      next: (estanques) => {
+      next: (estanques: string[]) => {
         console.log('Estanques disponibles:', estanques);
         this.estanquesDisponibles = estanques;
         if (estanques.length > 0) {
-          this.estanqueSeleccionado = estanques[0];
+          this.estanqueSeleccionado = estanques[0]; // ← CORREGIDO
           this.iniciarMonitorEstanque();
         }
       },
