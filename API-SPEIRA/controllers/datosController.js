@@ -83,9 +83,6 @@ exports.crearDato = async (req, res) => {
     const nuevoDato = new DatosSensor(datosConFecha);
     await nuevoDato.save();
 
-    estanque.datosSensores.push(nuevoDato.id);
-    await estanque.save();
-
     const datoRespuesta = {
       ...nuevoDato._doc,
       fecha: moment(nuevoDato.fecha).tz(ZONA_HORARIA).format('YYYY-MM-DD HH:mm')
