@@ -47,15 +47,26 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
       switchMap(() => this.apiService.getSensorGeneralData())
     ).subscribe(
       (response: any) => {
-        const rawData = response?.resumen?.[0];
-
-        if (!rawData || !rawData.datos) {
-          console.warn('No hay datos válidos:', response);
+        // CAMBIO: Adaptar a la nueva estructura del backend, que ahora devuelve un arreglo de estanques en 'resumen'
+        const resumenArray = response?.resumen;
+        // CAMBIO: Si no hay estanques, regresamos un warning y salimos
+        if (!resumenArray || resumenArray.length === 0) {
+          console.warn('No hay estanques en la respuesta:', response);
           return;
         }
 
-        const timestamp = new Date().toISOString();
+        // CAMBIO: Tomamos sólo el primer estanque (índice 0) para mostrar datos generales
+        const rawData = resumenArray[0];
+        // CAMBIO: Validamos que haya datos en ese estanque
+        if (!rawData || !rawData.datos) {
+          console.warn('No hay datos válidos en el resumen:', rawData);
+          return;
+        }
 
+        // CAMBIO: Usamos la fecha que envía el backend para el timestamp si está disponible
+        const timestamp = rawData.fecha || new Date().toISOString();
+
+        // MAPEO: Transformamos los datos del backend a nuestro formato SensorEntry
         const flatData: SensorEntry[] = Object.entries(rawData.datos).map(([key, value]) => {
           let name = '';
           let unit = '';
@@ -83,6 +94,8 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
         });
 
         this.sensorData = flatData;
+
+        // No cambio aquí, llamamos a updateCharts() para refrescar las gráficas
         this.updateCharts();
       },
       err => console.error('Error obteniendo datos de sensores:', err)
@@ -90,17 +103,20 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
+    // Sin cambio: creamos los gráficos al cargar el componente
     this.availableSensors.forEach(sensor => {
       this.createChart(sensor.canvasId, sensor.name, sensor.color);
     });
   }
 
   ngOnDestroy() {
+    // Sin cambio: limpiar subscripciones y destruir gráficos
     if (this.dataSubscription) this.dataSubscription.unsubscribe();
     Object.values(this.sensorCharts).forEach(chart => chart.destroy());
   }
 
   updateCharts() {
+    // Sin cambio: actualizar las gráficas con los datos nuevos
     this.availableSensors.forEach(sensor => {
       const chart = this.sensorCharts[sensor.canvasId];
       if (!chart) return;
@@ -123,6 +139,7 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   createChart(canvasId: string, label: string, color: string) {
+    // Sin cambio: creación inicial del gráfico Chart.js
     const ctx = (document.getElementById(canvasId) as HTMLCanvasElement)?.getContext('2d');
     if (!ctx) return;
 
@@ -166,6 +183,7 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   openMenu() {
+    // Sin cambio: abrir menú lateral
     const menu = document.querySelector('ion-menu#filter-menu');
     if (menu && typeof (menu as any).open === 'function') {
       (menu as any).open();
@@ -173,10 +191,12 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onFilterChange(value: string) {
+    // Sin cambio: actualizar filtro seleccionado
     this.selectedSensorFilter = value;
   }
 
   shouldDisplaySensor(sensorKey: string): boolean {
+    // Sin cambio: decidir si mostrar sensor en base al filtro
     const allowedKeys = this.availableSensors.map(sensor => sensor.key);
     return allowedKeys.includes(sensorKey);
   }

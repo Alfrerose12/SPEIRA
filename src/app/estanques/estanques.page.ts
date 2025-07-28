@@ -93,7 +93,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
             timestamp: lastValid ? lastValid.timestamp : new Date().toISOString(),
             key: sensor.key
           };
-        });
+        });   
   
         this.sensorData = flatData;
         this.updateCharts();
