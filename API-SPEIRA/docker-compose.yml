@@ -7,7 +7,7 @@ services:
     ports:
       - "${PORT:-3000}:${PORT:-3000}"
     env_file:
-      - .env  # Todas las variables sensibles se cargan desde aquí
+      - .env
     depends_on:
       mongo:
         condition: service_healthy
@@ -25,8 +25,8 @@ services:
       - mongo-data:/data/db
       - ./mongo-backups:/backups
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}  # Desde .env
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}  # Desde .env
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=tu_contraseña_segura
       - MONGO_INITDB_OPLOG_SIZE=1024
     command: >
       mongod --bind_ip_all
@@ -34,7 +34,7 @@ services:
       --wiredTigerCacheSizeGB 1
       --auth
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.auth('${MONGO_ROOT_USERNAME}', '${MONGO_ROOT_PASSWORD}'); db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "--eval", "db.auth('root', 'tu_contraseña_segura'); db.adminCommand('ping')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -52,8 +52,6 @@ services:
     volumes:
       - ./mongo-backups:/backups
       - ./backup.sh:/backup.sh
-    environment:
-      - MONGO_URI=${MONGO_URI}  
     entrypoint: ["/bin/bash", "/backup.sh"]
     networks:
       speira-network:
