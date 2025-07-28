@@ -9,8 +9,7 @@ services:
     env_file:
       - .env
     depends_on:
-      mongo:
-        condition: service_healthy
+      - mongo
     networks:
       speira-network:
         aliases:
@@ -25,16 +24,18 @@ services:
       - mongo-data:/data/db
       - ./mongo-backups:/backups
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=tu_contraseña_segura
       - MONGO_INITDB_OPLOG_SIZE=1024
     command: >
-      mongod --bind_ip_all
+      mongod --noauth
+      --bind_ip_all
       --journal
       --wiredTigerCacheSizeGB 1
-      --auth
+      --syncdelay 300
+      --notablescan
+      --logpath=/data/db/mongod.log
+      --logappend
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.auth('root', 'tu_contraseña_segura'); db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -60,6 +61,7 @@ services:
 
 volumes:
   mongo-data:
+    external: true
 
 networks:
   speira-network:
