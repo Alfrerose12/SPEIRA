@@ -24,9 +24,11 @@ services:
       - mongo-data:/data/db
       - ./mongo-backups:/backups
     environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
       - MONGO_INITDB_OPLOG_SIZE=1024
     command: >
-      mongod --noauth
+      mongod
       --bind_ip_all
       --journal
       --wiredTigerCacheSizeGB 1
