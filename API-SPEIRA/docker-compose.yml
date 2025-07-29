@@ -17,7 +17,7 @@ services:
 
   mongo:
     container_name: api-speira-mongo
-    image: mongo:6.0.24
+    image: mongo:6
     ports:
       - "27017:27017"
     volumes:
@@ -47,7 +47,7 @@ services:
 
   mongo-backup:
     container_name: mongo-backup
-    image: mongo:6.0.24
+    image: mongo:6
     depends_on:
       - mongo
     volumes:
@@ -61,6 +61,7 @@ services:
 
 volumes:
   mongo-data:
+    name: mongo-data
 
 networks:
   speira-network:
