@@ -144,7 +144,6 @@ exports.obtenerDatosGenerales = async (req, res) => {
 };
 
 
-
 exports.obtenerDatosPorPeriodo = async (req, res) => {
   try {
     const { periodo, fecha } = req.params;
