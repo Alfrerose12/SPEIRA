@@ -63,12 +63,24 @@ export class LoginPage implements OnInit {
           await loading.dismiss();
 
           localStorage.setItem('authToken', response.token || '');
-          localStorage.setItem('userData', JSON.stringify(response.user || {}));
-          localStorage.setItem('userRole', response.user?.rol || 'user');
-
+          localStorage.setItem('userData', JSON.stringify({
+            id: response.id,
+            nombre: response.nombre,
+            email: response.email,
+            rol: response.rol
+          }));
+          localStorage.setItem('userRole', response.rol || 'user');
+          
           this.router.navigate(['/inicio'], {
-            state: { userData: response.user }
-          });
+            state: {
+              userData: {
+                id: response.id,
+                nombre: response.nombre,
+                email: response.email,
+                rol: response.rol
+              }
+            }
+          });          
         },
         error: async (error) => {
           await loading.dismiss();
