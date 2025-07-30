@@ -72,6 +72,9 @@ export class RegisterPage implements OnInit {
         await loading.dismiss();
         this.loading = false;
 
+        console.log('Respuesta del backend:', response);
+
+
         if (response?.usuario || response?.id || response?.message?.toLowerCase().includes('registrado')) {
           const alert = await this.alertController.create({
             header: 'Registro exitoso',
