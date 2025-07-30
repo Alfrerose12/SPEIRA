@@ -56,6 +56,8 @@ export class LoginPage implements OnInit {
         ? { email: this.email, password: this.password}
         : { nombre: this.nombre || this.email, password: this.password };
 
+        console.log('Datos enviados al backend:', loginData);
+
       this.apiService.login(loginData).subscribe({
         next: async (response: any) => {
           await loading.dismiss();
