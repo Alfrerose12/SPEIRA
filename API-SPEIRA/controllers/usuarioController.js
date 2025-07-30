@@ -89,18 +89,23 @@ exports.eliminarUsuario = async (req, res) => {
 };
 
 exports.iniciarSesion = async (req, res) => {
-  const { email, nombre, password } = req.body;
 
+  const { email, nombre, password } = req.body;
+  
   try {
-    const usuario = await Usuario.findOne(
-      email ? { email } : { nombre }
-    );
+
+    const usuario = await Usuario.findOne(email ? { email } : { nombre });
+
     if (!usuario) {
+
       return res.status(401).json({ error: 'Usuario no encontrado' });
+
     }
 
     const esValido = await usuario.compararPassword(password);
+
     if (!esValido) {
+
       return res.status(401).json({ error: 'Contraseña incorrecta' });
     }
 
@@ -111,8 +116,10 @@ exports.iniciarSesion = async (req, res) => {
         email: usuario.email,
         rol: usuario.rol
       },
+
       process.env.JWT_SECRET || 'secreto',
       { expiresIn: '15min' }
+
     );
 
     res.cookie('token', token, {
@@ -123,15 +130,22 @@ exports.iniciarSesion = async (req, res) => {
     });
 
     res.json({
-      success: true,
-      id: usuario._id,
-      nombre: usuario.nombre,
-      email: usuario.email,
-      rol: usuario.rol,
+      token,
+      user: {
+        id: usuario._id,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        rol: usuario.rol
+      }
+
     });
+
   } catch (err) {
+
     res.status(500).json({ error: 'Error al iniciar sesión', detalles: err.message });
+
   }
+
 };
 
 
