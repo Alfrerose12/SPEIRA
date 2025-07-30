@@ -45,23 +45,24 @@ export class LoginPage implements OnInit {
       await alert.present();
       return;
     }
-
+  
     const loading = await this.loadingController.create({
       message: 'Iniciando sesión...'
     });
     await loading.present();
-
+  
     try {
-      const loginData = this.email.includes('@')
-        ? { email: this.email, password: this.password}
+      // Construir objeto de login dependiendo si se ingresó email o nombre
+      const loginData = this.email && this.email.includes('@')
+        ? { email: this.email, password: this.password }
         : { nombre: this.nombre || this.email, password: this.password };
-
-        console.log('Datos enviados al backend:', loginData);
-
+  
+      console.log('Datos enviados al backend:', loginData);
+  
       this.apiService.login(loginData).subscribe({
         next: async (response: any) => {
           await loading.dismiss();
-
+  
           localStorage.setItem('authToken', response.token || '');
           localStorage.setItem('userData', JSON.stringify({
             id: response.id,
@@ -70,7 +71,7 @@ export class LoginPage implements OnInit {
             rol: response.rol
           }));
           localStorage.setItem('userRole', response.rol || 'user');
-          
+  
           this.router.navigate(['/inicio'], {
             state: {
               userData: {
@@ -80,12 +81,12 @@ export class LoginPage implements OnInit {
                 rol: response.rol
               }
             }
-          });          
+          });
         },
         error: async (error) => {
           await loading.dismiss();
           console.error('Error en login:', error);
-          this.showErrorAlert(error.error?.message || 'Credenciales incorrectas');
+          this.showErrorAlert(error.error || 'Credenciales incorrectas');
         }
       });
     } catch (error) {
@@ -94,6 +95,7 @@ export class LoginPage implements OnInit {
       this.showErrorAlert('Error inesperado al iniciar sesión');
     }
   }
+  
 
   private async showErrorAlert(message: string) {
     const alert = await this.alertController.create({
