@@ -45,48 +45,44 @@ export class LoginPage implements OnInit {
       await alert.present();
       return;
     }
-  
+
     const loading = await this.loadingController.create({
       message: 'Iniciando sesión...'
     });
     await loading.present();
-  
+
     try {
-      // Construir objeto de login dependiendo si se ingresó email o nombre
-      const loginData = this.email && this.email.includes('@')
-        ? { email: this.email, password: this.password }
-        : { nombre: this.nombre || this.email, password: this.password };
-  
-      console.log('Datos enviados al backend:', loginData);
-  
+      let loginData: { email?: string; nombre?: string; password: string } = { password: this.password };
+
+      if (this.email && this.email.includes('@')) {
+        loginData.email = this.email;
+      } else if (this.nombre) {
+        loginData.nombre = this.nombre;
+      } else if (this.email) {
+        loginData.nombre = this.email;
+      } else {
+        await loading.dismiss();
+        this.showErrorAlert('Debes ingresar un correo electrónico válido o un nombre de usuario.');
+        return;
+      }
+
+
       this.apiService.login(loginData).subscribe({
         next: async (response: any) => {
           await loading.dismiss();
-  
+
           localStorage.setItem('authToken', response.token || '');
-          localStorage.setItem('userData', JSON.stringify({
-            id: response.id,
-            nombre: response.nombre,
-            email: response.email,
-            rol: response.rol
-          }));
-          localStorage.setItem('userRole', response.rol || 'user');
-  
+          localStorage.setItem('userData', JSON.stringify(response));
+          localStorage.setItem('userRole', response.user?.rol || 'user');
+
           this.router.navigate(['/inicio'], {
-            state: {
-              userData: {
-                id: response.id,
-                nombre: response.nombre,
-                email: response.email,
-                rol: response.rol
-              }
-            }
+            state: { userData: response.user }
           });
         },
         error: async (error) => {
           await loading.dismiss();
           console.error('Error en login:', error);
-          this.showErrorAlert(error.error || 'Credenciales incorrectas');
+          this.showErrorAlert(error.error?.message || 'Credenciales incorrectas');
         }
       });
     } catch (error) {
@@ -95,7 +91,6 @@ export class LoginPage implements OnInit {
       this.showErrorAlert('Error inesperado al iniciar sesión');
     }
   }
-  
 
   private async showErrorAlert(message: string) {
     const alert = await this.alertController.create({
