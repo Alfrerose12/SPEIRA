@@ -15,7 +15,7 @@ cron.schedule('0 0 * * *', async () => {
 
     const estanques = await Estanques.find();
     for (const estanque of estanques) {
-        await calcularPromedioYGuardar(estanque._id, desde, hasta, 'diario');
+        await calcularPromedioYGuardar(estanque._id, estanque.nombre, desde, hasta, 'diario');
     }
 
     console.log(' Promedios diarios guardados.');
@@ -31,7 +31,7 @@ cron.schedule('0 0 * * 1', async () => {
 
     const estanques = await Estanques.find();
     for (const estanque of estanques) {
-        await calcularPromedioYGuardar(estanque._id, desde, hasta, 'semanal');
+        await calcularPromedioYGuardar(estanque._id, estanque.nombre, desde, hasta, 'semanal');
     }
 
     console.log(' Promedios semanales guardados.');
@@ -47,7 +47,7 @@ cron.schedule('0 0 1 * *', async () => {
 
     const estanques = await Estanques.find();
     for (const estanque of estanques) {
-        await calcularPromedioYGuardar(estanque._id, desde, hasta, 'mensual');
+        await calcularPromedioYGuardar(estanque._id, estanque.nombre, desde, hasta, 'mensual');
     }
 
     console.log(' Promedios mensuales guardados.');
@@ -63,7 +63,7 @@ cron.schedule('0 0 1 1 *', async () => {
 
     const estanques = await Estanques.find();
     for (const estanque of estanques) {
-        await calcularPromedioYGuardar(estanque._id, desde, hasta, 'anual');
+        await calcularPromedioYGuardar(estanque._id, estanque.nombre, desde, hasta, 'anual');
     }
 
     console.log(' Promedios anuales guardados.');

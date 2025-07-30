@@ -1,7 +1,7 @@
 const DatosSensor = require('../models/datosModel');
 const PromedioSensor = require('../models/promedioModel');
 
-async function calcularPromedioYGuardar(estanqueId, desde, hasta, tipo) {
+async function calcularPromedioYGuardar(estanqueId, estanqueNombre, desde, hasta, tipo) {
     const datos = await DatosSensor.find({
         estanque: estanqueId,
         fecha: {
@@ -17,6 +17,7 @@ async function calcularPromedioYGuardar(estanqueId, desde, hasta, tipo) {
 
     const nuevoPromedio = new PromedioSensor({
         estanque: estanqueId,
+        estanqueNombre: estanqueNombre,
         fechaInicio: desde,
         fechaFin: hasta,
         tipo,

@@ -6,6 +6,10 @@ const promedioSensorSchema = new mongoose.Schema({
         ref: 'Estanques',
         required: true
     },
+    estanqueNombre: {
+        type: String,
+        required: true
+    },
     fechaInicio: {
         type: Date,
         required: true
