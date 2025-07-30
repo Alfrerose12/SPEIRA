@@ -15,7 +15,7 @@
       return this.http.post(`${this.baseUrl}/usuario/registro`, data, { withCredentials: true });
     }
 
-    login(data: { email?: string; password: string; nombre?: string }): Observable<any> {
+    login(data: { email?: string; password: string; nombre?: string; rol: string }): Observable<any> {
       return this.http.post(`${this.baseUrl}/usuario/iniciar-sesion`, data, { withCredentials: true });
     }
 
