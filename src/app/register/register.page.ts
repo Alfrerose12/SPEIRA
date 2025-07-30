@@ -85,7 +85,7 @@ export class RegisterPage implements OnInit {
             buttons: ['OK']
           });
           await alert.present();
-          this.router.navigate(['/inicio']);
+          this.router.navigate(['/login']);
         } else {
           const alert = await this.alertController.create({
             header: 'Error',
