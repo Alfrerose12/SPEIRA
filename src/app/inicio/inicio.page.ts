@@ -31,11 +31,11 @@ export class InicioPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    // const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    // this.isAdmin = localStorage.getItem('userRole') === 'admin';
-    // this.userName = userData.nombre || userData.email || 'Usuario';
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    this.isAdmin = localStorage.getItem('userRole') === 'admin';
+    this.userName = userData.nombre || userData.email || 'Usuario';
 
-    this.isAdmin = true;
+    //this.isAdmin = true;
 
     this.configureBackButton();
 
