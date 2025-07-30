@@ -75,7 +75,7 @@ export class RegisterPage implements OnInit {
         console.log('Respuesta del backend:', response);
 
 
-        if (response?.usuario || response?.id || response?.message?.toLowerCase().includes('registrado')) {
+        if (response?.email && response?.nombre && response?.rol) {
           const alert = await this.alertController.create({
             header: 'Registro exitoso',
             message: 'Tu cuenta ha sido creada correctamente.',
