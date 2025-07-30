@@ -67,6 +67,9 @@ export class RegisterPage implements OnInit {
       rol: 'user'  
     };
 
+    console.log('Datos enviados al backend:', registerData);
+
+
     this.apiService.register(registerData).subscribe({
       next: async (response: any) => {
         await loading.dismiss();
@@ -81,6 +84,7 @@ export class RegisterPage implements OnInit {
             message: 'Tu cuenta ha sido creada correctamente.',
             buttons: ['OK']
           });
+          await alert.present();
           this.router.navigate(['/inicio']);
         } else {
           const alert = await this.alertController.create({
