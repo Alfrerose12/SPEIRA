@@ -53,7 +53,7 @@ export class LoginPage implements OnInit {
 
     try {
       const loginData = this.email.includes('@')
-        ? { email: this.email, password: this.password }
+        ? { email: this.email, password: this.password}
         : { nombre: this.nombre || this.email, password: this.password };
 
       this.apiService.login(loginData).subscribe({
