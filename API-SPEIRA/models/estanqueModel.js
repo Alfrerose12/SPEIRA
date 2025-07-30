@@ -22,6 +22,13 @@ const EstanqueSchema = new mongoose.Schema({
     }
 });
 
+// Campo virtual para datosSensors (no se guarda en MongoDB)
+EstanqueSchema.virtual('datosSensors');
+
+// Permitir que los virtuales aparezcan en JSON
+EstanqueSchema.set('toJSON', { virtuals: true });
+EstanqueSchema.set('toObject', { virtuals: true });
+
 EstanqueSchema.pre('save', function (next) {
     this.updatedAt = moment().tz('America/Mexico_City').toDate();
     next();

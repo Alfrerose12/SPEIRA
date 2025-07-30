@@ -604,23 +604,6 @@ const swaggerDefinition = {
                     properties: {
                       _id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
                       nombre: { type: 'string', example: 'Estanque 1' },
-                      DatosSensor: {
-                        type: 'array',
-                        items: {
-                          type: 'object',
-                          properties: {
-                            id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
-                            ph: { type: 'number', example: 7.5 },
-                            temperaturaAgua: { type: 'number', example: 30.0 },
-                            temperaturaAmbiente: { type: 'number', example: 25.0 },
-                            humedad: { type: 'number', example: 60.0 },
-                            luminosidad: { type: 'number', example: 500 },
-                            conductividadElectrica: { type: 'number', example: 1500 },
-                            co2: { type: 'number', example: 400 },
-                            fecha: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' }
-                          }
-                        }
-                      },
                       createdAt: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' },
                       updatedAt: { type: 'string', format: 'date-time', example: '2025-01-01T15:45:00.000Z' }
                     }

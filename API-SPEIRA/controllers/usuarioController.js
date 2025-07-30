@@ -17,7 +17,7 @@ exports.registrarUsuario = async (req, res) => {
       nombre,
       email,
       password,
-      rol : rol || 'user',
+      rol: rol || 'user',
     });
 
     await nuevoUsuario.save();
@@ -109,7 +109,7 @@ exports.iniciarSesion = async (req, res) => {
         id: usuario._id,
         nombre: usuario.nombre,
         email: usuario.email,
-        rol: usuario.rol 
+        rol: usuario.rol
       },
       process.env.JWT_SECRET || 'secreto',
       { expiresIn: '15min' }
