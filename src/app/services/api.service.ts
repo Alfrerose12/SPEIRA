@@ -44,4 +44,9 @@
     getEstanquesDisponibles(): Observable<{ nombre: string }[]> {
       return this.http.get<{ nombre: string }[]>(`${this.baseUrl}/estanques`);
     }
+    
+    actualizarUsuario(data: { email?: string; password?: string; nombre?: string }): Observable<any> {
+      return this.http.put(`${this.baseUrl}/usuario/actualizar`, data, { withCredentials: true });
+    }
+    
   }

@@ -44,6 +44,10 @@ const routes: Routes = [
     path: 'piscinas',
     loadChildren: () => import('./piscinas/piscinas.module').then( m => m.PiscinasPageModule)
   },
+  {
+    path: 'ajustes-admin',
+    loadChildren: () => import('./ajustes-admin/ajustes-admin.module').then( m => m.AjustesAdminPageModule)
+  },
 
 
 

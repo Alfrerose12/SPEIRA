@@ -31,9 +31,11 @@ export class InicioPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    this.isAdmin = localStorage.getItem('userRole') === 'admin';
-    this.userName = userData.nombre || userData.email || 'Usuario';
+    // const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    // this.isAdmin = localStorage.getItem('userRole') === 'admin';
+    // this.userName = userData.nombre || userData.email || 'Usuario';
+
+    this.isAdmin = true;
 
     this.configureBackButton();
 
@@ -169,7 +171,7 @@ export class InicioPage implements OnInit {
       alert('Selecciona un estanque primero');
       return;
     }
-    this.router.navigate(['/reporte'], {
+    this.router.navigate(['/ajustes-admin'], {
       queryParams: { estanque: this.estanqueSeleccionado }
     });
   }
@@ -188,6 +190,10 @@ export class InicioPage implements OnInit {
 
   goToMonitoreo() {
     this.router.navigate(['/sensor-monitoring']);
+  }
+  
+  goToAdministradorEstanques(){
+    this.router.navigate(['/ajustes-admin']);
   }
 
    logout() {
@@ -209,5 +215,7 @@ export class InicioPage implements OnInit {
       }
     });
   }
+
+  
 
 }

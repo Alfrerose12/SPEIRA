@@ -126,10 +126,11 @@ ion-content.monitoring-content {
 
   /* Botón filtro fijo arriba a la izquierda */
   .filter-button-wrapper {
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    z-index: 9999;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
   }
 
   .filter-button {

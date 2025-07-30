@@ -1,13 +1,75 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>ajustes</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="ajustes-content">
+  <form class="ajustes-form" (ngSubmit)="guardarCambios()">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">ajustes</ion-title>
-    </ion-toolbar>
-  </ion-header>
+    <div class="bubbles">
+      <span *ngFor="let bubble of [1,2,3,4,5,6,7,8,9,10]"></span>
+    </div>
+
+    <h2 class="ajustes-title">Mis Datos</h2>
+
+    <div class="profile-container">
+      <div class="profile-img-wrapper" (click)="fileInput.click()">
+        <img
+          [src]="profileImage || 'assets/images/user-placeholder.png'"
+          alt="Foto de perfil"
+          class="profile-img"
+        />
+        <div class="overlay">
+          <ion-icon name="pencil" class="edit-icon"></ion-icon>
+        </div>
+      </div>
+      <input
+        type="file"
+        accept="image/*"
+        #fileInput
+        hidden
+        (change)="onFileSelected($event)"
+      />
+    </div>
+
+    <ion-list lines="none" class="datos-list" style="max-width: 400px; margin: 0 auto;">
+      <ion-item>
+        <ion-label position="floating">Correo</ion-label>
+        <ion-input
+          [(ngModel)]="email"
+          name="email"
+          type="email"
+          required
+          autocomplete="email"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Contraseña</ion-label>
+        <ion-input
+          [(ngModel)]="password"
+          name="password"
+          type="password"
+          placeholder=""
+          autocomplete="new-password"
+        ></ion-input>
+      </ion-item>
+    </ion-list>
+
+    <ion-button expand="block" type="submit" class="btn-guardar" style="max-width: 400px; margin: 20px auto;">
+      Guardar Cambios
+    </ion-button>
+
+    <ion-button expand="block" color="danger" (click)="logout()" style="max-width: 400px; margin: 0 auto;">
+      <ion-icon name="log-out-outline" slot="start"></ion-icon>
+      Cerrar Sesión
+    </ion-button>
+
+    <ion-button 
+    expand="block" 
+    fill="outline" 
+    color="white" 
+    (click)="volverInicio()" 
+    class="btn-volver-inicio" 
+    style="max-width: 400px; margin: 20px auto;">
+    <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+    Volver al Inicio
+  </ion-button>
+
+  </form>
 </ion-content>

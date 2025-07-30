@@ -25,7 +25,7 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
 
   sensorData: SensorEntry[] = [];
   dataSubscription!: Subscription;
-  refreshInterval = 10000;
+  refreshInterval = 60000;
   sensorCharts: { [key: string]: Chart } = {};
 
   availableSensors = [

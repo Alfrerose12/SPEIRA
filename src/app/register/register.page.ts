@@ -78,7 +78,6 @@ export class RegisterPage implements OnInit {
             message: 'Tu cuenta ha sido creada correctamente.',
             buttons: ['OK']
           });
-          await alert.present();
           this.router.navigate(['/inicio']);
         } else {
           const alert = await this.alertController.create({
