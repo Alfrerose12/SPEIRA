@@ -28,7 +28,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   sensorData: SensorEntry[] = [];
   dataSubscription!: Subscription;
-  refreshInterval = 1000; // 10 segundos por defecto
+  refreshInterval = 2000; // igual que sensor-monitoring
   sensorCharts: { [key: string]: Chart } = {};
 
   selectedSensorFilter: string = '';
@@ -39,16 +39,27 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     { key: 'temperaturaAmbiente', name: 'Temperatura ambiente', unit: '°C', canvasId: 'tempAmbientChart', color: '#f44336' },
     { key: 'humedad', name: 'Humedad', unit: '%', canvasId: 'humidityChart', color: '#ff9800' },
     { key: 'luminosidad', name: 'Luminosidad', unit: 'lux', canvasId: 'lightChart', color: '#9c27b0' },
-    { key: 'coductividad', name: 'Conductividad eléctrica', unit: 'µS/cm', canvasId: 'conductivityChart', color: '#3f51b5' },
+    { key: 'conductividadElectrica', name: 'Conductividad eléctrica', unit: 'µS/cm', canvasId: 'conductivityChart', color: '#3f51b5' },
     { key: 'co2', name: 'CO₂', unit: 'ppm', canvasId: 'co2Chart', color: '#009688' }
   ];
+
+  sensorLimits: { [key: string]: { min: number, max: number } } = {
+    ph: { min: 8, max: 11 },
+    temperaturaAgua: { min: 10, max: 50 },
+    temperaturaAmbiente: { min: 15, max: 50 },
+    humedad: { min: 20, max: 100 },
+    luminosidad: { min: 2000, max: 50000 },
+    conductividadElectrica: { min: 5, max: 20 },
+    co2: { min: 3, max: 18 }
+  };
+
+  private notifiedSensors: { [key: string]: boolean } = {};
 
   constructor(private apiService: ApiService, private menuCtrl: MenuController) {}
 
   ngOnInit() {
     this.apiService.getEstanquesDisponibles().subscribe({
       next: (estanques: { nombre: string }[]) => {
-        console.log('Estanques disponibles:', estanques);
         if (estanques.length > 0) {
           this.estanquesDisponibles = estanques.map(e => e.nombre);
           this.estanqueSeleccionado = this.estanquesDisponibles[0];
@@ -60,10 +71,10 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
       }
     });
   }
-  
+
   iniciarMonitorEstanque() {
     if (this.dataSubscription) this.dataSubscription.unsubscribe();
-  
+
     this.dataSubscription = interval(this.refreshInterval).pipe(
       switchMap(() => {
         return this.estanqueSeleccionado
@@ -71,18 +82,14 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
           : of(null);
       })
     ).subscribe(
-      (response: any) => {    
-        console.log('Respuesta API estanque:', response);
-  
+      (response: any) => {
         const datos = response?.datos;
-  
         if (!datos || datos.length === 0) {
           console.warn('No hay datos válidos para el estanque:', this.estanqueSeleccionado);
           return;
         }
-  
-        const entry = datos[datos.length - 1];
-  
+
+        // Extraemos los últimos datos válidos para cada sensor
         const flatData: SensorEntry[] = this.availableSensors.map(sensor => {
           const lastValid = [...datos].reverse().find(d => typeof d[sensor.key] !== 'undefined' && d[sensor.key] !== null);
           return {
@@ -93,15 +100,30 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
             timestamp: lastValid ? lastValid.timestamp : new Date().toISOString(),
             key: sensor.key
           };
-        });   
-  
+        });
+
         this.sensorData = flatData;
+
+        // Lógica para notificaciones por fuera de límites
+        flatData.forEach(sensor => {
+          const limit = this.sensorLimits[sensor.key];
+          if (!limit) return;
+
+          const isOutOfRange = sensor.value < limit.min || sensor.value > limit.max;
+
+          if (isOutOfRange && !this.notifiedSensors[sensor.key]) {
+            this.enviarNotificacion(sensor.name, sensor.value);
+            this.notifiedSensors[sensor.key] = true;
+          } else if (!isOutOfRange && this.notifiedSensors[sensor.key]) {
+            this.notifiedSensors[sensor.key] = false;
+          }
+        });
+
         this.updateCharts();
       },
       err => console.error('Error obteniendo datos del estanque:', err)
     );
   }
-  
 
   ngAfterViewInit() {
     this.availableSensors.forEach(sensor => {
@@ -120,6 +142,8 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   updateCharts() {
     this.availableSensors.forEach(sensor => {
+      if (this.selectedSensorFilter && sensor.key !== this.selectedSensorFilter) return;
+
       const chart = this.sensorCharts[sensor.canvasId];
       if (!chart) return;
 
@@ -133,8 +157,11 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
       if (data.length > 30) data.shift();
 
       const labels = chart.data.labels as string[];
-      labels.push(new Date(latest.timestamp).toLocaleTimeString());
+      labels.push(new Date(latest.timestamp).toLocaleTimeString('es-MX', { timeZone: 'America/Mexico_City', hour12: false }));
       if (labels.length > 30) labels.shift();
+
+      dataset.data = [...data];
+      chart.data.labels = [...labels];
 
       chart.update();
     });
@@ -191,4 +218,15 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     this.menuCtrl.open('filter-menu');
   }
 
+  enviarNotificacion(sensorNombre: string, valor: number) {
+    const payload = {
+      titulo: `Alerta: ${sensorNombre}`,
+      cuerpo: `El valor actual (${valor}) está fuera del rango permitido.`,
+    };
+
+    this.apiService.enviarNotificacion(payload).subscribe({
+      next: () => console.log('🔔 Notificación enviada'),
+      error: err => console.error('❌ Error al enviar notificación', err)
+    });
+  }
 }
