@@ -83,6 +83,8 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
       })
     ).subscribe(
       (response: any) => {
+        console.log('Datos recibidos del backend:', response); // <--- Aquí el console.log
+
         const datos = response?.datos;
         if (!datos || datos.length === 0) {
           console.warn('No hay datos válidos para el estanque:', this.estanqueSeleccionado);
