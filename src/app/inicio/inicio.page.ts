@@ -47,9 +47,9 @@ export class InicioPage implements OnInit {
       if (token) {
         console.log('✅ Token listo:', token);
     
-        this.apiService.registrarToken(token).subscribe({
+        this.apiService.guardarTokenNotificacion(token).subscribe({
           next: () => console.log('📡 Token registrado en backend'),
-          error: (err) => console.error('❌ Error al registrar token:', err)
+          error: (err: any) => console.error('❌ Error al registrar token:', err)
         });
       }
     

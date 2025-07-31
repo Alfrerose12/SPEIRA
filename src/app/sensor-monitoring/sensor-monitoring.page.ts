@@ -47,6 +47,19 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
 
   selectedSensorFilter: string = '';
 
+  sensorLimits: { [key: string]: { min: number, max: number } } = {
+    ph: { min: 6.5, max: 8 },
+    tempWater: { min: 20, max: 30 },
+    tempAmbient: { min: 18, max: 35 },
+    humidity: { min: 40, max: 80 },
+    luminosity: { min: 300, max: 10000 },
+    conductivity: { min: 200, max: 1200 },
+    co2: { min: 400, max: 1000 }
+  };
+
+  // Estado para controlar notificaciones ya enviadas y evitar spam
+  private notifiedSensors: { [key: string]: boolean } = {};
+
   constructor(private apiService: ApiService) { }
 
   ngOnInit() {
@@ -65,34 +78,27 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
         const sumData: { [key: string]: number } = {};
         const countData: { [key: string]: number } = {};
 
-        // Suma y cuenta para promedio
         resumenArray.forEach((estanque) => {
           if (!estanque.datos) return;
-
           Object.entries(estanque.datos).forEach(([key, value]) => {
             if (typeof value !== 'number') return;
-
             if (!sumData[key]) sumData[key] = 0;
             if (!countData[key]) countData[key] = 0;
-
             sumData[key] += value;
             countData[key]++;
           });
         });
 
-        // Calcular promedio
         const avgData: { [key: string]: number } = {};
         Object.keys(sumData).forEach(key => {
           avgData[key] = sumData[key] / countData[key];
         });
 
-        // Timestamp más reciente
         const timestamps = resumenArray
           .map(e => new Date(e.fecha).getTime())
           .filter(t => !isNaN(t));
         const latestTimestamp = timestamps.length ? new Date(Math.max(...timestamps)).toISOString() : new Date().toISOString();
 
-        // Mapeo para gráficas
         const flatData: SensorEntry[] = Object.entries(avgData).map(([key, value]) => {
           let name = '';
           let unit = '';
@@ -120,6 +126,22 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
         });
 
         this.sensorData = flatData;
+
+        // Verifica y controla notificaciones evitando spam
+        flatData.forEach(sensor => {
+          const limit = this.sensorLimits[sensor.key];
+          if (!limit) return;
+
+          const isOutOfRange = sensor.value < limit.min || sensor.value > limit.max;
+
+          if (isOutOfRange && !this.notifiedSensors[sensor.key]) {
+            this.enviarNotificacion(sensor.name, sensor.value);
+            this.notifiedSensors[sensor.key] = true; // Marca como notificado
+          } else if (!isOutOfRange && this.notifiedSensors[sensor.key]) {
+            this.notifiedSensors[sensor.key] = false; // Resetea para futuras alertas
+          }
+        });
+
         this.updateCharts();
       },
       err => console.error('Error obteniendo datos de sensores:', err)
@@ -139,10 +161,7 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
 
   updateCharts() {
     this.availableSensors.forEach(sensor => {
-      // Si hay filtro y este sensor no es el seleccionado, saltamos
-      if (this.selectedSensorFilter && sensor.key !== this.selectedSensorFilter) {
-        return;
-      }
+      if (this.selectedSensorFilter && sensor.key !== this.selectedSensorFilter) return;
 
       const chart = this.sensorCharts[sensor.canvasId];
       if (!chart) return;
@@ -224,5 +243,17 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
   shouldDisplaySensor(sensorKey: string): boolean {
     const allowedKeys = this.availableSensors.map(sensor => sensor.key);
     return allowedKeys.includes(sensorKey);
+  }
+
+  enviarNotificacion(sensorNombre: string, valor: number) {
+    const payload = {
+      titulo: `Alerta: ${sensorNombre}`,
+      cuerpo: `El valor actual (${valor}) está fuera del rango permitido.`,
+    };
+
+    this.apiService.enviarNotificacion(payload).subscribe({
+      next: () => console.log('🔔 Notificación enviada'),
+      error: err => console.error('❌ Error al enviar notificación', err)
+    });
   }
 }
