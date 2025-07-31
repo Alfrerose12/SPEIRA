@@ -38,10 +38,10 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
   availableSensors = [
     { key: 'ph', name: 'pH', unit: 'pH', canvasId: 'phChart', color: '#4caf50' },
     { key: 'TemperaturaAgua', name: 'Temperatura del agua', unit: '°C', canvasId: 'tempWaterChart', color: '#2196f3' },
-    { key: 'TemperaturaAmbiente', name: 'Temperatura ambiente', unit: '°C', canvasId: 'tempAmbientChart', color: '#f44336' },
-    { key: 'Humedad', name: 'Humedad', unit: '%', canvasId: 'humidityChart', color: '#ff9800' },
-    { key: 'Luminosidad', name: 'Luminosidad', unit: 'lux', canvasId: 'lightChart', color: '#9c27b0' },
-    { key: 'Conductividad', name: 'Conductividad eléctrica', unit: 'µS/cm', canvasId: 'conductivityChart', color: '#3f51b5' },
+    { key: 'temperaturaAmbiente', name: 'Temperatura ambiente', unit: '°C', canvasId: 'tempAmbientChart', color: '#f44336' },
+    { key: 'humedad', name: 'Humedad', unit: '%', canvasId: 'humidityChart', color: '#ff9800' },
+    { key: 'luminosidad', name: 'Luminosidad', unit: 'lux', canvasId: 'lightChart', color: '#9c27b0' },
+    { key: 'conductividad', name: 'Conductividad eléctrica', unit: 'µS/cm', canvasId: 'conductivityChart', color: '#3f51b5' },
     { key: 'co2', name: 'CO₂', unit: 'ppm', canvasId: 'co2Chart', color: '#009688' }
   ];
 
