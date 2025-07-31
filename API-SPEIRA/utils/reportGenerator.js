@@ -50,11 +50,11 @@ function agregarEncabezado(doc, periodo, fechaStr, fechaInicio, fechaFin) {
 
 function promedio(valores) {
   if (!valores || valores.length === 0) return 0;
-  
+
   const valoresNumericos = valores.filter(v => typeof v === 'number' && !isNaN(v));
-  
+
   if (valoresNumericos.length === 0) return 0;
-  
+
   return valoresNumericos.reduce((a, b) => a + b, 0) / valoresNumericos.length;
 }
 
@@ -74,7 +74,7 @@ function agruparPorDia(datos) {
   datos.forEach(dato => {
     if (!dato.estanque) return;
 
-    const hora = moment(dato.fecha).tz(ZONA_HORARIA).startOf('hour').format(); 
+    const hora = moment(dato.fecha).tz(ZONA_HORARIA).startOf('hour').format();
 
     if (!datosAgrupados[hora]) {
       datosAgrupados[hora] = {
@@ -97,9 +97,9 @@ function agruparPorDia(datos) {
     datosAgrupados[hora].luminosidad = sumarSegura(datosAgrupados[hora].luminosidad, dato.luminosidad);
     datosAgrupados[hora].conductividadElectrica = sumarSegura(datosAgrupados[hora].conductividadElectrica, dato.conductividadElectrica);
     datosAgrupados[hora].co2 = sumarSegura(datosAgrupados[hora].co2, dato.co2);
-    
-    if ([dato.ph, dato.temperaturaAgua, dato.temperaturaAmbiente, dato.humedad, 
-         dato.luminosidad, dato.conductividadElectrica, dato.co2].some(v => typeof v === 'number' && !isNaN(v))) {
+
+    if ([dato.ph, dato.temperaturaAgua, dato.temperaturaAmbiente, dato.humedad,
+    dato.luminosidad, dato.conductividadElectrica, dato.co2].some(v => typeof v === 'number' && !isNaN(v))) {
       datosAgrupados[hora].count++;
     }
   });
@@ -127,11 +127,11 @@ function agruparPorSemana(datos) {
     const fechaDato = moment(dato.fecha).tz(ZONA_HORARIA);
     const lunesSemana = fechaDato.clone().startOf('week').format('YYYY-MM-DD');
     const clave = `${lunesSemana}_${dato.estanque.nombre}`;
-    
+
     if (!agrupados[clave]) {
-      agrupados[clave] = { 
-        estanque: dato.estanque.nombre, 
-        datos: [] 
+      agrupados[clave] = {
+        estanque: dato.estanque.nombre,
+        datos: []
       };
     }
     agrupados[clave].datos.push(dato);
@@ -161,11 +161,11 @@ function agruparPorMes(datos) {
 
     const dia = moment(dato.fecha).tz(ZONA_HORARIA).format('YYYY-MM-DD');
     const clave = `${dia}_${dato.estanque.nombre}`;
-    
+
     if (!agrupados[clave]) {
-      agrupados[clave] = { 
-        estanque: dato.estanque.nombre, 
-        datos: [] 
+      agrupados[clave] = {
+        estanque: dato.estanque.nombre,
+        datos: []
       };
     }
     agrupados[clave].datos.push(dato);
@@ -195,11 +195,11 @@ function agruparPorAnio(datos) {
 
     const mes = moment(dato.fecha).tz(ZONA_HORARIA).format('YYYY-MM');
     const clave = `${mes}_${dato.estanque.nombre}`;
-    
+
     if (!agrupados[clave]) {
-      agrupados[clave] = { 
-        estanque: dato.estanque.nombre, 
-        datos: [] 
+      agrupados[clave] = {
+        estanque: dato.estanque.nombre,
+        datos: []
       };
     }
     agrupados[clave].datos.push(dato);
@@ -224,10 +224,10 @@ function agruparPorAnio(datos) {
 
 exports.generarReporte = async (periodo, fechaStr, nombreEstanqueFiltrado = null) => {
   try {
-    const doc = new PDFDocument({ 
-      margin: 20, 
-      size: 'A4', 
-      bufferPages: true 
+    const doc = new PDFDocument({
+      margin: 20,
+      size: 'A4',
+      bufferPages: true
     });
 
     const rutaReportes = path.join(__dirname, '../reportes', periodo);
@@ -250,22 +250,23 @@ exports.generarReporte = async (periodo, fechaStr, nombreEstanqueFiltrado = null
       .cursor();
 
     for await (const dato of datosCursor) {
-      if (!dato.estanque) {
-        console.warn('Registro sin estanque encontrado:', dato._id);
+      if (!dato.estanque || !dato.estanque.nombre) {
+        console.warn('Registro sin estanque o sin nombre encontrado:', dato._id);
         continue;
       }
 
-      if (nombreEstanqueFiltrado && dato.estanque.nombre !== nombreEstanqueFiltrado) {
+      const nombreEstanque = dato.estanque.nombre.trim().toLowerCase();
+      const nombreFiltrado = nombreEstanqueFiltrado?.trim().toLowerCase();
+
+      if (nombreEstanqueFiltrado && nombreEstanque !== nombreFiltrado) {
         continue;
       }
 
-      const nombreEstanque = dato.estanque.nombre;
-
-      if (!datosPorEstanque[nombreEstanque]) {
-        datosPorEstanque[nombreEstanque] = [];
+      if (!datosPorEstanque[dato.estanque.nombre]) {
+        datosPorEstanque[dato.estanque.nombre] = [];
       }
 
-      datosPorEstanque[nombreEstanque].push(dato);
+      datosPorEstanque[dato.estanque.nombre].push(dato);
       contador++;
 
       if (contador % BATCH_SIZE === 0) {
@@ -273,6 +274,7 @@ exports.generarReporte = async (periodo, fechaStr, nombreEstanqueFiltrado = null
         console.log(`Procesados ${contador} registros... Memoria: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
       }
     }
+
 
     if (contador === 0) {
       throw new Error('No hay datos para el período y estanque seleccionado');
