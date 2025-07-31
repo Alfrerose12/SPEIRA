@@ -25,7 +25,7 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
 
   sensorData: SensorEntry[] = [];
   dataSubscription!: Subscription;
-  refreshInterval = 10000;
+  refreshInterval = 2000;
   sensorCharts: { [key: string]: Chart } = {};
 
   availableSensors = [
@@ -116,27 +116,30 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateCharts() {
-    // Sin cambio: actualizar las gráficas con los datos nuevos
     this.availableSensors.forEach(sensor => {
       const chart = this.sensorCharts[sensor.canvasId];
       if (!chart) return;
-
+  
       const latest = this.sensorData.find(d => d.key === sensor.key);
       if (!latest) return;
-
+  
       const dataset = chart.data.datasets[0];
       const data = dataset.data as number[];
-
+      const labels = chart.data.labels as string[];
+  
       data.push(latest.value);
       if (data.length > 30) data.shift();
-
-      const labels = chart.data.labels as string[];
-      labels.push(new Date(latest.timestamp).toLocaleTimeString());
+  
+      labels.push(new Date(latest.timestamp).toLocaleTimeString('es-MX', { timeZone: 'America/Mexico_City', hour12: false }));
       if (labels.length > 30) labels.shift();
-
+  
+      dataset.data = [...data];
+      chart.data.labels = [...labels];
+  
       chart.update();
     });
   }
+  
 
   createChart(canvasId: string, label: string, color: string) {
     // Sin cambio: creación inicial del gráfico Chart.js
