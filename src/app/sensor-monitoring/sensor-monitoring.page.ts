@@ -106,11 +106,11 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
 
           switch (key) {
             case 'ph': name = 'pH'; unit = 'pH'; finalKey = 'ph'; break;
-            case 'temperaturaAgua': name = 'Temperatura del agua'; unit = '°C'; finalKey = 'tempWater'; break;
-            case 'temperaturaAmbiente': name = 'Temperatura ambiente'; unit = '°C'; finalKey = 'tempAmbient'; break;
-            case 'humedad': name = 'Humedad'; unit = '%'; finalKey = 'humidity'; break;
-            case 'luminosidad': name = 'Luminosidad'; unit = 'lux'; finalKey = 'luminosity'; break;
-            case 'conductividadElectrica': name = 'Conductividad eléctrica'; unit = 'µS/cm'; finalKey = 'conductivity'; break;
+            case 'tempWater': name = 'Temperatura del agua'; unit = '°C'; finalKey = 'tempWater'; break;
+            case 'tempAmbient': name = 'Temperatura ambiente'; unit = '°C'; finalKey = 'tempAmbient'; break;
+            case 'humidity': name = 'Humedad'; unit = '%'; finalKey = 'humidity'; break;
+            case 'luminosity': name = 'Luminosidad'; unit = 'lux'; finalKey = 'luminosity'; break;
+            case 'conductivity': name = 'Conductividad eléctrica'; unit = 'µS/cm'; finalKey = 'conductivity'; break;
             case 'co2': name = 'CO₂'; unit = 'ppm'; finalKey = 'co2'; break;
             default: name = key; finalKey = key; unit = ''; break;
           }
