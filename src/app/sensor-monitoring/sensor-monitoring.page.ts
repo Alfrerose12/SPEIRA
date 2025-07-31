@@ -47,6 +47,9 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
       switchMap(() => this.apiService.getSensorGeneralData())
     ).subscribe(
       (response: any) => {
+
+        console.log('Respuesta backend completa:', response);  // <--- Aquí lo puse
+
         // CAMBIO: Adaptar a la nueva estructura del backend, que ahora devuelve un arreglo de estanques en 'resumen'
         const resumenArray = response?.resumen;
         // CAMBIO: Si no hay estanques, regresamos un warning y salimos
