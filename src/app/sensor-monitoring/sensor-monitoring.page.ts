@@ -37,24 +37,24 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
 
   availableSensors = [
     { key: 'ph', name: 'pH', unit: 'pH', canvasId: 'phChart', color: '#4caf50' },
-    { key: 'tempWater', name: 'Temperatura del agua', unit: '°C', canvasId: 'tempWaterChart', color: '#2196f3' },
-    { key: 'tempAmbient', name: 'Temperatura ambiente', unit: '°C', canvasId: 'tempAmbientChart', color: '#f44336' },
-    { key: 'humidity', name: 'Humedad', unit: '%', canvasId: 'humidityChart', color: '#ff9800' },
-    { key: 'luminosity', name: 'Luminosidad', unit: 'lux', canvasId: 'lightChart', color: '#9c27b0' },
-    { key: 'conductivity', name: 'Conductividad eléctrica', unit: 'µS/cm', canvasId: 'conductivityChart', color: '#3f51b5' },
+    { key: 'TemperaturaAgua', name: 'Temperatura del agua', unit: '°C', canvasId: 'tempWaterChart', color: '#2196f3' },
+    { key: 'TemperaturaAmbiente', name: 'Temperatura ambiente', unit: '°C', canvasId: 'tempAmbientChart', color: '#f44336' },
+    { key: 'Humedad', name: 'Humedad', unit: '%', canvasId: 'humidityChart', color: '#ff9800' },
+    { key: 'Luminosidad', name: 'Luminosidad', unit: 'lux', canvasId: 'lightChart', color: '#9c27b0' },
+    { key: 'Conductividad', name: 'Conductividad eléctrica', unit: 'µS/cm', canvasId: 'conductivityChart', color: '#3f51b5' },
     { key: 'co2', name: 'CO₂', unit: 'ppm', canvasId: 'co2Chart', color: '#009688' }
   ];
 
   selectedSensorFilter: string = '';
 
   sensorLimits: { [key: string]: { min: number, max: number } } = {
-    ph: { min: 6.5, max: 8 },
-    tempWater: { min: 20, max: 30 },
-    tempAmbient: { min: 18, max: 35 },
-    humidity: { min: 40, max: 80 },
-    luminosity: { min: 300, max: 10000 },
-    conductivity: { min: 200, max: 1200 },
-    co2: { min: 400, max: 1000 }
+    ph: { min: 8, max: 11 },
+    TemperaturaAgua: { min: 10, max: 50 },
+    TemperaturaAmbiente: { min: 15, max: 50 },
+    Humedad: { min: 20, max: 100 },
+    Luminosidad: { min: 2000, max: 50000 },
+    Conductividad: { min: 5, max: 20 },
+    co2: { min: 3, max: 18 }
   };
 
   // Estado para controlar notificaciones ya enviadas y evitar spam
