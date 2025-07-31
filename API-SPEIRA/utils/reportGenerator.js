@@ -222,7 +222,7 @@ function agruparPorAnio(datos) {
   });
 }
 
-exports.generarReporte = async (periodo, fechaStr) => {
+exports.generarReporte = async (periodo, fechaStr, nombreEstanqueFiltrado = null) => {
   try {
     const doc = new PDFDocument({ 
       margin: 20, 
@@ -254,13 +254,17 @@ exports.generarReporte = async (periodo, fechaStr) => {
         console.warn('Registro sin estanque encontrado:', dato._id);
         continue;
       }
-      
+
+      if (nombreEstanqueFiltrado && dato.estanque.nombre !== nombreEstanqueFiltrado) {
+        continue;
+      }
+
       const nombreEstanque = dato.estanque.nombre;
-      
+
       if (!datosPorEstanque[nombreEstanque]) {
         datosPorEstanque[nombreEstanque] = [];
       }
-      
+
       datosPorEstanque[nombreEstanque].push(dato);
       contador++;
 
@@ -271,7 +275,7 @@ exports.generarReporte = async (periodo, fechaStr) => {
     }
 
     if (contador === 0) {
-      throw new Error('No hay datos para el período seleccionado');
+      throw new Error('No hay datos para el período y estanque seleccionado');
     }
 
     console.log(`Total de registros procesados: ${contador}`);
@@ -307,7 +311,7 @@ exports.generarReporte = async (periodo, fechaStr) => {
           console.log('PDF generado exitosamente');
           resolve(rutaArchivo);
         });
-        
+
         stream.on('error', (error) => {
           console.error('Error en el stream de escritura:', error);
           doc.end();
@@ -420,7 +424,7 @@ exports.generarReporte = async (periodo, fechaStr) => {
 
             for (let i = 0; i < datosEstanque.length; i += CHUNK_SIZE) {
               const chunk = datosEstanque.slice(i, i + CHUNK_SIZE);
-              
+
               const tabla = {
                 headers: configColumnas.map(col => col.label),
                 rows: chunk.map(item => configColumnas.map(col => col.format(item[col.key])))
@@ -440,7 +444,7 @@ exports.generarReporte = async (periodo, fechaStr) => {
 
               if (i + CHUNK_SIZE < datosEstanque.length) {
                 await new Promise(resolve => setImmediate(resolve));
-                console.log(`Procesando chunk ${i}-${i+CHUNK_SIZE} de ${datosEstanque.length}...`);
+                console.log(`Procesando chunk ${i}-${i + CHUNK_SIZE} de ${datosEstanque.length}...`);
               }
             }
           }
