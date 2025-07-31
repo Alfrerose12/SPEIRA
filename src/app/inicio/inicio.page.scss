@@ -192,7 +192,7 @@ ion-label {
   .welcome-text { font-size: 1.2rem; margin: 15px 10px; }
   .btn { font-size: 13px; padding: 8px 14px; }
   .action-buttons { margin-top: 40px; gap: 12px; }
-   .hamburger-menu {
+  .hamburger-menu {
     display: flex;
     padding: 2px 4px;
     
@@ -217,4 +217,19 @@ ion-label {
   .welcome-text { font-size: 1.1rem; margin: 10px 8px; }
   .btn { font-size: 12px; padding: 7px 12px; }
   .action-buttons { margin-top: 30px; gap: 10px; flex-direction: column; align-items: center; }
+}
+
+@media (min-width: 769px) {
+  .btn {
+    font-size: 1.1rem;           /* Tamaño base más grande */
+    padding: 14px 24px;          /* Padding más generoso */
+    border-radius: 10px;         /* Bordes un poco más suaves */
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    transform: scale(1);         /* Escala normal */
+  }
+
+  .btn:hover {
+    transform: scale(1.15);      /* Crece 15% al pasar el mouse */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Sombra para efecto destacado */
+  }
 }

@@ -1,0 +1,303 @@
+@use "sass:math";
+
+ion-content.cajas-content {
+  --background: linear-gradient(135deg, #0e6d2d 0%, #005ea7 100%);
+  position: relative;
+  overflow: hidden;
+
+  .loading-overlay,
+  .error-message {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 100;
+    color: white;
+
+    ion-spinner {
+      width: 48px;
+      height: 48px;
+      --color: white;
+    }
+
+    p {
+      margin-top: 16px;
+      font-size: 1.1em;
+    }
+  }
+
+  .error-message {
+    ion-icon {
+      font-size: 48px;
+      color: #ff6b6b;
+      margin-bottom: 16px;
+    }
+
+    p {
+      color: #ff6b6b;
+      text-align: center;
+      padding: 0 20px;
+    }
+  }
+
+  .content-wrapper {
+    position: relative;
+    z-index: 1;
+    padding: 16px;
+    height: 100%;
+  }
+
+  .bubbles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+
+    span {
+      position: absolute;
+      display: block;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: floatBubbles 15s linear infinite;
+      bottom: -100px;
+      will-change: transform;
+      opacity: 0;
+
+      @for $i from 1 through 10 {
+        &:nth-child(#{$i}) {
+          left: math.random(90) + 5%;
+          width: math.random(30) + 20px;
+          animation-delay: math.random(10) + s;
+          animation-duration: math.random(15) + 10s;
+        }
+      }
+    }
+  }
+
+  @keyframes floatBubbles {
+    0% {
+      transform: translateY(0) scale(0.8);
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 0.6;
+    }
+    100% {
+      transform: translateY(-100vh) scale(1.2);
+      opacity: 0;
+    }
+  }
+
+  ion-card {
+    border-radius: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.9);
+
+    ion-card-header {
+      padding-bottom: 0;
+
+      ion-card-title {
+        display: flex;
+        align-items: center;
+        font-size: 1.2em;
+        font-weight: 600;
+        color: var(--ion-color-primary);
+
+        ion-icon {
+          margin-right: 8px;
+        }
+      }
+    }
+
+    ion-card-content {
+      padding-top: 8px;
+    }
+  }
+
+  .filter-button-wrapper-right {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .filter-button {
+    border-radius: 24px;
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+
+    ion-grid {
+      width: 100%;
+      min-width: 600px;
+
+      .table-header {
+        font-weight: bold;
+        background: var(--ion-color-light);
+        border-bottom: 2px solid var(--ion-color-medium);
+
+        ion-col {
+          padding: 12px 8px;
+        }
+      }
+
+      .table-row {
+        border-bottom: 1px solid var(--ion-color-light-shade);
+        transition: background 0.2s;
+
+        &:nth-child(even) {
+          background: rgba(var(--ion-color-light-rgb), 0.4);
+        }
+
+        &:hover {
+          background: rgba(var(--ion-color-primary-rgb), 0.1);
+        }
+
+        ion-col {
+          padding: 10px 8px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+
+    .chart-container {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      .chart-header {
+        margin-bottom: 12px;
+
+        h3 {
+          margin: 0;
+          font-size: 1em;
+          color: var(--ion-color-dark);
+          font-weight: 500;
+        }
+      }
+
+      .chart-wrapper {
+        position: relative;
+        height: 200px;
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+
+        &::-webkit-scrollbar {
+          height: 8px;
+        }
+        &::-webkit-scrollbar-thumb {
+          background-color: rgba(0, 0, 0, 0.3);
+          border-radius: 4px;
+        }
+        &::-webkit-scrollbar-track {
+          background: transparent;
+        }
+      }
+    }
+  }
+
+  // 🔙 Botón regresar escritorio
+  .return-button-wrapper {
+    display: flex;
+    justify-content: flex-start;
+    padding: 0 16px 8px;
+
+    .return-button {
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 1em;
+      --border-color: var(--ion-color-primary);
+      --color: var(--ion-color-primary);
+      --background: transparent;
+
+      ion-icon {
+        margin-right: 8px;
+      }
+    }
+  }
+
+  // 🔙 Botón flotante circular para móvil (se superpone en el mismo lugar)
+  .return-button-wrapper.mobile-fab {
+    display: none;
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 999;
+
+    .return-button {
+      border-radius: 50% !important;
+      width: 56px;
+      height: 56px;
+      padding: 0;
+      font-size: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      --background: var(--ion-color-primary);
+      --color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+      ion-icon {
+        margin: 0;
+        font-size: 28px;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .chart-grid {
+      grid-template-columns: 1fr;
+    }
+
+    ion-card {
+      margin-bottom: 12px;
+    }
+
+    .bubbles span {
+      animation-duration: 20s !important;
+    }
+
+    // Oculta el botón normal en móvil
+    .return-button-wrapper:not(.mobile-fab) {
+      display: none !important;
+    }
+
+    // Muestra el botón flotante circular en móvil
+    .return-button-wrapper.mobile-fab {
+      display: flex !important;
+    }
+  }
+}

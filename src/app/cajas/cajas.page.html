@@ -1,13 +1,142 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>cajas</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">cajas</ion-title>
+<ion-menu side="start" menuId="filter-menu" contentId="main-content">
+  <ion-header>
+    <ion-toolbar color="primary">
+      <ion-title>Filtro de Sensores</ion-title>
     </ion-toolbar>
   </ion-header>
+  <ion-content>
+    <ion-segment [(ngModel)]="selectedSensorFilter" color="primary">
+      <ion-segment-button value="">
+        <ion-label>Todos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button *ngFor="let sensor of availableSensors" [value]="sensor.key">
+        <ion-label>{{ sensor.name }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-content>
+</ion-menu>
+
+<ion-content id="main-content" class="cajas-content">
+
+  <!-- Botón flotante para filtro alineado a la derecha -->
+  <div class="filter-button-wrapper-right">
+    <ion-button (click)="openMenu()" fill="solid" class="filter-button" title="Filtrar sensores">
+      <ion-icon slot="start" name="options-outline"></ion-icon>
+      Filtrado de Sensores
+    </ion-button>
+  </div>
+
+      <!-- Botón Regresar al Inicio -->
+      <div class="return-button-wrapper desktop-only">
+        <ion-button routerLink="/inicio" fill="outline" class="return-button" title="Volver al inicio">
+          <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+          Regresar al Inicio
+        </ion-button>
+      </div>
+
+<!-- Botón Regresar al Inicio - Móvil (Botón flotante circular) -->
+<div class="return-button-wrapper mobile-fab">
+  <ion-button routerLink="/inicio" class="return-button" title="Volver al inicio">
+    <ion-icon name="arrow-back-outline"></ion-icon>
+  </ion-button>
+</div>
+
+  <!-- Card: Selector de Caja -->
+  <ion-card class="estanque-selector-card">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="cube-outline"></ion-icon> Selección de Caja
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item lines="none">
+        <ion-label position="stacked">Caja</ion-label>
+        <ion-select [(ngModel)]="cajaSeleccionada" (ionChange)="onCajaChange()" interface="popover">
+          <ion-select-option *ngFor="let caja of cajasDisponibles" [value]="caja">
+            {{ caja }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Decoración: burbujas -->
+  <div class="bubbles">
+    <span *ngFor="let bubble of [1,2,3,4,5,6,7,8,9,10]"></span>
+  </div>
+
+  <div class="content-wrapper">
+
+    <!-- Card: Tabla de sensores en tiempo real -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="time-outline"></ion-icon> Datos en Tiempo Real
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row class="table-header">
+            <ion-col size="4"><strong>Nombre</strong></ion-col>
+            <ion-col size="4"><strong>Valor</strong></ion-col>
+            <ion-col size="4"><strong>Unidad</strong></ion-col>
+          </ion-row>
+          <ion-row *ngFor="let sensor of sensorData" [hidden]="!shouldDisplaySensor(sensor.key)">
+            <ion-col size="4">{{ sensor.name }}</ion-col>
+            <ion-col size="4">{{ sensor.value | number:'1.2-2' }}</ion-col>
+            <ion-col size="4">{{ sensor.unit }}</ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Card: Gráficos históricos -->
+    <ion-card class="charts-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="bar-chart-outline"></ion-icon> Histórico de Sensores
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="chart-grid">
+
+          <div class="chart-container" *ngIf="shouldDisplaySensor('ph')">
+            <div class="chart-header"><h3>pH</h3></div>
+            <div class="chart-wrapper"><canvas id="phChart"></canvas></div>
+          </div>
+
+          <div class="chart-container" *ngIf="shouldDisplaySensor('tempWater')">
+            <div class="chart-header"><h3>Temperatura del Agua (°C)</h3></div>
+            <div class="chart-wrapper"><canvas id="tempWaterChart"></canvas></div>
+          </div>
+
+          <div class="chart-container" *ngIf="shouldDisplaySensor('tempAmbient')">
+            <div class="chart-header"><h3>Temperatura Ambiental (°C)</h3></div>
+            <div class="chart-wrapper"><canvas id="tempAmbientChart"></canvas></div>
+          </div>
+
+          <div class="chart-container" *ngIf="shouldDisplaySensor('humidity')">
+            <div class="chart-header"><h3>Humedad (%)</h3></div>
+            <div class="chart-wrapper"><canvas id="humidityChart"></canvas></div>
+          </div>
+
+          <div class="chart-container" *ngIf="shouldDisplaySensor('luminosity')">
+            <div class="chart-header"><h3>Luminosidad (lux)</h3></div>
+            <div class="chart-wrapper"><canvas id="lightChart"></canvas></div>
+          </div>
+
+          <div class="chart-container" *ngIf="shouldDisplaySensor('conductivity')">
+            <div class="chart-header"><h3>Conductividad Eléctrica (µS/cm)</h3></div>
+            <div class="chart-wrapper"><canvas id="conductivityChart"></canvas></div>
+          </div>
+
+          <div class="chart-container" *ngIf="shouldDisplaySensor('co2')">
+            <div class="chart-header"><h3>CO₂ (ppm)</h3></div>
+            <div class="chart-wrapper"><canvas id="co2Chart"></canvas></div>
+          </div>
+
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>

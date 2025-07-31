@@ -48,5 +48,14 @@
     actualizarUsuario(data: { email?: string; password?: string; nombre?: string }): Observable<any> {
       return this.http.put(`${this.baseUrl}/usuario/actualizar`, data, { withCredentials: true });
     }
+
+    getCajasDisponibles() {
+      return this.http.get<{nombre: string}[]>(`${this.baseUrl}/cajas`);
+    }
+    
+    getCajaData(nombreCaja: string) {
+      return this.http.get<any>(`${this.baseUrl}/cajas/${nombreCaja}/datos`);
+    }
+    
     
   }

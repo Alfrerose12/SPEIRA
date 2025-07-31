@@ -7,10 +7,7 @@ ion-content.estanques-content {
 
   .loading-overlay, .error-message {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -125,10 +122,11 @@ ion-content.estanques-content {
   }
 
   .filter-button-wrapper {
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    z-index: 9999;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
   }
 
   .filter-button {
