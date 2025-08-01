@@ -28,18 +28,18 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   sensorData: SensorEntry[] = [];
   dataSubscription!: Subscription;
-  refreshInterval = 2000; // igual que sensor-monitoring
+  refreshInterval = 2000;
   sensorCharts: { [key: string]: Chart } = {};
 
   selectedSensorFilter: string = '';
 
   availableSensors = [
     { key: 'ph', name: 'pH', unit: 'pH', canvasId: 'phChart', color: '#4caf50' },
-    { key: 'temperaturaAgua', name: 'Temperatura del agua', unit: '°C', canvasId: 'tempWaterChart', color: '#2196f3' },
-    { key: 'temperaturaAmbiente', name: 'Temperatura ambiente', unit: '°C', canvasId: 'tempAmbientChart', color: '#f44336' },
+    { key: 'temperaturaAgua', name: 'Temperatura del Agua', unit: '°C', canvasId: 'tempWaterChart', color: '#2196f3' },
+    { key: 'temperaturaAmbiente', name: 'Temperatura Ambiente', unit: '°C', canvasId: 'tempAmbientChart', color: '#f44336' },
     { key: 'humedad', name: 'Humedad', unit: '%', canvasId: 'humidityChart', color: '#ff9800' },
     { key: 'luminosidad', name: 'Luminosidad', unit: 'lux', canvasId: 'lightChart', color: '#9c27b0' },
-    { key: 'conductividadElectrica', name: 'Conductividad eléctrica', unit: 'µS/cm', canvasId: 'conductivityChart', color: '#3f51b5' },
+    { key: 'conductividadElectrica', name: 'Conductividad Eléctrica', unit: 'µS/cm', canvasId: 'conductivityChart', color: '#3f51b5' },
     { key: 'co2', name: 'CO₂', unit: 'ppm', canvasId: 'co2Chart', color: '#009688' }
   ];
 
@@ -55,7 +55,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   private notifiedSensors: { [key: string]: boolean } = {};
 
-  constructor(private apiService: ApiService, private menuCtrl: MenuController) {}
+  constructor(private apiService: ApiService, private menuCtrl: MenuController) { }
 
   ngOnInit() {
     this.apiService.getEstanquesDisponibles().subscribe({
@@ -99,7 +99,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
             name: sensor.name,
             value: lastValid ? Number(lastValid[sensor.key]) : 0,
             unit: sensor.unit,
-            timestamp: lastValid ? lastValid.timestamp : new Date().toISOString(),
+            timestamp: lastValid?.updatedAt || lastValid?.fecha || new Date().toISOString(),
             key: sensor.key
           };
         });
@@ -139,8 +139,20 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onEstanqueChange() {
+    // Limpia datos previos
+    this.sensorData = [];
+
+    // Limpia los datos de los gráficos
+    Object.values(this.sensorCharts).forEach(chart => {
+      chart.data.labels = [];
+      chart.data.datasets.forEach(dataset => dataset.data = []);
+      chart.update();
+    });
+
+    // Reinicia el monitoreo del estanque seleccionado
     this.iniciarMonitorEstanque();
   }
+
 
   updateCharts() {
     this.availableSensors.forEach(sensor => {
@@ -223,20 +235,20 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
   // Cambio aquí: enviarNotificacion ahora arma payload para backend con titulo y cuerpo
   enviarNotificacion(sensorNombre: string, valor: number) {
     const token = localStorage.getItem('fcmToken'); // 🔽 tomamos el token guardado
-  
+
     if (!token) {
       console.warn('⚠️ No se encontró token FCM en localStorage');
       return;
     }
-  
+
     const payload = {
       titulo: `Alerta: ${sensorNombre}`,
       cuerpo: `El valor actual (${valor.toString()}) está fuera del rango permitido.`,
       token
     };
-  
+
     console.log('👉 Payload que se enviará:', payload);
-  
+
     this.apiService.enviarNotificacion(payload).subscribe({
       next: (response) => {
         console.log('✅ Notificación enviada con éxito:', response);
@@ -247,6 +259,6 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
       }
     });
   }
-  
-  
+
+
 }
