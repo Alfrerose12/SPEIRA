@@ -99,7 +99,7 @@ exports.iniciarSesion = async (req, res) => {
     const usuario = await Usuario.findOne({
       $or: [
         email ? { email } : null,
-        nombre ? { nombre } : null
+        nombre ? { nombre: { $regex: new RegExp(`^${nombre}$`, 'i') } } : null
       ].filter(Boolean)
     });
 
@@ -145,7 +145,6 @@ exports.iniciarSesion = async (req, res) => {
     res.status(500).json({ error: 'Error al iniciar sesión', detalles: err.message });
   }
 };
-
 
 
 exports.obtenerUsuarios = async (req, res) => {
