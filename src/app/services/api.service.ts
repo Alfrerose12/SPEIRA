@@ -68,4 +68,4 @@ export class ApiService {
   enviarNotificacion(payload: { titulo: string; cuerpo: string; token?: string }): Observable<any> {
     return this.http.post(`${this.baseUrl}/notificaciones`, payload);
   }
-}
+
