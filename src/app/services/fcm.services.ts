@@ -62,7 +62,6 @@ export class FcmService {
 
     onMessage(this.messaging, (payload) => {
       console.log('📩 Mensaje recibido en primer plano:', payload);
-      // Puedes mostrar alerta, actualizar UI, etc.
       alert(`🔔 ${payload.notification?.title}\n${payload.notification?.body}`);
     });
   }

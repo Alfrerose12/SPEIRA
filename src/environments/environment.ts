@@ -10,6 +10,6 @@ export const environment = {
     appId: "1:405388809495:web:d2d8cde904c3f4e3ec5352",
     measurementId: "G-DWJCN7HR3Y"
   },
-  messagingPublicKey: 'BNctf7zQoi75ZkCccfJQyWF4ObxHVIVDHVg06W1SrV8_4e-wHcnguwLYXR0Qp3DnWyRVoxPpnrT9wINPm3UG7P0',
+  messagingPublicKey: 'BEoRVFWZJfSLaOY4gcvJL6P1x5rSEfbFPspDph1craPCMOnrjjHTRTO0Ux_Ys1OU8g5RBsxL_H0Ko2t1TA5ZFDo',
   serviceWorker: false
 };
