@@ -59,7 +59,7 @@ export class ApiService {
    * Guarda el token de notificaciones en el backend
    */
   guardarTokenNotificacion(token: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/notificaciones/token`, { token });
+    return this.http.post(`${this.baseUrl}/token`, { token });
   }
 
   /**
