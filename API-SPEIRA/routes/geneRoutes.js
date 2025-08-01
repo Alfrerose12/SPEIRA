@@ -32,7 +32,7 @@ const {
   enviarNotificacion
 } = require('../controllers/notificationController');
 
-router.post('/notificaciones/token', guardarToken);
+router.post('/token', guardarToken);
 router.post('/notificaciones', enviarNotificacion);
 
 router.post('/datos',  crearDato);
