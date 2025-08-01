@@ -28,7 +28,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   sensorData: SensorEntry[] = [];
   dataSubscription!: Subscription;
-  refreshInterval = 2000;
+  refreshInterval = 5000;
   sensorCharts: { [key: string]: Chart } = {};
 
   selectedSensorFilter: string = '';
