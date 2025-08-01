@@ -65,7 +65,7 @@ export class ApiService {
   /**
    * Envía una notificación push manual desde el frontend (admin)
    */
-  enviarNotificacion(payload: { titulo: string; cuerpo: string }): Observable<any> {
+  enviarNotificacion(payload: { titulo: string; cuerpo: string; token?: string }): Observable<any> {
     return this.http.post(`${this.baseUrl}/notificaciones`, payload);
   }
 }

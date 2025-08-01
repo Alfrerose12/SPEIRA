@@ -114,7 +114,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
           const isOutOfRange = sensor.value < limit.min || sensor.value > limit.max;
 
           if (isOutOfRange && !this.notifiedSensors[sensor.key]) {
-            this.enviarNotificacion(sensor.name, sensor.value);
+            this.enviarNotificacion(sensor.name, sensor.value);  // <-- Cambio aquí para usar objeto payload
             this.notifiedSensors[sensor.key] = true;
           } else if (!isOutOfRange && this.notifiedSensors[sensor.key]) {
             this.notifiedSensors[sensor.key] = false;
@@ -220,10 +220,11 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     this.menuCtrl.open('filter-menu');
   }
 
+  // Cambio aquí: enviarNotificacion ahora arma payload para backend con titulo y cuerpo
   enviarNotificacion(sensorNombre: string, valor: number) {
     const payload = {
       titulo: `Alerta: ${sensorNombre}`,
-      cuerpo: `El valor actual (${valor}) está fuera del rango permitido.`,
+      cuerpo: `El valor actual (${valor.toString()}) está fuera del rango permitido.`,
     };
 
     this.apiService.enviarNotificacion(payload).subscribe({

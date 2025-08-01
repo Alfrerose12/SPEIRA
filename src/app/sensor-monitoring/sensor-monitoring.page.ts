@@ -129,7 +129,7 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
           const isOutOfRange = sensor.value < limit.min || sensor.value > limit.max;
 
           if (isOutOfRange && !this.notifiedSensors[sensor.key]) {
-            this.enviarNotificacion(sensor.name, sensor.value);
+            this.enviarNotificacion(sensor.name, sensor.value); // <-- Cambiado para enviar correctamente
             this.notifiedSensors[sensor.key] = true;
           } else if (!isOutOfRange && this.notifiedSensors[sensor.key]) {
             this.notifiedSensors[sensor.key] = false;
@@ -238,10 +238,12 @@ export class SensorMonitoringPage implements OnInit, OnDestroy, AfterViewInit {
     return this.availableSensors.some(sensor => sensor.key === sensorKey);
   }
 
-  enviarNotificacion(sensorNombre: string, valor: number) {
+  // Adaptación: enviarNotificacion ahora recibe titulo y cuerpo (valor convertido a string)
+  enviarNotificacion(titulo: string, valor: number, token?: string) {
     const payload = {
-      titulo: `Alerta: ${sensorNombre}`,
-      cuerpo: `El valor actual (${valor}) está fuera del rango permitido.`,
+      titulo,
+      cuerpo: `El valor actual (${valor.toString()}) está fuera del rango permitido.`,
+      ...(token ? { token } : {})
     };
 
     this.apiService.enviarNotificacion(payload).subscribe({
