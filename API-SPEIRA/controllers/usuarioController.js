@@ -89,23 +89,27 @@ exports.eliminarUsuario = async (req, res) => {
 };
 
 exports.iniciarSesion = async (req, res) => {
-
   const { email, nombre, password } = req.body;
-  
-  try {
 
-    const usuario = await Usuario.findOne(email ? { email } : { nombre });
+  try {
+    if (!password || (!email && !nombre)) {
+      return res.status(400).json({ error: 'Faltan credenciales' });
+    }
+
+    const usuario = await Usuario.findOne({
+      $or: [
+        email ? { email } : null,
+        nombre ? { nombre } : null
+      ].filter(Boolean)
+    });
 
     if (!usuario) {
-
       return res.status(401).json({ error: 'Usuario no encontrado' });
-
     }
 
     const esValido = await usuario.compararPassword(password);
 
     if (!esValido) {
-
       return res.status(401).json({ error: 'Contraseña incorrecta' });
     }
 
@@ -116,10 +120,8 @@ exports.iniciarSesion = async (req, res) => {
         email: usuario.email,
         rol: usuario.rol
       },
-
       process.env.JWT_SECRET || 'secreto',
       { expiresIn: '15min' }
-
     );
 
     res.cookie('token', token, {
@@ -137,16 +139,13 @@ exports.iniciarSesion = async (req, res) => {
         email: usuario.email,
         rol: usuario.rol
       }
-
     });
 
   } catch (err) {
-
     res.status(500).json({ error: 'Error al iniciar sesión', detalles: err.message });
-
   }
-
 };
+
 
 
 exports.obtenerUsuarios = async (req, res) => {
