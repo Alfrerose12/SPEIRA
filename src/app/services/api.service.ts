@@ -53,11 +53,6 @@ export class ApiService {
     return this.http.get<any>(`${this.baseUrl}/cajas/${nombreCaja}/datos`);
   }
 
-  // 🔔 Funciones de notificaciones 🔔
-
-  /**
-   * Guarda el token de notificaciones en el backend
-   */
   guardarTokenNotificacion(token: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/token`, { token });
   }

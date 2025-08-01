@@ -222,9 +222,17 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   // Cambio aquí: enviarNotificacion ahora arma payload para backend con titulo y cuerpo
   enviarNotificacion(sensorNombre: string, valor: number) {
+    const token = localStorage.getItem('fcmToken'); // 🔽 tomamos el token guardado
+  
+    if (!token) {
+      console.warn('⚠️ No se encontró token FCM en localStorage');
+      return;
+    }
+  
     const payload = {
       titulo: `Alerta: ${sensorNombre}`,
       cuerpo: `El valor actual (${valor.toString()}) está fuera del rango permitido.`,
+      token
     };
   
     console.log('👉 Payload que se enviará:', payload);
@@ -235,10 +243,10 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
       },
       error: (err) => {
         console.error('❌ Error al enviar notificación:', err);
-        // Puedes inspeccionar más detalles del error así:
         if (err.error) console.error('Detalle error:', err.error);
       }
     });
   }
+  
   
 }
