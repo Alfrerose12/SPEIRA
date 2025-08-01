@@ -269,11 +269,15 @@ exports.generarReporte = async (periodo, fechaStr, nombreEstanqueFiltrado = null
       datosPorEstanque[dato.estanque.nombre].push(dato);
       contador++;
 
+      if (!primerDato || dato.fecha < primerDato.fecha) primerDato = dato;
+      if (!ultimoDato || dato.fecha > ultimoDato.fecha) ultimoDato = dato;
+
       if (contador % BATCH_SIZE === 0) {
         await new Promise(resolve => setImmediate(resolve));
         console.log(`Procesados ${contador} registros... Memoria: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`);
       }
     }
+
 
 
     if (contador === 0) {

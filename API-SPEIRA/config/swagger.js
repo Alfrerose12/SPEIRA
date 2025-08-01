@@ -13,7 +13,8 @@ const swaggerDefinition = {
     '/datos': {
       post: {
         tags: ['Datos'],
-        summary: 'Registrar datos de sensores',
+        summary: 'Registrar datos',
+        description: 'Registra los datos que se mandan desde los sensores.',
         requestBody: {
           required: true,
           content: {
@@ -78,8 +79,8 @@ const swaggerDefinition = {
     '/datos/generales': {
       get: {
         tags: ['Datos'],
-        summary: 'Obtener datos generales de sensores',
-        description: 'Obtiene los datos generales de todos los sensores registrados.',
+        summary: 'Obtener datos generales de todos los estanques',
+        description: 'Obtiene los datos registrados de todos los estanques.',
         responses: {
           200: {
             description: 'Datos generales obtenidos exitosamente',
@@ -134,7 +135,7 @@ const swaggerDefinition = {
     '/datos/{periodo}/{fecha}': {
       get: {
         tags: ['Datos'],
-        summary: 'Obtener datos de sensores por período y fecha',
+        summary: 'Obtener datos de todos los estanques por período y fecha',
         description: 'Obtiene datos según el período especificado. Formatos de fecha requeridos:<br>' +
           '- Diario: YYYY-MM-DD (ej: 2025-01-01)<br>' +
           '- Semanal: YYYY-MM-DD (debe ser lunes, ej: 2025-01-06)<br>' +
@@ -217,20 +218,26 @@ const swaggerDefinition = {
     '/datos/estanque/{nombre}': {
       get: {
         tags: ['Datos'],
-        summary: 'Obtener datos de sensores por estanque',
-        description: 'Obtiene datos de un estanque específico.',
-        parameters: [
-          {
-            name: 'nombre',
-            in: 'path',
-            required: true,
-            schema: {
-              type: 'string',
-              description: 'Nombre del estanque',
-              example: 'Estanque 1'
+        summary: 'Obtener datos de un estanque específico',
+        description: 'Obtiene todos los datos de un estanque específico.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  nombre: {
+                    type: 'string',
+                    description: 'Nombre del estanque',
+                    example: 'Estanque 1'
+                  }
+                },
+                required: ['nombre']
+              }
             }
           }
-        ],
+        },
         responses: {
           200: {
             description: 'Datos del estanque',
@@ -257,7 +264,7 @@ const swaggerDefinition = {
       post: {
         tags: ['Datos'],
         summary: 'Generar reporte PDF por estanque',
-        description: 'Genera un reporte PDF según el período especificado. Formatos de fecha requeridos:<br>' +
+        description: 'Genera un reporte PDF de un estanque específico según el período especificado. Formatos de fecha requeridos:<br>' +
           '- Diario: YYYY-MM-DD (ej: 2025-01-01)<br>' +
           '- Semanal: YYYY-MM-DD (debe ser lunes, ej: 2025-01-06)<br>' +
           '- Mensual: YYYY-MM (ej: 2025-01)<br>' +
@@ -356,7 +363,7 @@ const swaggerDefinition = {
       post: {
         tags: ['Datos'],
         summary: 'Generar reporte PDF general',
-        description: 'Genera un reporte PDF según el período especificado. Formatos de fecha requeridos:<br>' +
+        description: 'Genera un reporte PDF general de todos los estanques según el período especificado. Formatos de fecha requeridos:<br>' +
           '- Diario: YYYY-MM-DD (ej: 2025-01-01)<br>' +
           '- Semanal: YYYY-MM-DD (debe ser lunes, ej: 2025-01-06)<br>' +
           '- Mensual: YYYY-MM (ej: 2025-01)<br>' +
@@ -449,7 +456,7 @@ const swaggerDefinition = {
     '/estanque': {
       post: {
         tags: ['Estanque'],
-        summary: 'Crear estanque',
+        summary: 'Crear un estanque',
         description: 'Crea un nuevo estanque en el sistema.',
         requestBody: {
           required: true,

@@ -6,7 +6,7 @@ const {
   obtenerDatosPorPeriodo,
   generarReporte,
   generarReporteporEstanque,
-  obtenerDatosPorNombreEstanque,
+  obtenerDatosPorEstanque,
   obtenerDatosGenerales
 } = require('../controllers/datosController');
 
@@ -37,7 +37,7 @@ router.post('/notificaciones', enviarNotificacion);
 
 router.post('/datos',  crearDato);
 router.get('/datos/generales',  obtenerDatosGenerales);
-router.get('/datos/estanque/:nombre',  obtenerDatosPorNombreEstanque);
+router.get('/datos/estanque/:nombre',  obtenerDatosPorEstanque);
 router.get('/datos/:periodo/:fecha',  obtenerDatosPorPeriodo);
 router.post('/datos/reportes/estanque',  generarReporteporEstanque);
 router.post('/datos/reportes',  generarReporte);

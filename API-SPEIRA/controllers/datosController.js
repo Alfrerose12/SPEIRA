@@ -215,9 +215,9 @@ exports.obtenerDatosPorPeriodo = async (req, res) => {
   }
 };
 
-exports.obtenerDatosPorNombreEstanque = async (req, res) => {
+exports.obtenerDatosPorEstanque = async (req, res) => {
   try {
-    const { nombre } = req.params;
+    const { nombre } = req.body;
 
     const estanque = await Estanque.findOne({ nombre });
     if (!estanque) {
