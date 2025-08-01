@@ -11,7 +11,7 @@ import { ApiService } from './services/api.service';
   styleUrls: ['app.component.scss'],
   standalone: true,
   imports: [IonicModule],
-  providers: [FirebaseMessagingService, ApiService], // <- aquí los servicios
+  providers: [FirebaseMessagingService], // <-- Quité ApiService de aquí
 })
 export class AppComponent {
   authState$!: Observable<any>;
