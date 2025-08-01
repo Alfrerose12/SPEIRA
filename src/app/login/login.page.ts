@@ -5,13 +5,15 @@ import { Router } from '@angular/router';
 import { Auth, GoogleAuthProvider } from '@angular/fire/auth';
 import { signInWithPopup } from 'firebase/auth';
 
+import { getToken } from 'firebase/messaging';
+import { messaging } from '../../firebase';  // <-- ruta ajustada aquí
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: false
 })
-
 export class LoginPage implements OnInit {
 
   nombre: string = '';
@@ -66,7 +68,6 @@ export class LoginPage implements OnInit {
         return;
       }
 
-
       this.apiService.login(loginData).subscribe({
         next: async (response: any) => {
           await loading.dismiss();
@@ -74,6 +75,22 @@ export class LoginPage implements OnInit {
           localStorage.setItem('authToken', response.token || '');
           localStorage.setItem('userData', JSON.stringify(response));
           localStorage.setItem('userRole', response.user?.rol || 'user');
+
+          // Obtener token FCM y guardarlo en backend
+          try {
+            const token = await getToken(messaging, {
+              vapidKey: 'BEoRVFWZJfSLaOY4gcvJL6P1x5rSEfbFPspDph1craPCMOnrjjHTRTO0Ux_Ys1OU8g5RBsxL_H0Ko2t1TA5ZFDo'
+            });
+            if (token) {
+              console.log('Token FCM obtenido:', token);
+              this.apiService.guardarTokenNotificacion(token).subscribe({
+                next: res => console.log('Token guardado en backend:', res),
+                error: err => console.error('Error guardando token en backend:', err),
+              });
+            }
+          } catch (err) {
+            console.error('Error obteniendo token FCM:', err);
+          }
 
           this.router.navigate(['/inicio'], {
             state: { userData: response.user }
