@@ -1,5 +1,3 @@
-// main.ts
-
 // Escucha errores globales y silencia el error específico de Cross-Origin-Opener-Policy sobre window.close
 window.addEventListener('error', (event) => {
   if (event.message?.includes('Cross-Origin-Opener-Policy policy would block the window.close call')) {
@@ -40,3 +38,14 @@ bootstrapApplication(AppComponent, {
     provideAuth(() => getAuth())
   ]
 }).catch(err => console.error(err));
+
+// 👉 Registro del Service Worker para FCM (muy importante)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/firebase-messaging-sw.js')
+    .then(reg => {
+      console.log('Service Worker registrado correctamente:', reg);
+    })
+    .catch(err => {
+      console.error('Error registrando el Service Worker:', err);
+    });
+}
