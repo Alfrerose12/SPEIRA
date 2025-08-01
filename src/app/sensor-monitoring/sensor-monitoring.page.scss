@@ -7,10 +7,7 @@ ion-content.monitoring-content {
 
   .loading-overlay, .error-message {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -54,8 +51,7 @@ ion-content.monitoring-content {
 
   .bubbles {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 0; left: 0;
     width: 100%;
     height: 100%;
     z-index: 0;
@@ -233,6 +229,18 @@ ion-content.monitoring-content {
     }
   }
 
+  /* === Aquí controlamos los botones regresar === */
+
+  /* Por defecto: mostrar solo el botón escritorio, ocultar móvil */
+  .return-button-wrapper.desktop-only {
+    display: flex;
+  }
+
+  .return-button-wrapper.mobile-fab {
+    display: none;
+  }
+
+  /* En pantallas móviles: ocultar escritorio, mostrar móvil */
   @media (max-width: 768px) {
     .chart-grid {
       grid-template-columns: 1fr;
@@ -244,6 +252,37 @@ ion-content.monitoring-content {
 
     .bubbles span {
       animation-duration: 20s !important;
+    }
+
+    .return-button-wrapper.desktop-only {
+      display: none !important;
+    }
+
+    .return-button-wrapper.mobile-fab {
+      display: flex !important;
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 999;
+
+      .return-button {
+        border-radius: 50% !important;
+        width: 56px;
+        height: 56px;
+        padding: 0;
+        font-size: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        --background: var(--ion-color-primary);
+        --color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+        ion-icon {
+          margin: 0;
+          font-size: 28px;
+        }
+      }
     }
   }
 }

@@ -25,6 +25,21 @@
     </ion-button>
   </div>
 
+  <!-- Botón Regresar al Inicio - Escritorio -->
+  <div class="return-button-wrapper desktop-only">
+    <ion-button routerLink="/inicio" fill="outline" class="return-button" title="Volver al inicio">
+      <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+      Regresar al Inicio
+    </ion-button>
+  </div>
+
+  <!-- Botón Regresar al Inicio - Móvil flotante circular -->
+  <div class="return-button-wrapper mobile-fab">
+    <ion-button routerLink="/inicio" class="return-button" title="Volver al inicio">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+    </ion-button>
+  </div>
+
   <!-- Burbujas decorativas -->
   <div class="bubbles">
     <span *ngFor="let bubble of [1,2,3,4,5,6,7,8,9,10]"></span>
