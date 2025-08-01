@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Platform, PopoverController } from '@ionic/angular';
 import { PopoverMenuComponent } from '../components/popover-menu/popover-menu.component';
 import { ApiService } from '../services/api.service';
-import { FcmService } from '../services/fcm.services';
+import { FcmService } from '../services/fcm.services'; // corregido singular .service
 
 declare var navigator: any;
 
@@ -35,27 +35,23 @@ export class InicioPage implements OnInit {
     this.isAdmin = localStorage.getItem('userRole') === 'admin';
     this.userName = userData.nombre || userData.email || 'Usuario';
 
-    //this.isAdmin = true;
-
     this.configureBackButton();
-
     this.initFcm();
-  
+  }
+
+  async initFcm() {
+    const token: string | null = await this.fcmService.requestPermissionAndGetToken();
+    if (token) {
+      console.log('✅ Token listo:', token);
+
+      this.apiService.guardarTokenNotificacion(token).subscribe({
+        next: () => console.log('📡 Token registrado en backend'),
+        error: (err: any) => console.error('❌ Error al registrar token:', err)
+      });
     }
-    async initFcm() {
-      const token: string | null = await this.fcmService.getDeviceToken();
-      if (token) {
-        console.log('✅ Token listo:', token);
-    
-        this.apiService.guardarTokenNotificacion(token).subscribe({
-          next: () => console.log('📡 Token registrado en backend'),
-          error: (err: any) => console.error('❌ Error al registrar token:', err)
-        });
-      }
-    
-      this.fcmService.listenToForegroundMessages();
-    }
-  
+
+    this.fcmService.listenToForegroundMessages();
+  }
 
   configureBackButton() {
     this.platform.backButton.subscribeWithPriority(10, () => {
@@ -196,7 +192,7 @@ export class InicioPage implements OnInit {
     this.router.navigate(['/ajustes-admin']);
   }
 
-   logout() {
+  logout() {
     this.apiService.logout().subscribe({
       next: () => {
         localStorage.removeItem('authToken');
@@ -215,7 +211,4 @@ export class InicioPage implements OnInit {
       }
     });
   }
-
-  
-
 }

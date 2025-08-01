@@ -1,60 +1,68 @@
 import { Injectable } from '@angular/core';
 import { initializeApp } from 'firebase/app';
-import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage, isSupported, Messaging } from 'firebase/messaging';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FcmService {
-  messaging: any = null;
+  private messaging: Messaging | null = null;
 
   constructor() {
     this.initFirebaseMessaging();
   }
 
-  async initFirebaseMessaging() {
+  private async initFirebaseMessaging() {
     const supported = await isSupported();
     if (supported) {
-      const firebaseConfig = {
-        apiKey: "AIzaSyCe1-ukYoXmUPeSQqqmmSL_bUnFsY_3hs0",
-        authDomain: "speira-c84d5.firebaseapp.com",
-        projectId: "speira-c84d5",
-        storageBucket: "speira-c84d5.appspot.com",
-        messagingSenderId: "405388809495",
-        appId: "1:405388809495:web:d2d8cde904c3f4e3ec5352",
-        measurementId: "G-DWJCN7HR3Y"
-      };
-
-      const app = initializeApp(firebaseConfig);
+      const app = initializeApp(environment.firebaseConfig);
       this.messaging = getMessaging(app);
+      console.log('✅ Firebase Messaging inicializado');
     } else {
       console.warn('⚠️ Firebase Messaging no es soportado en este navegador o entorno.');
       this.messaging = null;
     }
   }
 
-  async getDeviceToken(): Promise<string | null> {
+  async requestPermissionAndGetToken(): Promise<string | null> {
     if (!this.messaging) {
-      return null;  // No soportado, no intentar obtener token
+      console.warn('🚫 Firebase Messaging no está disponible.');
+      return null;
     }
+
     try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        console.warn('Permiso de notificaciones no concedido');
+        return null;
+      }
+
       const token = await getToken(this.messaging, {
-        vapidKey: 'TU_VAPID_KEY (opcional si solo móvil)'
+        vapidKey: environment.messagingPublicKey
       });
-      console.log('🔥 Token FCM:', token);
-      return token;
+
+      if (token) {
+        console.log('🔥 Token FCM obtenido:', token);
+        return token;
+      } else {
+        console.warn('No se pudo obtener el token FCM');
+        return null;
+      }
     } catch (error) {
-      console.error('❌ Error obteniendo token:', error);
+      console.error('❌ Error obteniendo token FCM:', error);
       return null;
     }
   }
 
   listenToForegroundMessages() {
     if (!this.messaging) {
-      return; // No soportado, no hacer nada
+      return;
     }
-    onMessage(this.messaging, payload => {
-      console.log('📩 Mensaje en foreground:', payload);
+
+    onMessage(this.messaging, (payload) => {
+      console.log('📩 Mensaje recibido en primer plano:', payload);
+      // Puedes mostrar alerta, actualizar UI, etc.
       alert(`🔔 ${payload.notification?.title}\n${payload.notification?.body}`);
     });
   }
