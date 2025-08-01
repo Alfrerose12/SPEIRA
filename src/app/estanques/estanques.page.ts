@@ -226,10 +226,19 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
       titulo: `Alerta: ${sensorNombre}`,
       cuerpo: `El valor actual (${valor.toString()}) está fuera del rango permitido.`,
     };
-
+  
+    console.log('👉 Payload que se enviará:', payload);
+  
     this.apiService.enviarNotificacion(payload).subscribe({
-      next: () => console.log('🔔 Notificación enviada'),
-      error: err => console.error('❌ Error al enviar notificación', err)
+      next: (response) => {
+        console.log('✅ Notificación enviada con éxito:', response);
+      },
+      error: (err) => {
+        console.error('❌ Error al enviar notificación:', err);
+        // Puedes inspeccionar más detalles del error así:
+        if (err.error) console.error('Detalle error:', err.error);
+      }
     });
   }
+  
 }
