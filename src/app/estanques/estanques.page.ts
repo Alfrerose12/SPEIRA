@@ -93,7 +93,16 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
         // Extraemos los últimos datos válidos para cada sensor
         const flatData: SensorEntry[] = this.availableSensors.map(sensor => {
-          const lastValid = [...datos].reverse().find(d => typeof d[sensor.key] !== 'undefined' && d[sensor.key] !== null);
+          // Ordena datos por fecha descendente
+          const sortedDatos = [...datos].sort((a, b) => {
+            const dateA = new Date(a.updatedAt || a.fecha).getTime();
+            const dateB = new Date(b.updatedAt || b.fecha).getTime();
+            return dateB - dateA;
+          });
+
+          // Encuentra el dato más reciente con valor definido
+          const lastValid = sortedDatos.find(d => typeof d[sensor.key] !== 'undefined' && d[sensor.key] !== null);
+
           return {
             id: 0,
             name: sensor.name,
