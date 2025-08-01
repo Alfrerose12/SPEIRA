@@ -13,7 +13,9 @@ export class FirebaseMessagingService {
 
   async getTokenFCM(): Promise<string | null> {
     try {
-      const token = await getToken(this.messaging, { vapidKey: '<TU_VAPID_KEY_AQUI>' });
+      const token = await getToken(this.messaging, { 
+        vapidKey: 'BNctf7zQoi75ZkCccfJQyWF4ObxHVIVDHVg06W1SrV8_4e-wHcnguwLYXR0Qp3DnWyRVoxPpnrT9wINPm3UG7P0' 
+      });
       return token;
     } catch (error) {
       console.error('Error obteniendo token FCM', error);
