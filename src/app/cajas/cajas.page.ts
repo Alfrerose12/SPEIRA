@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { Subscription, interval, switchMap, of } from 'rxjs';
 import { ApiService } from '../services/api.service';
-import { MenuController } from '@ionic/angular';
+import { IonContent, MenuController } from '@ionic/angular';
 
 interface SensorEntry {
   id: number;
@@ -22,6 +22,8 @@ Chart.register(...registerables);
   standalone: false
 })
 export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
+
+  @ViewChild(IonContent, { static: false }) contentRef!: IonContent;
 
   cajasDisponibles: string[] = [];
   cajaSeleccionada: string = '';
@@ -165,7 +167,10 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
     this.iniciarMonitorCaja();
   }
 
- updateCharts() {
+  async updateCharts() {
+    const contentEl = await this.contentRef.getScrollElement();
+    const scrollTop = contentEl.scrollTop;
+
     this.availableSensors.forEach(sensor => {
       if (this.selectedSensorFilter && sensor.key !== this.selectedSensorFilter) return;
 
@@ -190,6 +195,11 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
 
       chart.update();
     });
+
+    // Restaurar scroll después de actualizar los gráficos
+    setTimeout(() => {
+      this.contentRef.scrollToPoint(0, scrollTop, 0);
+    }, 50);
   }
 
   createChart(canvasId: string, label: string, color: string) {
