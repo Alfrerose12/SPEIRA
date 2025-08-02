@@ -121,7 +121,6 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
         this.sensorData = flatData;
 
-
         // Lógica para notificaciones por fuera de límites
         flatData.forEach(sensor => {
           const limit = this.sensorLimits[sensor.key];

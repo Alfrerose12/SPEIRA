@@ -39,7 +39,7 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
     { key: 'temperaturaAmbiente', name: 'Temperatura Ambiente', unit: '°C', canvasId: 'tempAmbientChart', color: '#f44336' },
     { key: 'humedad', name: 'Humedad', unit: '%', canvasId: 'humidityChart', color: '#ff9800' },
     { key: 'luminosidad', name: 'Luminosidad', unit: 'lux', canvasId: 'lightChart', color: '#9c27b0' },
-    { key: 'conductividadElectrica', name: 'Conductividad eléctrica', unit: 'µS/cm', canvasId: 'conductivityChart', color: '#3f51b5' },
+    { key: 'conductividadElectrica', name: 'Conductividad Eléctrica', unit: 'µS/cm', canvasId: 'conductivityChart', color: '#3f51b5' },
     { key: 'co2', name: 'CO₂', unit: 'ppm', canvasId: 'co2Chart', color: '#009688' }
   ];
 
@@ -88,8 +88,8 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
       })
     ).subscribe(
       (response: any) => {
-        const datos = response?.datos;
 
+        const datos = response?.datos;
         if (!datos || datos.length === 0) {
           console.warn('No hay datos válidos para la caja:', this.cajaSeleccionada);
           return;
@@ -161,6 +161,7 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
       chart.update();
     });
 
+    // Reinicia el monitoreo de la caja seleccionada
     this.iniciarMonitorCaja();
   }
 
