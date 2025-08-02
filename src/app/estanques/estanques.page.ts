@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { Subscription, interval, switchMap, of } from 'rxjs';
 import { ApiService } from '../services/api.service';
-import { IonContent, MenuController } from '@ionic/angular';
+import { MenuController } from '@ionic/angular';
 
 interface SensorEntry {
   id: number;
@@ -23,8 +23,6 @@ Chart.register(...registerables);
 })
 
 export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
-
-  @ViewChild(IonContent, { static: false }) contentRef!: IonContent;
 
   estanquesDisponibles: string[] = [];
   estanqueSeleccionado: string = '';
@@ -172,10 +170,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
-  async updateCharts() {
-    const contentEl = await this.contentRef.getScrollElement();
-    const scrollTop = contentEl.scrollTop;
-
+  updateCharts() {
     this.availableSensors.forEach(sensor => {
       if (this.selectedSensorFilter && sensor.key !== this.selectedSensorFilter) return;
 
@@ -200,11 +195,6 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
       chart.update();
     });
-
-    // Restaurar scroll después de actualizar los gráficos
-    setTimeout(() => {
-      this.contentRef.scrollToPoint(0, scrollTop, 0);
-    }, 50);
   }
 
   createChart(canvasId: string, label: string, color: string) {
