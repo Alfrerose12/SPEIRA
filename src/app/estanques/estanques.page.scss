@@ -49,50 +49,6 @@ ion-content.estanques-content {
     height: 100%;
   }
 
-  .bubbles {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    overflow: hidden;
-    pointer-events: none;
-
-    span {
-      position: absolute;
-      display: block;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      animation: floatBubbles 15s linear infinite;
-      bottom: -100px;
-      will-change: transform;
-      opacity: 0;
-
-      @for $i from 1 through 10 {
-        &:nth-child(#{$i}) {
-          left: math.random(90) + 5%;
-          width: math.random(30) + 20px;
-          animation-delay: math.random(10) + s;
-          animation-duration: math.random(15) + 10s;
-        }
-      }
-    }
-  }
-
-  @keyframes floatBubbles {
-    0% {
-      transform: translateY(0) scale(0.8);
-      opacity: 0.4;
-    }
-    50% {
-      opacity: 0.6;
-    }
-    100% {
-      transform: translateY(-100vh) scale(1.2);
-      opacity: 0;
-    }
-  }
 
   ion-card {
     border-radius: 12px;
@@ -120,25 +76,7 @@ ion-content.estanques-content {
       padding-top: 8px;
     }
   }
-
-  .filter-button-wrapper {
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
-    padding: 16px;
-    box-sizing: border-box;
-  }
-
-  .filter-button {
-    border-radius: 24px;
-    padding: 8px 16px;
-    font-weight: 600;
-    font-size: 1em;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
+  
   .table-responsive {
     overflow-x: auto;
 

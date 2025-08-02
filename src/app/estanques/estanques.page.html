@@ -19,10 +19,25 @@
 <ion-content id="main-content" class="estanques-content">
 
   <!-- Botón flotante para filtro -->
-  <div class="filter-button-wrapper">
+  <div class="filter-button-wrapper-right">
     <ion-button (click)="openMenu()" fill="solid" class="filter-button" title="Filtrar sensores">
       <ion-icon slot="start" name="options-outline"></ion-icon>
       Filtrado de Sensores
+    </ion-button>
+  </div>
+
+  <!-- Botón Regresar al Inicio -->
+  <div class="return-button-wrapper desktop-only">
+    <ion-button routerLink="/inicio" fill="outline" class="return-button" title="Volver al inicio">
+      <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+      Regresar al Inicio
+    </ion-button>
+  </div>
+
+    <!-- Botón Regresar al Inicio - Móvil (Botón flotante circular) -->
+  <div class="return-button-wrapper mobile-fab">
+    <ion-button routerLink="/inicio" class="return-button" title="Volver al inicio">
+      <ion-icon name="arrow-back-outline"></ion-icon>
     </ion-button>
   </div>
 
@@ -86,37 +101,51 @@
         <div class="chart-grid">
 
           <div class="chart-container" *ngIf="shouldDisplaySensor('ph')">
-            <div class="chart-header"><h3>pH</h3></div>
+            <div class="chart-header">
+              <h3>pH</h3>
+            </div>
             <div class="chart-wrapper"><canvas id="phChart"></canvas></div>
           </div>
 
           <div class="chart-container" *ngIf="shouldDisplaySensor('temperaturaAgua')">
-            <div class="chart-header"><h3>Temperatura del Agua (°C)</h3></div>
+            <div class="chart-header">
+              <h3>Temperatura del Agua (°C)</h3>
+            </div>
             <div class="chart-wrapper"><canvas id="tempWaterChart"></canvas></div>
           </div>
 
           <div class="chart-container" *ngIf="shouldDisplaySensor('temperaturaAmbiente')">
-            <div class="chart-header"><h3>Temperatura Ambiental (°C)</h3></div>
+            <div class="chart-header">
+              <h3>Temperatura Ambiental (°C)</h3>
+            </div>
             <div class="chart-wrapper"><canvas id="tempAmbientChart"></canvas></div>
           </div>
 
           <div class="chart-container" *ngIf="shouldDisplaySensor('humedad')">
-            <div class="chart-header"><h3>Humedad (%)</h3></div>
+            <div class="chart-header">
+              <h3>Humedad (%)</h3>
+            </div>
             <div class="chart-wrapper"><canvas id="humidityChart"></canvas></div>
           </div>
 
           <div class="chart-container" *ngIf="shouldDisplaySensor('luminosidad')">
-            <div class="chart-header"><h3>Luminosidad (lux)</h3></div>
+            <div class="chart-header">
+              <h3>Luminosidad (lux)</h3>
+            </div>
             <div class="chart-wrapper"><canvas id="lightChart"></canvas></div>
           </div>
 
           <div class="chart-container" *ngIf="shouldDisplaySensor('conductividadElectrica')">
-            <div class="chart-header"><h3>Conductividad Eléctrica (µS/cm)</h3></div>
+            <div class="chart-header">
+              <h3>Conductividad Eléctrica (µS/cm)</h3>
+            </div>
             <div class="chart-wrapper"><canvas id="conductivityChart"></canvas></div>
           </div>
 
           <div class="chart-container" *ngIf="shouldDisplaySensor('co2')">
-            <div class="chart-header"><h3>CO₂ (ppm)</h3></div>
+            <div class="chart-header">
+              <h3>CO₂ (ppm)</h3>
+            </div>
             <div class="chart-wrapper"><canvas id="co2Chart"></canvas></div>
           </div>
 

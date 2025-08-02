@@ -35,8 +35,8 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
 
   availableSensors = [
     { key: 'ph', name: 'pH', unit: 'pH', canvasId: 'phChart', color: '#4caf50' },
-    { key: 'temperaturaAgua', name: 'Temperatura del agua', unit: '°C', canvasId: 'tempWaterChart', color: '#2196f3' },
-    { key: 'temperaturaAmbiente', name: 'Temperatura ambiente', unit: '°C', canvasId: 'tempAmbientChart', color: '#f44336' },
+    { key: 'temperaturaAgua', name: 'Temperatura del Agua', unit: '°C', canvasId: 'tempWaterChart', color: '#2196f3' },
+    { key: 'temperaturaAmbiente', name: 'Temperatura Ambiente', unit: '°C', canvasId: 'tempAmbientChart', color: '#f44336' },
     { key: 'humedad', name: 'Humedad', unit: '%', canvasId: 'humidityChart', color: '#ff9800' },
     { key: 'luminosidad', name: 'Luminosidad', unit: 'lux', canvasId: 'lightChart', color: '#9c27b0' },
     { key: 'conductividadElectrica', name: 'Conductividad eléctrica', unit: 'µS/cm', canvasId: 'conductivityChart', color: '#3f51b5' },
@@ -56,10 +56,10 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
   constructor(private apiService: ApiService, private menuCtrl: MenuController) { }
 
   ngOnInit() {
-    this.apiService.getCajasDisponibles().subscribe({
-      next: (cajas: { nombre: string }[]) => {
-        if (cajas.length > 0) {
-          this.cajasDisponibles = cajas
+    this.apiService.getEstanquesDisponibles().subscribe({
+      next: (estanques: { nombre: string }[]) => {
+        if (estanques.length > 0) {
+          this.cajasDisponibles = estanques
             .map(c => c.nombre)
             .filter(nombre => nombre.toLowerCase().includes('caja'));
 
@@ -83,7 +83,7 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
     this.dataSubscription = interval(this.refreshInterval).pipe(
       switchMap(() => {
         return this.cajaSeleccionada
-          ? this.apiService.getCajaData(this.cajaSeleccionada)
+          ? this.apiService.getEstanqueData(this.cajaSeleccionada)
           : of(null);
       })
     ).subscribe(
@@ -164,8 +164,10 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
     this.iniciarMonitorCaja();
   }
 
-  updateCharts() {
+ updateCharts() {
     this.availableSensors.forEach(sensor => {
+      if (this.selectedSensorFilter && sensor.key !== this.selectedSensorFilter) return;
+
       const chart = this.sensorCharts[sensor.canvasId];
       if (!chart) return;
 
@@ -179,8 +181,11 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
       if (data.length > 30) data.shift();
 
       const labels = chart.data.labels as string[];
-      labels.push(new Date(latest.timestamp).toLocaleTimeString());
+      labels.push(new Date(latest.timestamp).toLocaleTimeString('es-MX', { timeZone: 'America/Mexico_City', hour12: false }));
       if (labels.length > 30) labels.shift();
+
+      dataset.data = [...data];
+      chart.data.labels = [...labels];
 
       chart.update();
     });

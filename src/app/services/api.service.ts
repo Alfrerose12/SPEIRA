@@ -45,14 +45,6 @@ export class ApiService {
     return this.http.get<{ nombre: string }[]>(`${this.baseUrl}/estanques`);
   }
 
-  getCajasDisponibles(): Observable<{ nombre: string }[]> {
-    return this.http.get<{ nombre: string }[]>(`${this.baseUrl}/cajas`);
-  }
-
-  getCajaData(nombreCaja: string): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/cajas/${nombreCaja}/datos`);
-  }
-
   guardarTokenNotificacion(token: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/token`, { token });
   }
