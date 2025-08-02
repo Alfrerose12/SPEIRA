@@ -18,26 +18,27 @@
 
 <ion-content id="main-content" class="estanques-content">
 
-  <!-- Botón flotante para filtro -->
-  <div class="filter-button-wrapper-right">
+  <!-- Botones normales (solo escritorio) -->
+  <div class="button-bar desktop-only">
+    <ion-button routerLink="/inicio" fill="outline" class="return-button" title="Volver al inicio">
+      <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+      Regresar al Inicio
+    </ion-button>
+
     <ion-button (click)="openMenu()" fill="solid" class="filter-button" title="Filtrar sensores">
       <ion-icon slot="start" name="options-outline"></ion-icon>
       Filtrado de Sensores
     </ion-button>
   </div>
 
-  <!-- Botón Regresar al Inicio -->
-  <div class="return-button-wrapper desktop-only">
-    <ion-button routerLink="/inicio" fill="outline" class="return-button" title="Volver al inicio">
-      <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
-      Regresar al Inicio
-    </ion-button>
-  </div>
-
-    <!-- Botón Regresar al Inicio - Móvil (Botón flotante circular) -->
-  <div class="return-button-wrapper mobile-fab">
+  <!-- Barra móvil fija en parte superior con botones circulares -->
+  <div class="button-bar mobile-only">
     <ion-button routerLink="/inicio" class="return-button" title="Volver al inicio">
       <ion-icon name="arrow-back-outline"></ion-icon>
+    </ion-button>
+
+    <ion-button (click)="openMenu()" class="filter-button" title="Filtrar sensores">
+      <ion-icon name="options-outline"></ion-icon>
     </ion-button>
   </div>
 
