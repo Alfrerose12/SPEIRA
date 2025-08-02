@@ -61,9 +61,16 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     this.apiService.getEstanquesDisponibles().subscribe({
       next: (estanques: { nombre: string }[]) => {
         if (estanques.length > 0) {
-          this.estanquesDisponibles = estanques.map(e => e.nombre);
-          this.estanqueSeleccionado = this.estanquesDisponibles[0];
-          this.iniciarMonitorEstanque();
+          this.estanquesDisponibles = estanques
+            .map(e => e.nombre)
+            .filter(nombre => nombre.toLowerCase().includes('estanque'));
+
+          if (this.estanquesDisponibles.length > 0) {
+            this.estanqueSeleccionado = this.estanquesDisponibles[0];
+            this.iniciarMonitorEstanque();
+          } else {
+            console.warn('No hay estanques que coincidan con el filtro.');
+          }
         }
       },
       error: (err) => {
@@ -71,6 +78,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
       }
     });
   }
+
 
   iniciarMonitorEstanque() {
     if (this.dataSubscription) this.dataSubscription.unsubscribe();
@@ -83,7 +91,6 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
       })
     ).subscribe(
       (response: any) => {
-        console.log('Datos recibidos del backend:', response); // <--- Aquí el console.log
 
         const datos = response?.datos;
         if (!datos || datos.length === 0) {
@@ -114,6 +121,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
         });
 
         this.sensorData = flatData;
+
 
         // Lógica para notificaciones por fuera de límites
         flatData.forEach(sensor => {
@@ -246,7 +254,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     const token = localStorage.getItem('fcmToken'); // 🔽 tomamos el token guardado
 
     if (!token) {
-      console.warn('⚠️ No se encontró token FCM en localStorage');
+      console.warn('No se encontró token FCM en localStorage');
       return;
     }
 
@@ -256,14 +264,14 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
       token
     };
 
-    console.log('👉 Payload que se enviará:', payload);
+    console.log('Payload que se enviará:', payload);
 
     this.apiService.enviarNotificacion(payload).subscribe({
       next: (response) => {
-        console.log('✅ Notificación enviada con éxito:', response);
+        console.log('Notificación enviada con éxito:', response);
       },
       error: (err) => {
-        console.error('❌ Error al enviar notificación:', err);
+        console.error('Error al enviar notificación:', err);
         if (err.error) console.error('Detalle error:', err.error);
       }
     });
