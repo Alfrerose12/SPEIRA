@@ -79,7 +79,6 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-
   iniciarMonitorEstanque() {
     if (this.dataSubscription) this.dataSubscription.unsubscribe();
 

@@ -28,30 +28,47 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
 
   sensorData: SensorEntry[] = [];
   dataSubscription!: Subscription;
-  refreshInterval = 1000;
+  refreshInterval = 5000;
   sensorCharts: { [key: string]: Chart } = {};
 
   selectedSensorFilter: string = '';
 
   availableSensors = [
     { key: 'ph', name: 'pH', unit: 'pH', canvasId: 'phChart', color: '#4caf50' },
-    { key: 'tempWater', name: 'Temperatura del agua', unit: '°C', canvasId: 'tempWaterChart', color: '#2196f3' },
-    { key: 'tempAmbient', name: 'Temperatura ambiente', unit: '°C', canvasId: 'tempAmbientChart', color: '#f44336' },
-    { key: 'humidity', name: 'Humedad', unit: '%', canvasId: 'humidityChart', color: '#ff9800' },
-    { key: 'luminosity', name: 'Luminosidad', unit: 'lux', canvasId: 'lightChart', color: '#9c27b0' },
-    { key: 'conductivity', name: 'Conductividad eléctrica', unit: 'µS/cm', canvasId: 'conductivityChart', color: '#3f51b5' },
+    { key: 'temperaturaAgua', name: 'Temperatura del agua', unit: '°C', canvasId: 'tempWaterChart', color: '#2196f3' },
+    { key: 'temperaturaAmbiente', name: 'Temperatura ambiente', unit: '°C', canvasId: 'tempAmbientChart', color: '#f44336' },
+    { key: 'humedad', name: 'Humedad', unit: '%', canvasId: 'humidityChart', color: '#ff9800' },
+    { key: 'luminosidad', name: 'Luminosidad', unit: 'lux', canvasId: 'lightChart', color: '#9c27b0' },
+    { key: 'conductividadElectrica', name: 'Conductividad eléctrica', unit: 'µS/cm', canvasId: 'conductivityChart', color: '#3f51b5' },
     { key: 'co2', name: 'CO₂', unit: 'ppm', canvasId: 'co2Chart', color: '#009688' }
   ];
 
-  constructor(private apiService: ApiService, private menuCtrl: MenuController) {}
+  sensorLimits: { [key: string]: { min: number, max: number } } = {
+    ph: { min: 8, max: 11 },
+    temperaturaAgua: { min: 10, max: 50 },
+    temperaturaAmbiente: { min: 15, max: 50 },
+    humedad: { min: 20, max: 100 },
+    luminosidad: { min: 2000, max: 50000 },
+    conductividadElectrica: { min: 5, max: 20 },
+    co2: { min: 3, max: 18 }
+  };
+
+  constructor(private apiService: ApiService, private menuCtrl: MenuController) { }
 
   ngOnInit() {
     this.apiService.getCajasDisponibles().subscribe({
       next: (cajas: { nombre: string }[]) => {
         if (cajas.length > 0) {
-          this.cajasDisponibles = cajas.map(c => c.nombre);
-          this.cajaSeleccionada = this.cajasDisponibles[0];
-          this.iniciarMonitorCaja();
+          this.cajasDisponibles = cajas
+            .map(c => c.nombre)
+            .filter(nombre => nombre.toLowerCase().includes('caja'));
+
+          if (this.cajasDisponibles.length > 0) {
+            this.cajaSeleccionada = this.cajasDisponibles[0];
+            this.iniciarMonitorCaja();
+          } else {
+            console.warn('No hay cajas que coincidan con el filtro.');
+          }
         }
       },
       error: (err) => {
@@ -79,18 +96,43 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
         }
 
         const flatData: SensorEntry[] = this.availableSensors.map(sensor => {
-          const lastValid = [...datos].reverse().find(d => typeof d[sensor.key] !== 'undefined' && d[sensor.key] !== null);
+          // Ordena datos por fecha descendente
+          const sortedDatos = [...datos].sort((a, b) => {
+            const dateA = new Date(a.updatedAt || a.fecha).getTime();
+            const dateB = new Date(b.updatedAt || b.fecha).getTime();
+            return dateB - dateA;
+          });
+
+          // Encuentra el dato más reciente con valor definido
+          const lastValid = sortedDatos.find(d => typeof d[sensor.key] !== 'undefined' && d[sensor.key] !== null);
+
           return {
             id: 0,
             name: sensor.name,
             value: lastValid ? Number(lastValid[sensor.key]) : 0,
             unit: sensor.unit,
-            timestamp: lastValid ? lastValid.timestamp : new Date().toISOString(),
+            timestamp: lastValid?.updatedAt || lastValid?.fecha || new Date().toISOString(),
             key: sensor.key
           };
         });
 
         this.sensorData = flatData;
+
+        /* Lógica para notificaciones por fuera de límites
+        flatData.forEach(sensor => {
+          const limit = this.sensorLimits[sensor.key];
+          if (!limit) return;
+
+          const isOutOfRange = sensor.value < limit.min || sensor.value > limit.max;
+
+          if (isOutOfRange && !this.notifiedSensors[sensor.key]) {
+            this.enviarNotificacion(sensor.name, sensor.value);  // <-- Cambio aquí para usar objeto payload
+            this.notifiedSensors[sensor.key] = true;
+          } else if (!isOutOfRange && this.notifiedSensors[sensor.key]) {
+            this.notifiedSensors[sensor.key] = false;
+          }
+        });*/
+
         this.updateCharts();
       },
       err => console.error('Error obteniendo datos de la caja:', err)
@@ -109,6 +151,16 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onCajaChange() {
+    // Limpia datos previos
+    this.sensorData = [];
+
+    // Limpia los datos de los gráficos
+    Object.values(this.sensorCharts).forEach(chart => {
+      chart.data.labels = [];
+      chart.data.datasets.forEach(dataset => dataset.data = []);
+      chart.update();
+    });
+
     this.iniciarMonitorCaja();
   }
 
