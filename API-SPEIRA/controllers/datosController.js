@@ -21,42 +21,7 @@ exports.crearDato = async (req, res) => {
       co2
     } = req.body;
 
-    const errores = [];
-
-    const rangos = {
-      ph: { min: 8, max: 11 },
-      temperaturaAgua: { min: 10, max: 50 },
-      temperaturaAmbiente: { min: 15, max: 50 },
-      humedad: { min: 0, max: 100 },
-      luminosidad: { min: 0, max: 100000 },
-      conductividadElectrica: { min: 0, max: 100000 },
-      co2: { min: 0, max: 1000 }
-    };
-
-    function validarParametro(nombreParam, valor) {
-      if (valor === undefined || isNaN(valor)) {
-        return `${nombreParam} inválido o faltante`;
-      }
-      const num = parseFloat(valor);
-      if (num < rangos[nombreParam].min || num > rangos[nombreParam].max) {
-        return `${nombreParam} fuera de rango (${rangos[nombreParam].min} - ${rangos[nombreParam].max})`;
-      }
-      return null;
-    }
-
-    const params = { ph, temperaturaAgua, temperaturaAmbiente, humedad, luminosidad, conductividadElectrica, co2 };
-
-    for (const [param, valor] of Object.entries(params)) {
-      const error = validarParametro(param, valor);
-      if (error) errores.push(error);
-    }
-
-    if (errores.length > 0) {
-      return res.status(400).json({ error: 'Parámetros inválidos', detalles: errores });
-    }
-
     let estanque = null;
-
     if (estanqueId) {
       estanque = await Estanque.findById(estanqueId);
     } else if (nombre) {
@@ -69,15 +34,15 @@ exports.crearDato = async (req, res) => {
     }
 
     const datosConFecha = {
-      ph: parseFloat(ph),
-      temperaturaAgua: parseFloat(temperaturaAgua),
-      temperaturaAmbiente: parseFloat(temperaturaAmbiente),
-      humedad: parseFloat(humedad),
-      luminosidad: parseFloat(luminosidad),
-      conductividadElectrica: parseFloat(conductividadElectrica),
-      co2: parseFloat(co2),
+      ph: ph !== undefined ? parseFloat(ph) : null,
+      temperaturaAgua: temperaturaAgua !== undefined ? parseFloat(temperaturaAgua) : null,
+      temperaturaAmbiente: temperaturaAmbiente !== undefined ? parseFloat(temperaturaAmbiente) : null,
+      humedad: humedad !== undefined ? parseFloat(humedad) : null,
+      luminosidad: luminosidad !== undefined ? parseFloat(luminosidad) : null,
+      conductividadElectrica: conductividadElectrica !== undefined ? parseFloat(conductividadElectrica) : null,
+      co2: co2 !== undefined ? parseFloat(co2) : null,
       fecha: moment.tz(ZONA_HORARIA).toDate(),
-      estanque: estanque.id
+      estanque: estanque._id
     };
 
     const nuevoDato = new DatosSensor(datosConFecha);
