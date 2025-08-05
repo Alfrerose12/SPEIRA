@@ -1,5 +1,5 @@
 const FcmToken = require('../models/fcmToken');
-const admin = require('../firebase');
+const admin = require('../config/firebase');
 
 exports.guardarToken = async (req, res) => {
   const { token, userId } = req.body;
