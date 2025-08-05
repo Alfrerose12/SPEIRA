@@ -220,24 +220,18 @@ const swaggerDefinition = {
         tags: ['Datos'],
         summary: 'Obtener datos de un estanque específico',
         description: 'Obtiene todos los datos de un estanque específico.',
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  nombre: {
-                    type: 'string',
-                    description: 'Nombre del estanque',
-                    example: 'Estanque 1'
-                  }
-                },
-                required: ['nombre']
-              }
+        parameters: [
+          {
+            name: 'nombre',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+              description: 'Nombre del estanque',
+              example: 'Estanque 1'
             }
           }
-        },
+        ],
         responses: {
           200: {
             description: 'Datos del estanque',
