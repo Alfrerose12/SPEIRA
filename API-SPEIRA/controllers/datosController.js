@@ -116,14 +116,14 @@ exports.obtenerDatosGenerales = async (req, res) => {
           fecha: ultimoDato ? moment(ultimoDato.fecha).tz(ZONA_HORARIA).format('YYYY-MM-DD HH:mm') : null,
           datos: ultimoDato
             ? {
-              ph: ultimoDato.ph,
-              temperaturaAgua: ultimoDato.temperaturaAgua,
-              temperaturaAmbiente: ultimoDato.temperaturaAmbiente,
-              humedad: ultimoDato.humedad,
-              luminosidad: ultimoDato.luminosidad,
-              conductividadElectrica: ultimoDato.conductividadElectrica,
-              co2: ultimoDato.co2
-            }
+                ph: ultimoDato.ph,
+                temperaturaAgua: ultimoDato.temperaturaAgua,
+                temperaturaAmbiente: ultimoDato.temperaturaAmbiente,
+                humedad: ultimoDato.humedad,
+                luminosidad: ultimoDato.luminosidad,
+                conductividadElectrica: ultimoDato.conductividadElectrica,
+                co2: ultimoDato.co2
+              }
             : null
         };
       })
@@ -224,13 +224,9 @@ exports.obtenerDatosPorEstanque = async (req, res) => {
       return res.status(404).json({ error: 'Estanque no encontrado' });
     }
 
-    console.log(`Consultando datos para estanque: ${estanque._id}`);
     const datos = await DatosSensor.find({ estanque: estanque._id })
       .sort({ fecha: -1 })
       .limit(10);
-    console.log(`Datos encontrados: ${datos.length}`);
-    console.log("Primer dato:", datos[0]?.fecha);
-    console.log("Último dato:", datos[datos.length - 1]?.fecha);
 
     if (datos.length === 0) {
       return res.status(404).json({
