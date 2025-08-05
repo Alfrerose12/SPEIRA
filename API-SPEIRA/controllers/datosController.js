@@ -225,8 +225,8 @@ exports.obtenerDatosPorEstanque = async (req, res) => {
     }
 
     const datos = await DatosSensor.find({ estanque: estanque._id })
-      .sort({ fecha: -1 }) 
-      .limit(10);          
+      .sort({ fecha: -1 })
+      .limit(10);
 
     if (datos.length === 0) {
       return res.status(404).json({
@@ -237,8 +237,8 @@ exports.obtenerDatosPorEstanque = async (req, res) => {
 
     const datosFormateados = datos.map(dato => ({
       ...dato._doc,
-      fecha: moment(dato.fecha).tz(ZONA_HORARIA).format('YYYY-MM-DD HH:mm:ss')
-    })).reverse(); 
+      fecha: moment(dato.fecha).tz(ZONA_HORARIA).format('YYYY-MM-DD HH:mm')
+    }));
 
     res.json({
       zona_horaria: ZONA_HORARIA,
@@ -253,7 +253,6 @@ exports.obtenerDatosPorEstanque = async (req, res) => {
     });
   }
 };
-
 
 
 exports.generarReporteporEstanque = async (req, res) => {
