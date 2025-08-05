@@ -24,9 +24,9 @@ exports.crearDato = async (req, res) => {
     const errores = [];
 
     const rangos = {
-      ph: { min: 0, max: 14 },
-      temperaturaAgua: { min: -10, max: 50 },
-      temperaturaAmbiente: { min: -10, max: 50 },
+      ph: { min: 8, max: 11 },
+      temperaturaAgua: { min: 10, max: 50 },
+      temperaturaAmbiente: { min: 15, max: 50 },
       humedad: { min: 0, max: 100 },
       luminosidad: { min: 0, max: 100000 },
       conductividadElectrica: { min: 0, max: 100000 },
@@ -217,14 +217,17 @@ exports.obtenerDatosPorPeriodo = async (req, res) => {
 
 exports.obtenerDatosPorEstanque = async (req, res) => {
   try {
-    const { nombre } = req.body;
+    const { nombre } = req.params;
 
     const estanque = await Estanque.findOne({ nombre });
     if (!estanque) {
       return res.status(404).json({ error: 'Estanque no encontrado' });
     }
 
-    const datos = await DatosSensor.find({ estanque: estanque._id }).sort({ fecha: -1 });
+    const datos = await DatosSensor.find({ estanque: estanque._id })
+      .sort({ fecha: -1 }) 
+      .limit(10);          
+
     if (datos.length === 0) {
       return res.status(404).json({
         mensaje: 'No se encontraron datos para el estanque',
@@ -234,8 +237,8 @@ exports.obtenerDatosPorEstanque = async (req, res) => {
 
     const datosFormateados = datos.map(dato => ({
       ...dato._doc,
-      fecha: moment(dato.fecha).tz(ZONA_HORARIA).format('YYYY-MM-DD HH:mm')
-    }));
+      fecha: moment(dato.fecha).tz(ZONA_HORARIA).format('YYYY-MM-DD HH:mm:ss')
+    })).reverse(); 
 
     res.json({
       zona_horaria: ZONA_HORARIA,
@@ -250,6 +253,8 @@ exports.obtenerDatosPorEstanque = async (req, res) => {
     });
   }
 };
+
+
 
 exports.generarReporteporEstanque = async (req, res) => {
   try {
