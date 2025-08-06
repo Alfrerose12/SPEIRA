@@ -39,21 +39,19 @@ export class InicioPage implements OnInit {
   }
 
   async initFcm() {
-    const permission = await this.fcmService.requestPermission();
-    if (permission !== 'granted') {
-      console.warn('Permiso de notificaciones no concedido');
+    // requestPermission() ya devuelve el token o null
+    const token = await this.fcmService.requestPermission();
+    if (!token) {
+      console.warn('Permiso de notificaciones no concedido o no se obtuvo token');
       return;
     }
 
-    const token: string | null = await this.fcmService.getTokenFCM();
-    if (token) {
-      console.log('✅ Token listo:', token);
+    console.log('✅ Token listo:', token);
 
-      this.apiService.guardarTokenNotificacion(token).subscribe({
-        next: () => console.log('📡 Token registrado en backend'),
-        error: (err: any) => console.error('❌ Error al registrar token:', err)
-      });
-    }
+    this.apiService.guardarTokenNotificacion(token).subscribe({
+      next: () => console.log('📡 Token registrado en backend'),
+      error: (err: any) => console.error('❌ Error al registrar token:', err)
+    });
 
     this.fcmService.listenMessages((payload: any) => {
       console.log('📨 Mensaje recibido en foreground:', payload);
