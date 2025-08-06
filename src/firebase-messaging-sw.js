@@ -17,13 +17,13 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 // Escucha mensajes en segundo plano
-messaging.onBackgroundMessage(function(payload) {
+messaging.onBackgroundMessage(function (payload) {
   console.log('[firebase-messaging-sw.js] Mensaje recibido en segundo plano:', payload);
 
   const notificationTitle = payload?.notification?.title || 'Notificación';
   const notificationOptions = {
     body: payload?.notification?.body || 'Tienes un nuevo mensaje.',
-    icon: '/assets/icon/icon.png', // Cambia por el ícono que uses
+    icon: '/assets/icon/icon.png',
     data: {
       click_action: payload?.notification?.click_action || '/'
     }
@@ -33,16 +33,21 @@ messaging.onBackgroundMessage(function(payload) {
 });
 
 // Maneja clics en notificaciones
-self.addEventListener('notificationclick', function(event) {
+self.addEventListener('notificationclick', function (event) {
   event.notification.close();
 
   const urlToOpen = event.notification.data?.click_action || '/';
+
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
       for (const client of clientList) {
-        if (client.url === urlToOpen && 'focus' in client) return client.focus();
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
+        }
       }
-      if (clients.openWindow) return clients.openWindow(urlToOpen);
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
     })
   );
 });

@@ -13,50 +13,65 @@ export class FirebaseMessagingService {
     this.messaging = getMessaging(this.app);
   }
 
+  /**
+   * Solicita permiso al usuario para enviar notificaciones
+   */
   requestPermission(): Promise<NotificationPermission> {
     return Notification.requestPermission();
   }
 
+  /**
+   * Obtiene el token FCM del dispositivo
+   */
   async getTokenFCM(): Promise<string | null> {
+    if (!environment.serviceWorker) {
+      console.warn('Service Worker deshabilitado por configuración.');
+      return null;
+    }
+
     if (!('serviceWorker' in navigator)) {
       console.warn('Service Worker no soportado en este navegador.');
       return null;
     }
 
     try {
-      // Registrar Service Worker
+      // Registrar el Service Worker para FCM
       const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-      console.log('Service Worker registrado:', registration);
+      console.log('✅ Service Worker registrado:', registration);
 
-      // Esperar que el Service Worker esté listo
+      // Esperar a que esté listo
       const readyRegistration = await navigator.serviceWorker.ready;
 
       if (!readyRegistration.pushManager) {
-        console.error('pushManager no está disponible en el Service Worker registrado.');
+        console.error('❌ pushManager no está disponible.');
         return null;
       }
 
-      // Obtener token con VAPID key y SW registrado
+      // Obtener el token FCM
       const token = await getToken(this.messaging, {
         vapidKey: environment.messagingPublicKey,
-        serviceWorkerRegistration: registration
+        serviceWorkerRegistration: readyRegistration
       });
 
       if (token) {
-        console.log('Token FCM obtenido:', token);
+        console.log('🎉 Token FCM obtenido:', token);
       } else {
-        console.warn('No se obtuvo token FCM');
+        console.warn('⚠️ No se obtuvo token FCM');
       }
+
       return token;
     } catch (error) {
-      console.error('Error obteniendo token FCM', error);
+      console.error('❌ Error al obtener el token FCM:', error);
       return null;
     }
   }
 
+  /**
+   * Escucha mensajes cuando la app está en primer plano
+   */
   listenMessages(callback: (payload: any) => void): void {
     onMessage(this.messaging, (payload) => {
-      console.log('Mensaje recibido:', payload);
+      console.log('📩 Mensaje recibido en foreground:', payload);
       callback(payload);
     });
   }
