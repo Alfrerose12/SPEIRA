@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Platform, IonicModule, ToastController } from '@ionic/angular';
 import { Auth } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
-import { FirebaseMessagingService } from './firebase-messaging.service';
+import { FirebaseMessagingService } from './services/firebase-messaging.service';
 import { ApiService } from './services/api.service';
 
 @Component({
@@ -11,7 +11,6 @@ import { ApiService } from './services/api.service';
   styleUrls: ['app.component.scss'],
   standalone: true,
   imports: [IonicModule],
-  providers: [FirebaseMessagingService], // <-- Quité ApiService de aquí
 })
 export class AppComponent {
   authState$!: Observable<any>;

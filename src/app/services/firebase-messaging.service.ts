@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
 import { initializeApp, FirebaseApp } from 'firebase/app';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseMessagingService {
@@ -19,9 +19,15 @@ export class FirebaseMessagingService {
 
   async getTokenFCM(): Promise<string | null> {
     try {
+      // Registro del service worker
+      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+
+      // Obtener token con VAPID key y SW registrado
       const token = await getToken(this.messaging, {
-        vapidKey: 'BNctf7zQoi75ZkCccfJQyWF4ObxHVIVDHVg06W1SrV8_4e-wHcnguwLYXR0Qp3DnWyRVoxPpnrT9wINPm3UG7P0'
+        vapidKey: environment.messagingPublicKey,
+        serviceWorkerRegistration: registration
       });
+
       if (token) {
         console.log('Token FCM obtenido:', token);
       } else {

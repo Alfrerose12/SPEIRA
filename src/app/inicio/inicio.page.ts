@@ -4,8 +4,7 @@ import { Router } from '@angular/router';
 import { Platform, PopoverController } from '@ionic/angular';
 import { PopoverMenuComponent } from '../components/popover-menu/popover-menu.component';
 import { ApiService } from '../services/api.service';
-import { FcmService } from '../services/fcm.services'; // corregido singular .service
-
+import { FirebaseMessagingService } from '../services/firebase-messaging.service';
 declare var navigator: any;
 
 @Component({
@@ -27,7 +26,7 @@ export class InicioPage implements OnInit {
     private platform: Platform,
     private location: Location,
     private apiService: ApiService,
-    private fcmService: FcmService
+    private fcmService: FirebaseMessagingService
   ) { }
 
   ngOnInit() {
@@ -40,7 +39,13 @@ export class InicioPage implements OnInit {
   }
 
   async initFcm() {
-    const token: string | null = await this.fcmService.requestPermissionAndGetToken();
+    const permission = await this.fcmService.requestPermission();
+    if (permission !== 'granted') {
+      console.warn('Permiso de notificaciones no concedido');
+      return;
+    }
+
+    const token: string | null = await this.fcmService.getTokenFCM();
     if (token) {
       console.log('✅ Token listo:', token);
 
@@ -50,7 +55,10 @@ export class InicioPage implements OnInit {
       });
     }
 
-    this.fcmService.listenToForegroundMessages();
+    this.fcmService.listenMessages((payload: any) => {
+      console.log('📨 Mensaje recibido en foreground:', payload);
+      // Aquí podrías mostrar un toast, alerta, etc.
+    });
   }
 
   configureBackButton() {
@@ -88,10 +96,10 @@ export class InicioPage implements OnInit {
         isAdmin: this.isAdmin
       },
       cssClass: 'custom-popover',
-      side: 'bottom', 
-      alignment: 'end', 
-      size: 'auto', 
-      arrow: false 
+      side: 'bottom',
+      alignment: 'end',
+      size: 'auto',
+      arrow: false
     });
 
     await popover.present();
@@ -187,8 +195,8 @@ export class InicioPage implements OnInit {
   goToMonitoreo() {
     this.router.navigate(['/sensor-monitoring']);
   }
-  
-  goToAdministradorEstanques(){
+
+  goToAdministradorEstanques() {
     this.router.navigate(['/ajustes-admin']);
   }
 
@@ -198,7 +206,7 @@ export class InicioPage implements OnInit {
         localStorage.removeItem('authToken');
         localStorage.removeItem('userData');
         localStorage.removeItem('userRole');
-        
+
         this.router.navigate(['/login']);
         this.location.replaceState('/login');
       },

@@ -1,5 +1,3 @@
-// firebase-messaging-sw.js
-
 // Importa las versiones 'compat' para soporte de service workers
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
@@ -15,7 +13,7 @@ firebase.initializeApp({
   measurementId: "G-DWJCN7HR3Y"
 });
 
-// Obtiene una instancia del servicio de mensajería
+// Obtiene instancia del servicio de mensajería
 const messaging = firebase.messaging();
 
 // Escucha mensajes en segundo plano
@@ -25,7 +23,7 @@ messaging.onBackgroundMessage(function(payload) {
   const notificationTitle = payload?.notification?.title || 'Notificación';
   const notificationOptions = {
     body: payload?.notification?.body || 'Tienes un nuevo mensaje.',
-    icon: '/assets/icon/icon.png', // Puedes personalizar este ícono
+    icon: '/assets/icon/icon.png', // Cambia por el ícono que uses
     data: {
       click_action: payload?.notification?.click_action || '/'
     }
@@ -34,7 +32,7 @@ messaging.onBackgroundMessage(function(payload) {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Opción adicional para manejar clics en las notificaciones (opcional)
+// Maneja clics en notificaciones
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
 
