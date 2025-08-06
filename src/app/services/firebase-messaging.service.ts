@@ -11,12 +11,14 @@ export class FirebaseMessagingService {
   constructor() {
     this.app = initializeApp(environment.firebaseConfig);
     this.messaging = getMessaging(this.app);
+    console.log('Firebase app initialized');
   }
 
   /**
    * Solicita permiso al usuario para enviar notificaciones
    */
   requestPermission(): Promise<NotificationPermission> {
+    console.log('Solicitando permiso para notificaciones...');
     return Notification.requestPermission();
   }
 
@@ -35,19 +37,21 @@ export class FirebaseMessagingService {
     }
 
     try {
-      // Registrar el Service Worker para FCM
+      console.log('Registrando Service Worker...');
       const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
       console.log('✅ Service Worker registrado:', registration);
 
-      // Esperar a que esté listo
+      console.log('Esperando a que el Service Worker esté listo...');
       const readyRegistration = await navigator.serviceWorker.ready;
+      console.log('Service Worker listo:', readyRegistration);
 
       if (!readyRegistration.pushManager) {
-        console.error('❌ pushManager no está disponible.');
+        console.error('❌ pushManager no está disponible en el Service Worker registrado.');
         return null;
       }
+      console.log('pushManager disponible.');
 
-      // Obtener el token FCM
+      console.log('Solicitando token FCM...');
       const token = await getToken(this.messaging, {
         vapidKey: environment.messagingPublicKey,
         serviceWorkerRegistration: readyRegistration
