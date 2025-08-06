@@ -28,40 +28,44 @@ export class AppComponent {
 
       this.authState$ = new Observable((observer) => {
         this.auth.onAuthStateChanged((user) => {
+          console.log('[AuthState] Usuario cambió:', user); // Log auth state change
           observer.next(user);
         });
       });
 
       this.authState$.subscribe((user) => {
-        if (user) {
-          console.log('Usuario autenticado:', user);
+        console.log('[AuthState suscripción] Usuario actual:', user); // Log current user
 
+        if (user) {
           this.fcmService.requestPermission().then((permission: NotificationPermission) => {
+            console.log('[Permiso Notificaciones] Resultado:', permission); // Log permission result
+
             if (permission === 'granted') {
               this.fcmService.getTokenFCM().then((token: string | null) => {
-                if (token) {
-                  console.log('Token FCM:', token);
+                console.log('[Token FCM] Token obtenido:', token); // Log token obtained
 
+                if (token) {
                   this.apiService.guardarTokenNotificacion(token).subscribe({
                     next: (res) => {
-                      console.log('Token guardado en backend:', res);
+                      console.log('[API] Token guardado:', res);
                     },
                     error: (err) => {
-                      console.error('Error guardando token en backend:', err);
+                      console.error('[API] Error guardando token:', err);
                     }
                   });
-
                 } else {
-                  console.warn('No se obtuvo token FCM');
+                  console.warn('[Token FCM] No se obtuvo token');
                 }
+              }).catch(err => {
+                console.error('[Token FCM] Error obteniendo token:', err);
               });
             } else {
-              console.warn('Permiso para notificaciones no concedido');
+              console.warn('[Permiso Notificaciones] Permiso NO concedido');
             }
           });
-
+          
           this.fcmService.listenMessages(async (payload: any) => {
-            console.log('Notificación recibida en foreground:', payload);
+            console.log('[Foreground Message] Mensaje recibido:', payload);
 
             const toast = await this.toastCtrl.create({
               message: `${payload.notification?.title}: ${payload.notification?.body}`,
@@ -72,7 +76,7 @@ export class AppComponent {
           });
 
         } else {
-          console.log('No hay usuario autenticado');
+          console.log('[AuthState suscripción] No hay usuario autenticado');
         }
       });
     });
