@@ -30,45 +30,51 @@ export class FirebaseMessagingService {
       console.warn('Service Worker deshabilitado por configuración.');
       return null;
     }
-
+  
     if (!('serviceWorker' in navigator)) {
       console.warn('Service Worker no soportado en este navegador.');
       return null;
     }
-
+  
     try {
       console.log('Registrando Service Worker...');
       const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
       console.log('✅ Service Worker registrado:', registration);
-
+  
       console.log('Esperando a que el Service Worker esté listo...');
       const readyRegistration = await navigator.serviceWorker.ready;
       console.log('Service Worker listo:', readyRegistration);
-
+  
+      if (!readyRegistration) {
+        console.error('Service Worker listo es undefined o null');
+        return null;
+      }
+  
       if (!readyRegistration.pushManager) {
         console.error('❌ pushManager no está disponible en el Service Worker registrado.');
         return null;
       }
+  
       console.log('pushManager disponible.');
-
-      console.log('Solicitando token FCM...');
+  
       const token = await getToken(this.messaging, {
         vapidKey: environment.messagingPublicKey,
         serviceWorkerRegistration: readyRegistration
       });
-
+  
       if (token) {
         console.log('🎉 Token FCM obtenido:', token);
       } else {
         console.warn('⚠️ No se obtuvo token FCM');
       }
-
+  
       return token;
     } catch (error) {
       console.error('❌ Error al obtener el token FCM:', error);
       return null;
     }
   }
+  
 
   /**
    * Escucha mensajes cuando la app está en primer plano
