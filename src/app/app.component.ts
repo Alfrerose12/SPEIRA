@@ -28,42 +28,35 @@ export class AppComponent {
 
       this.authState$ = new Observable((observer) => {
         this.auth.onAuthStateChanged((user) => {
-          console.log('[AuthState] Usuario cambió:', user); // Log auth state change
+          console.log('[AuthState] Usuario cambió:', user);
           observer.next(user);
         });
       });
 
       this.authState$.subscribe((user) => {
-        console.log('[AuthState suscripción] Usuario actual:', user); // Log current user
+        console.log('[AuthState suscripción] Usuario actual:', user);
 
         if (user) {
-          this.fcmService.requestPermission().then((permission: NotificationPermission) => {
-            console.log('[Permiso Notificaciones] Resultado:', permission); // Log permission result
+          // Aquí se asume que requestPermission() devuelve Promise<string | null>
+          this.fcmService.requestPermission().then((token: string | null) => {
+            console.log('[Permiso y Token Notificaciones] Resultado:', token);
 
-            if (permission === 'granted') {
-              this.fcmService.getTokenFCM().then((token: string | null) => {
-                console.log('[Token FCM] Token obtenido:', token); // Log token obtained
-
-                if (token) {
-                  this.apiService.guardarTokenNotificacion(token).subscribe({
-                    next: (res) => {
-                      console.log('[API] Token guardado:', res);
-                    },
-                    error: (err) => {
-                      console.error('[API] Error guardando token:', err);
-                    }
-                  });
-                } else {
-                  console.warn('[Token FCM] No se obtuvo token');
+            if (token) {
+              this.apiService.guardarTokenNotificacion(token).subscribe({
+                next: (res) => {
+                  console.log('[API] Token guardado:', res);
+                },
+                error: (err) => {
+                  console.error('[API] Error guardando token:', err);
                 }
-              }).catch(err => {
-                console.error('[Token FCM] Error obteniendo token:', err);
               });
             } else {
-              console.warn('[Permiso Notificaciones] Permiso NO concedido');
+              console.warn('[Token FCM] No se obtuvo token o permiso no concedido');
             }
+          }).catch(err => {
+            console.error('[Token FCM] Error obteniendo token:', err);
           });
-          
+
           this.fcmService.listenMessages(async (payload: any) => {
             console.log('[Foreground Message] Mensaje recibido:', payload);
 

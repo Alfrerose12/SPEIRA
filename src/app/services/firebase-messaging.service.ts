@@ -11,77 +11,79 @@ export class FirebaseMessagingService {
   constructor() {
     this.app = initializeApp(environment.firebaseConfig);
     this.messaging = getMessaging(this.app);
-    console.log('Firebase app initialized');
+    console.log('[🔥] Firebase app initialized');
   }
 
   /**
-   * Solicita permiso al usuario para enviar notificaciones
+   * Solicita permiso al usuario y obtiene el token FCM
    */
-  requestPermission(): Promise<NotificationPermission> {
-    console.log('Solicitando permiso para notificaciones...');
-    return Notification.requestPermission();
+  async requestPermission(): Promise<string | null> {
+    console.log('[🔥] Solicitando permiso para notificaciones...');
+    
+    const permission = await Notification.requestPermission();
+    console.log('[🔥] Permiso de notificación:', permission);
+
+    if (permission !== 'granted') {
+      console.warn('[🔥] Permiso denegado por el usuario');
+      return null;
+    }
+
+    return this.getTokenFCM();
   }
 
   /**
    * Obtiene el token FCM del dispositivo
    */
-  async getTokenFCM(): Promise<string | null> {
+  private async getTokenFCM(): Promise<string | null> {
     if (!environment.serviceWorker) {
-      console.warn('Service Worker deshabilitado por configuración.');
+      console.warn('[🔥] Service Worker deshabilitado por configuración');
       return null;
     }
-  
+
     if (!('serviceWorker' in navigator)) {
-      console.warn('Service Worker no soportado en este navegador.');
+      console.warn('[🔥] Service Worker no soportado en este navegador');
       return null;
     }
-  
+
     try {
-      console.log('Registrando Service Worker...');
+      console.log('[🔥] Registrando Service Worker...');
       const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-      console.log('✅ Service Worker registrado:', registration);
-  
-      console.log('Esperando a que el Service Worker esté listo...');
+      console.log('[🔥] ✅ Service Worker registrado:', registration);
+
       const readyRegistration = await navigator.serviceWorker.ready;
-      console.log('Service Worker listo:', readyRegistration);
-  
-      if (!readyRegistration) {
-        console.error('Service Worker listo es undefined o null');
+      console.log('[🔥] Service Worker listo:', readyRegistration);
+
+      if (!readyRegistration?.pushManager) {
+        console.error('[🔥] ❌ pushManager no disponible en Service Worker');
         return null;
       }
-  
-      if (!readyRegistration.pushManager) {
-        console.error('❌ pushManager no está disponible en el Service Worker registrado.');
-        return null;
-      }
-  
-      console.log('pushManager disponible.');
-  
+
+      console.log('[🔥] pushManager disponible');
+
       const token = await getToken(this.messaging, {
         vapidKey: environment.messagingPublicKey,
         serviceWorkerRegistration: readyRegistration
       });
-  
+
       if (token) {
-        console.log('🎉 Token FCM obtenido:', token);
+        console.log('[🔥] 🎉 Token FCM obtenido:', token);
       } else {
-        console.warn('⚠️ No se obtuvo token FCM');
+        console.warn('[🔥] ⚠️ No se obtuvo token FCM');
       }
-  
+
       return token;
     } catch (error) {
-      console.error('❌ Error al obtener el token FCM:', error);
+      console.error('[🔥] ❌ Error al obtener el token FCM:', error);
       return null;
     }
   }
-  
 
   /**
    * Escucha mensajes cuando la app está en primer plano
    */
   listenMessages(callback: (payload: any) => void): void {
     onMessage(this.messaging, (payload) => {
-      console.log('📩 Mensaje recibido en foreground:', payload);
+      console.log('[🔥] 📩 Mensaje recibido en foreground:', payload);
       callback(payload);
     });
   }
