@@ -11,5 +11,5 @@ export const environment = {
     measurementId: "G-DWJCN7HR3Y"
   },
   messagingPublicKey: 'BOIEbnD3_HzVlQ9_cmLVE8mDQqgNTHMci9ENGhDz_ovLLavDI35ms4sijmm9r0-uxSXxx0liPU2-TgvcI310fRs',
-  serviceWorker: false
+  serviceWorker: true
 };
