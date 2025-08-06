@@ -18,9 +18,23 @@ export class FirebaseMessagingService {
   }
 
   async getTokenFCM(): Promise<string | null> {
+    if (!('serviceWorker' in navigator)) {
+      console.warn('Service Worker no soportado en este navegador.');
+      return null;
+    }
+
     try {
-      // Registro del service worker
+      // Registrar Service Worker
       const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      console.log('Service Worker registrado:', registration);
+
+      // Esperar que el Service Worker esté listo
+      const readyRegistration = await navigator.serviceWorker.ready;
+
+      if (!readyRegistration.pushManager) {
+        console.error('pushManager no está disponible en el Service Worker registrado.');
+        return null;
+      }
 
       // Obtener token con VAPID key y SW registrado
       const token = await getToken(this.messaging, {
