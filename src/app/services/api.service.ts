@@ -9,7 +9,7 @@ import { environment } from 'src/environments/environment';
 export class ApiService {
   private baseUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   register(data: { nombre: string; email: string; password: string; rol: string }): Observable<any> {
     return this.http.post(`${this.baseUrl}/usuario/registro`, data, { withCredentials: true });
@@ -29,7 +29,12 @@ export class ApiService {
 
   generarReporte(body: { estanque: string; periodo: string; fecha: string }): Observable<Blob> {
     return this.http.post(`${this.baseUrl}/datos/reportes/estanque`, body, {
-      responseType: 'blob'
+      responseType: 'blob' as const,
+      headers: {
+        'Accept': 'application/pdf',
+        'Content-Type': 'application/json'
+      },
+      withCredentials: true
     });
   }
 
