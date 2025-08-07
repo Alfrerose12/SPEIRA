@@ -170,6 +170,15 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     return this.selectedSensorFilter === '' || this.selectedSensorFilter === key;
   }
 
+  limpiarGraficas() {
+    Object.values(this.sensorCharts).forEach(chart => {
+      chart.data.labels = [];
+      chart.data.datasets.forEach(dataset => dataset.data = []);
+      chart.update();
+    });
+  }
+
+
   updateCharts() {
     this.availableSensors.forEach(sensor => {
       const chart = this.sensorCharts[sensor.canvasId];
@@ -267,9 +276,12 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
     if (data?.action === 'filtro-seleccionado' && data.filtro !== undefined) {
       this.selectedSensorFilter = data.filtro;
+
+      this.limpiarGraficas();
       this.updateCharts();
     }
   }
+
 
   enviarNotificacion(sensorNombre: string, valor: number) {
     const token = localStorage.getItem('fcmToken');

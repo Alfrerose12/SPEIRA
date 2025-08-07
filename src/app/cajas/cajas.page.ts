@@ -167,13 +167,20 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
     this.iniciarMonitorCaja();
   }
 
+  limpiarGraficas() {
+    Object.values(this.sensorCharts).forEach(chart => {
+      chart.data.labels = [];
+      chart.data.datasets.forEach(dataset => dataset.data = []);
+      chart.update();
+    });
+  }
+
   updateCharts() {
     this.availableSensors.forEach(sensor => {
       const chart = this.sensorCharts[sensor.canvasId];
       if (!chart) return;
 
       if (this.selectedSensorFilter && sensor.key !== this.selectedSensorFilter) {
-        // Limpia datos y etiquetas de gráficos que no aplican al filtro
         chart.data.labels = [];
         chart.data.datasets.forEach(dataset => dataset.data = []);
         chart.update();
@@ -269,6 +276,8 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
 
     if (data?.action === 'filtro-seleccionado' && data.filtro !== undefined) {
       this.selectedSensorFilter = data.filtro;
+
+      this.limpiarGraficas();
       this.updateCharts();
     }
   }
