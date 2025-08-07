@@ -3,6 +3,7 @@ import { NavController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { ApiService } from '../services/api.service';
+import { HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-reporte',
@@ -89,31 +90,24 @@ export class ReportePage implements OnInit {
     return /([A-Za-zÁ-Úá-úñÑ\s]+\s*\d+)/.test(this.estanque.trim());
   }
 
-  private descargarPDF(data: Blob) {
-    // Crear URL del blob
-    const urlBlob = URL.createObjectURL(data);
+  private descargarPDF(pdfBlob: Blob) {
+    const pdfUrl = URL.createObjectURL(pdfBlob);
 
-    // Crear elemento anchor
-    const a = document.createElement('a');
-    a.href = urlBlob;
+    const downloadLink = document.createElement('a');
+    downloadLink.href = pdfUrl;
 
-    // Forzar descarga usando el nombre del archivo que viene del backend
-    a.download = this.extraerNombreDescarga() || 'reporte.pdf'; // Usamos nombre del header o uno por defecto
-    a.style.display = 'none';
+    downloadLink.download = `reporte_${this.estanque}_${this.periodo}_${this.fechaSeleccionada.split('T')[0]}.pdf`;
 
-    // Agregar al DOM y hacer click
-    document.body.appendChild(a);
-    a.click();
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
 
-    // Limpiar
-    document.body.removeChild(a);
-    URL.revokeObjectURL(urlBlob);
-    this.generando = false;
+    setTimeout(() => {
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(pdfUrl);
+      this.generando = false;
+    }, 100);
   }
 
-  private extraerNombreDescarga(): string | null {
-    return null;
-  }
 
   private manejarError(err: any) {
     this.generando = false;
