@@ -241,6 +241,9 @@ exports.generarReporte = async (periodo, fechaStr, nombreEstanqueFiltrado = null
     let contador = 0;
     const BATCH_SIZE = 100;
 
+    let primerDato = null;
+    let ultimoDato = null;
+
     console.log('Iniciando consulta a MongoDB...');
     const datosCursor = DatosSensor.find({
       fecha: { $gte: fechaInicio, $lte: fechaFin }
