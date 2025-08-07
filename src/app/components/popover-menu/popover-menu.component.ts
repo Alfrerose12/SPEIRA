@@ -14,7 +14,6 @@ import { CommonModule } from '@angular/common';
         <!-- Admin: Reportes -->
         <ion-item 
           button detail="false" 
-          *ngIf="isAdmin" 
           (click)="close('reportes')"
           class="menu-item">
           <ion-icon name="document-text-outline" slot="start"></ion-icon>
@@ -46,7 +45,7 @@ import { CommonModule } from '@angular/common';
           (click)="close('usuario')"
           class="menu-item">
           <ion-icon name="settings-outline" slot="start"></ion-icon>
-          <ion-label>Ajustes</ion-label>
+          <ion-label>Mis Datos</ion-label>
         </ion-item>
 
       </ng-container>
