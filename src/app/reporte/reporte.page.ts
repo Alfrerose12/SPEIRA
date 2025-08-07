@@ -90,12 +90,29 @@ export class ReportePage implements OnInit {
   }
 
   private descargarPDF(data: Blob) {
+    // Crear URL del blob
     const urlBlob = URL.createObjectURL(data);
+
+    // Crear elemento anchor
     const a = document.createElement('a');
     a.href = urlBlob;
+
+    // Forzar descarga usando el nombre del archivo que viene del backend
+    a.download = this.extraerNombreDescarga() || 'reporte.pdf'; // Usamos nombre del header o uno por defecto
+    a.style.display = 'none';
+
+    // Agregar al DOM y hacer click
+    document.body.appendChild(a);
     a.click();
+
+    // Limpiar
+    document.body.removeChild(a);
     URL.revokeObjectURL(urlBlob);
     this.generando = false;
+  }
+
+  private extraerNombreDescarga(): string | null {
+    return null;
   }
 
   private manejarError(err: any) {
