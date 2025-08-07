@@ -2,7 +2,8 @@ import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { Subscription, interval, switchMap, of } from 'rxjs';
 import { ApiService } from '../services/api.service';
-import { MenuController } from '@ionic/angular';
+import { PopoverController } from '@ionic/angular';
+import { PopoverMenuComponent } from '../components/popover-menu/popover-menu.component';
 
 interface SensorEntry {
   id: number;
@@ -16,9 +17,9 @@ interface SensorEntry {
 Chart.register(...registerables);
 
 @Component({
-  selector: 'app-cajas',
-  templateUrl: './cajas.page.html',
-  styleUrls: ['./cajas.page.scss'],
+  selector: 'app-estanques',
+  templateUrl: './estanques.page.html',
+  styleUrls: ['./estanques.page.scss'],
   standalone: false
 })
 export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
@@ -53,14 +54,19 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
     co2: { min: 3, max: 18 }
   };
 
-  constructor(private apiService: ApiService, private menuCtrl: MenuController) { }
+  private notifiedSensors: { [key: string]: boolean } = {};
+
+  constructor(
+    private apiService: ApiService, 
+    private popoverCtrl: PopoverController
+  ) { }
 
   ngOnInit() {
     this.apiService.getEstanquesDisponibles().subscribe({
-      next: (estanques: { nombre: string }[]) => {
-        if (estanques.length > 0) {
-          this.cajasDisponibles = estanques
-            .map(c => c.nombre)
+      next: (cajas: { nombre: string }[]) => {
+        if (cajas.length > 0) {
+          this.cajasDisponibles = cajas
+            .map(e => e.nombre)
             .filter(nombre => nombre.toLowerCase().includes('caja'));
 
           if (this.cajasDisponibles.length > 0) {
@@ -96,14 +102,12 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
         }
 
         const flatData: SensorEntry[] = this.availableSensors.map(sensor => {
-          // Ordena datos por fecha descendente
           const sortedDatos = [...datos].sort((a, b) => {
             const dateA = new Date(a.updatedAt || a.fecha).getTime();
             const dateB = new Date(b.updatedAt || b.fecha).getTime();
             return dateB - dateA;
           });
 
-          // Encuentra el dato más reciente con valor definido
           const lastValid = sortedDatos.find(d => typeof d[sensor.key] !== 'undefined' && d[sensor.key] !== null);
 
           return {
@@ -118,7 +122,6 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
 
         this.sensorData = flatData;
 
-        /* Lógica para notificaciones por fuera de límites
         flatData.forEach(sensor => {
           const limit = this.sensorLimits[sensor.key];
           if (!limit) return;
@@ -126,16 +129,16 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
           const isOutOfRange = sensor.value < limit.min || sensor.value > limit.max;
 
           if (isOutOfRange && !this.notifiedSensors[sensor.key]) {
-            this.enviarNotificacion(sensor.name, sensor.value);  // <-- Cambio aquí para usar objeto payload
+            this.enviarNotificacion(sensor.name, sensor.value);
             this.notifiedSensors[sensor.key] = true;
           } else if (!isOutOfRange && this.notifiedSensors[sensor.key]) {
             this.notifiedSensors[sensor.key] = false;
           }
-        });*/
+        });
 
         this.updateCharts();
       },
-      err => console.error('Error obteniendo datos de la caja:', err)
+      err => console.error('Error obteniendo datos del estanque:', err)
     );
   }
 
@@ -150,22 +153,22 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
     Object.values(this.sensorCharts).forEach(chart => chart.destroy());
   }
 
-  onCajaChange() {
-    // Limpia datos previos
+  onEstanqueChange() {
     this.sensorData = [];
-
-    // Limpia los datos de los gráficos
     Object.values(this.sensorCharts).forEach(chart => {
       chart.data.labels = [];
       chart.data.datasets.forEach(dataset => dataset.data = []);
       chart.update();
     });
 
-    // Reinicia el monitoreo de la caja seleccionada
     this.iniciarMonitorCaja();
   }
 
- updateCharts() {
+  shouldDisplaySensor(key: string): boolean {
+    return this.selectedSensorFilter === '' || this.selectedSensorFilter === key;
+  }
+
+  updateCharts() {
     this.availableSensors.forEach(sensor => {
       if (this.selectedSensorFilter && sensor.key !== this.selectedSensorFilter) return;
 
@@ -235,11 +238,51 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
     this.sensorCharts[canvasId] = chart;
   }
 
-  shouldDisplaySensor(key: string): boolean {
-    return this.selectedSensorFilter === '' || this.selectedSensorFilter === key;
+  async openFilterPopover(event: Event) {
+    const popover = await this.popoverCtrl.create({
+      component: PopoverMenuComponent,
+      event,
+      translucent: true,
+      componentProps: {
+        mode: 'filtro',
+        availableSensors: this.availableSensors
+      }
+    });
+
+    await popover.present();
+
+    const { data } = await popover.onDidDismiss();
+
+    if (data?.action === 'filtro-seleccionado' && data.filtro !== undefined) {
+      this.selectedSensorFilter = data.filtro;
+      this.updateCharts();
+    }
   }
 
-  openMenu() {
-    this.menuCtrl.open('filter-menu');
+  enviarNotificacion(sensorNombre: string, valor: number) {
+    const token = localStorage.getItem('fcmToken');
+    if (!token) {
+      console.warn('No se encontró token FCM en localStorage');
+      return;
+    }
+
+    const payload = {
+      titulo: `Alerta: ${sensorNombre}`,
+      cuerpo: `El valor actual (${valor.toString()}) está fuera del rango permitido.`,
+      token
+    };
+
+    console.log('Payload que se enviará:', payload);
+
+    this.apiService.enviarNotificacion(payload).subscribe({
+      next: (response) => {
+        console.log('Notificación enviada con éxito:', response);
+      },
+      error: (err) => {
+        console.error('Error al enviar notificación:', err);
+        if (err.error) console.error('Detalle error:', err.error);
+      }
+    });
   }
+
 }

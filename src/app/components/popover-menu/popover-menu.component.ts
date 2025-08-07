@@ -72,6 +72,19 @@ import { CommonModule } from '@angular/common';
         </ion-item>
       </ng-container>
 
+      <!-- Filtro de Sensores -->
+      <ng-container *ngIf="mode === 'filtro'">
+        <ion-list-header>Filtrar por Sensor</ion-list-header>
+
+        <ion-item button (click)="seleccionarFiltro('')">
+          <ion-label>Todos</ion-label>
+        </ion-item>
+
+        <ion-item button *ngFor="let sensor of availableSensors" (click)="seleccionarFiltro(sensor.key)">
+          <ion-label>{{ sensor.name }}</ion-label>
+        </ion-item>
+      </ng-container>
+
     </ion-list>
   `,
   styleUrls: ['./popover-menu.component.scss'],
@@ -79,17 +92,25 @@ import { CommonModule } from '@angular/common';
   imports: [IonicModule, CommonModule]
 })
 export class PopoverMenuComponent {
-  @Input() mode: 'hamburger' | 'context' = 'hamburger';
+  @Input() mode: 'hamburger' | 'context' | 'filtro' = 'hamburger';
+  @Input() availableSensors: any[] = [];
   @Input() tipo: string = '';
   @Input() isAdmin: boolean = false;
 
-  constructor(private popoverCtrl: PopoverController) {}
+  constructor(private popoverCtrl: PopoverController) { }
 
   close(action: string) {
-    this.popoverCtrl.dismiss({ 
+    this.popoverCtrl.dismiss({
       action,
       mode: this.mode,
       ...(this.mode === 'context' && { tipo: this.tipo })
+    });
+  }
+
+  seleccionarFiltro(key: string) {
+    this.popoverCtrl.dismiss({
+      action: 'filtro-seleccionado',
+      filtro: key
     });
   }
 }

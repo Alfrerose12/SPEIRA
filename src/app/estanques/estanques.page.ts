@@ -2,7 +2,8 @@ import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { Subscription, interval, switchMap, of } from 'rxjs';
 import { ApiService } from '../services/api.service';
-import { MenuController } from '@ionic/angular';
+import { PopoverController } from '@ionic/angular';
+import { PopoverMenuComponent } from '../components/popover-menu/popover-menu.component';
 
 interface SensorEntry {
   id: number;
@@ -21,7 +22,6 @@ Chart.register(...registerables);
   styleUrls: ['./estanques.page.scss'],
   standalone: false
 })
-
 export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   estanquesDisponibles: string[] = [];
@@ -56,7 +56,10 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   private notifiedSensors: { [key: string]: boolean } = {};
 
-  constructor(private apiService: ApiService, private menuCtrl: MenuController) { }
+  constructor(
+    private apiService: ApiService, 
+    private popoverCtrl: PopoverController
+  ) { }
 
   ngOnInit() {
     this.apiService.getEstanquesDisponibles().subscribe({
@@ -98,16 +101,13 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
           return;
         }
 
-        // Extraemos los últimos datos válidos para cada sensor
         const flatData: SensorEntry[] = this.availableSensors.map(sensor => {
-          // Ordena datos por fecha descendente
           const sortedDatos = [...datos].sort((a, b) => {
             const dateA = new Date(a.updatedAt || a.fecha).getTime();
             const dateB = new Date(b.updatedAt || b.fecha).getTime();
             return dateB - dateA;
           });
 
-          // Encuentra el dato más reciente con valor definido
           const lastValid = sortedDatos.find(d => typeof d[sensor.key] !== 'undefined' && d[sensor.key] !== null);
 
           return {
@@ -122,7 +122,6 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
         this.sensorData = flatData;
 
-        // Lógica para notificaciones por fuera de límites
         flatData.forEach(sensor => {
           const limit = this.sensorLimits[sensor.key];
           if (!limit) return;
@@ -130,7 +129,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
           const isOutOfRange = sensor.value < limit.min || sensor.value > limit.max;
 
           if (isOutOfRange && !this.notifiedSensors[sensor.key]) {
-            this.enviarNotificacion(sensor.name, sensor.value);  // <-- Cambio aquí para usar objeto payload
+            this.enviarNotificacion(sensor.name, sensor.value);
             this.notifiedSensors[sensor.key] = true;
           } else if (!isOutOfRange && this.notifiedSensors[sensor.key]) {
             this.notifiedSensors[sensor.key] = false;
@@ -155,20 +154,19 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onEstanqueChange() {
-    // Limpia datos previos
     this.sensorData = [];
-
-    // Limpia los datos de los gráficos
     Object.values(this.sensorCharts).forEach(chart => {
       chart.data.labels = [];
       chart.data.datasets.forEach(dataset => dataset.data = []);
       chart.update();
     });
 
-    // Reinicia el monitoreo del estanque seleccionado
     this.iniciarMonitorEstanque();
   }
 
+  shouldDisplaySensor(key: string): boolean {
+    return this.selectedSensorFilter === '' || this.selectedSensorFilter === key;
+  }
 
   updateCharts() {
     this.availableSensors.forEach(sensor => {
@@ -240,18 +238,29 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     this.sensorCharts[canvasId] = chart;
   }
 
-  shouldDisplaySensor(key: string): boolean {
-    return this.selectedSensorFilter === '' || this.selectedSensorFilter === key;
+  async openFilterPopover(event: Event) {
+    const popover = await this.popoverCtrl.create({
+      component: PopoverMenuComponent,
+      event,
+      translucent: true,
+      componentProps: {
+        mode: 'filtro',
+        availableSensors: this.availableSensors
+      }
+    });
+
+    await popover.present();
+
+    const { data } = await popover.onDidDismiss();
+
+    if (data?.action === 'filtro-seleccionado' && data.filtro !== undefined) {
+      this.selectedSensorFilter = data.filtro;
+      this.updateCharts();
+    }
   }
 
-  openMenu() {
-    this.menuCtrl.open('filter-menu');
-  }
-
-  // Cambio aquí: enviarNotificacion ahora arma payload para backend con titulo y cuerpo
   enviarNotificacion(sensorNombre: string, valor: number) {
-    const token = localStorage.getItem('fcmToken'); // 🔽 tomamos el token guardado
-
+    const token = localStorage.getItem('fcmToken');
     if (!token) {
       console.warn('No se encontró token FCM en localStorage');
       return;
@@ -275,6 +284,5 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
       }
     });
   }
-
 
 }
