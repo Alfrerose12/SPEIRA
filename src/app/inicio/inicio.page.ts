@@ -168,15 +168,15 @@ export class InicioPage implements OnInit {
     await popover.present();
   }
 
-  navigateToReporte() {
-    if (!this.isAdmin && !this.estanqueSeleccionado) {
-      alert('Selecciona un estanque primero');
-      return;
-    }
-    this.router.navigate(['/ajustes-admin'], {
-      queryParams: { estanque: this.estanqueSeleccionado }
-    });
-  }
+  // navigateToReporte() {
+  //   if (!this.isAdmin && !this.estanqueSeleccionado) {
+  //     alert('Selecciona un estanque primero');
+  //     return;
+  //   }
+  //   this.router.navigate(['/ajustes-admin'], {
+  //     queryParams: { estanque: this.estanqueSeleccionado }
+  //   });
+  // }
 
   goToUsuario() {
     this.router.navigate(['/ajustes']);
@@ -186,7 +186,7 @@ export class InicioPage implements OnInit {
     if (this.isAdmin) {
       this.router.navigate(['/reporte']);
     } else {
-      this.navigateToReporte();
+      // this.navigateToReporte();
     }
   }
 
