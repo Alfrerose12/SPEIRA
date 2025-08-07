@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { Subscription, interval, switchMap, of } from 'rxjs';
 import { ApiService } from '../services/api.service';
-import { PopoverController } from '@ionic/angular';
+import { MenuController, PopoverController } from '@ionic/angular';
 import { PopoverMenuComponent } from '../components/popover-menu/popover-menu.component';
 
 interface SensorEntry {
@@ -58,6 +58,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   constructor(
     private apiService: ApiService, 
+    private menuCtrl: MenuController,
     private popoverCtrl: PopoverController
   ) { }
 
@@ -155,6 +156,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   onEstanqueChange() {
     this.sensorData = [];
+    
     Object.values(this.sensorCharts).forEach(chart => {
       chart.data.labels = [];
       chart.data.datasets.forEach(dataset => dataset.data = []);
@@ -236,6 +238,10 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.sensorCharts[canvasId] = chart;
+  }
+
+  openMenu() {
+    this.menuCtrl.open('filter-menu');
   }
 
   async openFilterPopover(event: Event) {
