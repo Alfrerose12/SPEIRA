@@ -28,7 +28,7 @@ export class ApiService {
   }
 
   generarReporte(body: { estanque: string; periodo: string; fecha: string }): Observable<Blob> {
-    return this.http.post(`${this.baseUrl}/datos/reportes`, body, {
+    return this.http.post(`${this.baseUrl}/datos/reportes/estanque`, body, {
       responseType: 'blob'
     });
   }
