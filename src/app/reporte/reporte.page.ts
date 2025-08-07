@@ -90,11 +90,9 @@ export class ReportePage implements OnInit {
   }
 
   private descargarPDF(data: Blob) {
-    const blob = new Blob([data], { type: 'application/pdf' });
-    const urlBlob = URL.createObjectURL(blob);
+    const urlBlob = URL.createObjectURL(data);
     const a = document.createElement('a');
     a.href = urlBlob;
-    a.download = `reporte_${this.periodo}_${this.fechaSeleccionada}.pdf`;
     a.click();
     URL.revokeObjectURL(urlBlob);
     this.generando = false;
