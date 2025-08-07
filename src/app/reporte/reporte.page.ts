@@ -45,8 +45,10 @@ export class ReportePage implements OnInit {
 
     this.generando = true;
 
+    const estanqueFormateado = `Caja ${this.estanque}`;
+
     const body = {
-      estanque: this.estanque,
+      estanque: estanqueFormateado,
       periodo: this.periodo,
       fecha: this.formatearFecha(this.fechaSeleccionada)
     };
