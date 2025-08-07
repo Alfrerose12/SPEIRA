@@ -45,10 +45,8 @@ export class ReportePage implements OnInit {
 
     this.generando = true;
 
-    const estanqueFormateado = `Caja ${this.estanque}`;
-
     const body = {
-      estanque: estanqueFormateado,
+      estanque: this.estanque.trim(),
       periodo: this.periodo,
       fecha: this.formatearFecha(this.fechaSeleccionada)
     };
@@ -66,25 +64,29 @@ export class ReportePage implements OnInit {
   }
 
   private validarCampos(): boolean {
-    if (!this.estanque || !this.periodo || !this.fechaSeleccionada) {
-      alert('Completa todos los campos.');
-      return false;
-    }
-
-    if (isNaN(Number(this.estanque))) {
-      alert('El estanque debe ser un número.');
+    if (!this.estanque?.trim() || !this.periodo || !this.fechaSeleccionada) {
+      alert('Completa todos los campos correctamente.');
       return false;
     }
 
     if (this.periodo === 'semanal') {
       const date = new Date(this.fechaSeleccionada);
       if (date.getDay() !== 1) {
-        alert('Para reportes semanales, selecciona un lunes.');
+        alert('Para reportes semanales, la fecha debe ser un lunes.');
         return false;
       }
     }
 
+    if (!this.validarFormatoEstanque()) {
+      alert('Formato sugerido: "Caja 10" o similar');
+      return false;
+    }
+
     return true;
+  }
+
+  private validarFormatoEstanque(): boolean {
+    return /([A-Za-zÁ-Úá-úñÑ\s]+\s*\d+)/.test(this.estanque.trim());
   }
 
   private descargarPDF(data: Blob) {
