@@ -55,7 +55,7 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
   };
 
   constructor(
-    private apiService: ApiService, 
+    private apiService: ApiService,
     private menuCtrl: MenuController,
     private popoverCtrl: PopoverController
   ) { }
@@ -167,12 +167,18 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
     this.iniciarMonitorCaja();
   }
 
- updateCharts() {
+  updateCharts() {
     this.availableSensors.forEach(sensor => {
-      if (this.selectedSensorFilter && sensor.key !== this.selectedSensorFilter) return;
-
       const chart = this.sensorCharts[sensor.canvasId];
       if (!chart) return;
+
+      if (this.selectedSensorFilter && sensor.key !== this.selectedSensorFilter) {
+        // Limpia datos y etiquetas de gráficos que no aplican al filtro
+        chart.data.labels = [];
+        chart.data.datasets.forEach(dataset => dataset.data = []);
+        chart.update();
+        return;
+      }
 
       const latest = this.sensorData.find(d => d.key === sensor.key);
       if (!latest) return;
@@ -193,6 +199,7 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
       chart.update();
     });
   }
+
 
   createChart(canvasId: string, label: string, color: string) {
     const ctx = (document.getElementById(canvasId) as HTMLCanvasElement)?.getContext('2d');
@@ -246,23 +253,23 @@ export class CajasPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async openFilterPopover(event: Event) {
-      const popover = await this.popoverCtrl.create({
-        component: PopoverMenuComponent,
-        event,
-        translucent: true,
-        componentProps: {
-          mode: 'filtro',
-          availableSensors: this.availableSensors
-        }
-      });
-  
-      await popover.present();
-  
-      const { data } = await popover.onDidDismiss();
-  
-      if (data?.action === 'filtro-seleccionado' && data.filtro !== undefined) {
-        this.selectedSensorFilter = data.filtro;
-        this.updateCharts();
+    const popover = await this.popoverCtrl.create({
+      component: PopoverMenuComponent,
+      event,
+      translucent: true,
+      componentProps: {
+        mode: 'filtro',
+        availableSensors: this.availableSensors
       }
+    });
+
+    await popover.present();
+
+    const { data } = await popover.onDidDismiss();
+
+    if (data?.action === 'filtro-seleccionado' && data.filtro !== undefined) {
+      this.selectedSensorFilter = data.filtro;
+      this.updateCharts();
     }
+  }
 }

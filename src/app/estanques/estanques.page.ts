@@ -57,7 +57,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
   private notifiedSensors: { [key: string]: boolean } = {};
 
   constructor(
-    private apiService: ApiService, 
+    private apiService: ApiService,
     private menuCtrl: MenuController,
     private popoverCtrl: PopoverController
   ) { }
@@ -156,7 +156,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   onEstanqueChange() {
     this.sensorData = [];
-    
+
     Object.values(this.sensorCharts).forEach(chart => {
       chart.data.labels = [];
       chart.data.datasets.forEach(dataset => dataset.data = []);
@@ -172,10 +172,15 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
 
   updateCharts() {
     this.availableSensors.forEach(sensor => {
-      if (this.selectedSensorFilter && sensor.key !== this.selectedSensorFilter) return;
-
       const chart = this.sensorCharts[sensor.canvasId];
       if (!chart) return;
+
+      if (this.selectedSensorFilter && sensor.key !== this.selectedSensorFilter) {
+        chart.data.labels = [];
+        chart.data.datasets.forEach(dataset => dataset.data = []);
+        chart.update();
+        return;
+      }
 
       const latest = this.sensorData.find(d => d.key === sensor.key);
       if (!latest) return;
@@ -196,6 +201,7 @@ export class EstanquesPage implements OnInit, OnDestroy, AfterViewInit {
       chart.update();
     });
   }
+
 
   createChart(canvasId: string, label: string, color: string) {
     const ctx = (document.getElementById(canvasId) as HTMLCanvasElement)?.getContext('2d');
