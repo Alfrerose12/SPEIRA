@@ -17,14 +17,14 @@ export class ReportePage implements OnInit {
   fechaSeleccionada = '';
   generando = false;
 
-  constructor( 
+  constructor(
     private apiService: ApiService,
     private navCtrl: NavController,
     private router: Router,
     private location: Location
-  ) {}
+  ) { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   navigateBack() {
     this.navCtrl.back();
@@ -33,7 +33,7 @@ export class ReportePage implements OnInit {
   obtenerPresentacionFecha(): string {
     switch (this.periodo) {
       case 'diario': return 'date';
-      case 'semanal': return 'date'; 
+      case 'semanal': return 'date';
       case 'mensual': return 'month';
       case 'anual': return 'year';
       default: return 'date';
@@ -48,7 +48,7 @@ export class ReportePage implements OnInit {
     const body = {
       estanque: this.estanque,
       periodo: this.periodo,
-      fecha: this.fechaSeleccionada
+      fecha: this.formatearFecha(this.fechaSeleccionada)
     };
 
     this.apiService.generarReporte(body).subscribe({
@@ -58,15 +58,28 @@ export class ReportePage implements OnInit {
     });
   }
 
+  private formatearFecha(fecha: string): string {
+    const date = new Date(fecha);
+    return date.toISOString().split('T')[0];
+  }
+
   private validarCampos(): boolean {
     if (!this.estanque || !this.periodo || !this.fechaSeleccionada) {
       alert('Completa todos los campos.');
       return false;
     }
 
-    if (this.periodo === 'semanal' && new Date(this.fechaSeleccionada).getDay() !== 1) {
-      alert('Para reportes semanales, la fecha debe comenzar en lunes.');
+    if (isNaN(Number(this.estanque))) {
+      alert('El estanque debe ser un número.');
       return false;
+    }
+
+    if (this.periodo === 'semanal') {
+      const date = new Date(this.fechaSeleccionada);
+      if (date.getDay() !== 1) {
+        alert('Para reportes semanales, selecciona un lunes.');
+        return false;
+      }
     }
 
     return true;
@@ -89,13 +102,13 @@ export class ReportePage implements OnInit {
     alert('No se pudo generar el reporte. Intenta nuevamente.');
   }
 
-   logout() {
+  logout() {
     this.apiService.logout().subscribe({
       next: () => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('userData');
         localStorage.removeItem('userRole');
-        
+
         this.router.navigate(['/login']);
         this.location.replaceState('/login');
       },
