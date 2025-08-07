@@ -183,12 +183,16 @@ export class InicioPage implements OnInit {
   }
 
   goToReportes() {
-    if (this.isAdmin) {
-      this.router.navigate(['/reporte']);
-    } else {
-      // this.navigateToReporte();
-    }
+    this.router.navigate(['/reporte']);
   }
+
+  // goToReportes() {
+  //   if (this.isAdmin) {
+  //     this.router.navigate(['/reporte']);
+  //   } else {
+  //     this.navigateToReporte();
+  //   }
+  // }
 
   goToMonitoreo() {
     this.router.navigate(['/sensor-monitoring']);
