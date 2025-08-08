@@ -63,7 +63,7 @@ exports.editarEstanque = async (req, res) => {
       return res.status(400).json({ error: 'El nuevo nombre es requerido' });
     }
 
-    const estanque = await Estanque.findOne({ nombre });
+    const estanque = await Estanques.findOne({ nombre });
     if (!estanque) {
       return res.status(404).json({ error: 'Estanque no encontrado' });
     }
@@ -80,7 +80,7 @@ exports.editarEstanque = async (req, res) => {
 exports.eliminarEstanque = async (req, res) => {
   try {
     const { nombre } = req.params;
-    const estanque = await Estanque.findOneAndDelete({ nombre });
+    const estanque = await Estanques.findOneAndDelete({ nombre });
     if (!estanque) {
       return res.status(404).json({ error: 'Estanque no encontrado' });
     }
