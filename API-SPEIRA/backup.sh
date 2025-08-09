@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -a
+source /ruta/al/.env
+set +a
+
 LOG_FILE="/backups/backup.log"
 BACKUP_DIR="/backups"
 
@@ -8,6 +12,12 @@ log() {
 }
 
 log "Iniciando servicio de backups MongoDB"
+
+# Verificación de variables requeridas
+if [[ -z "$MONGO_USER" || -z "$MONGO_PASS" || -z "$MONGO_AUTH_DB" ]]; then
+    log "ERROR: Faltan variables de entorno de MongoDB (MONGO_USER, MONGO_PASS o MONGO_AUTH_DB)"
+    exit 1
+fi
 
 while true; do
     TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
@@ -19,6 +29,9 @@ while true; do
         --host=mongo \
         --port=27017 \
         --db=speiraDB \
+        --username="$MONGO_USER" \
+        --password="$MONGO_PASS" \
+        --authenticationDatabase="$MONGO_AUTH_DB" \
         --out="$BACKUP_PATH" 2>> "$LOG_FILE";
     then
         log "Backup exitoso: $BACKUP_PATH"

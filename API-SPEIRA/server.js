@@ -11,7 +11,7 @@ const swaggerAuth = require('./middleware/swaggerAuth');
 const especificacionSwagger = require('./config/swagger');
 
 if (!process.env.MONGO_URI) throw new Error('MONGO_URI no está definida en .env');
-if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) throw new Error('Claves VAPID no están definidas en .env');
+if (!process.env.VAPID_PRIVATE_KEY) throw new Error('Clave VAPID no está definida en .env');
 
 
 const app = express();

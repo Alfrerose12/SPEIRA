@@ -17,7 +17,7 @@ exports.registrarUsuario = async (req, res) => {
       nombre,
       email,
       password,
-      rol : rol || 'user',
+      rol: rol || 'user',
     });
 
     await nuevoUsuario.save();
@@ -92,14 +92,23 @@ exports.iniciarSesion = async (req, res) => {
   const { email, nombre, password } = req.body;
 
   try {
-    const usuario = await Usuario.findOne(
-      email ? { email } : { nombre }
-    );
+    if (!password || (!email && !nombre)) {
+      return res.status(400).json({ error: 'Faltan credenciales' });
+    }
+
+    const usuario = await Usuario.findOne({
+      $or: [
+        email ? { email } : null,
+        nombre ? { nombre: { $regex: new RegExp(`^${nombre}$`, 'i') } } : null
+      ].filter(Boolean)
+    });
+
     if (!usuario) {
       return res.status(401).json({ error: 'Usuario no encontrado' });
     }
 
     const esValido = await usuario.compararPassword(password);
+
     if (!esValido) {
       return res.status(401).json({ error: 'Contraseña incorrecta' });
     }
@@ -109,7 +118,7 @@ exports.iniciarSesion = async (req, res) => {
         id: usuario._id,
         nombre: usuario.nombre,
         email: usuario.email,
-        rol: usuario.rol 
+        rol: usuario.rol
       },
       process.env.JWT_SECRET || 'secreto',
       { expiresIn: '15min' }
@@ -123,12 +132,15 @@ exports.iniciarSesion = async (req, res) => {
     });
 
     res.json({
-      success: true,
-      id: usuario._id,
-      nombre: usuario.nombre,
-      email: usuario.email,
-      rol: usuario.rol,
+      token,
+      user: {
+        id: usuario._id,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        rol: usuario.rol
+      }
     });
+
   } catch (err) {
     res.status(500).json({ error: 'Error al iniciar sesión', detalles: err.message });
   }

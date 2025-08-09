@@ -50,11 +50,11 @@ function agregarEncabezado(doc, periodo, fechaStr, fechaInicio, fechaFin) {
 
 function promedio(valores) {
   if (!valores || valores.length === 0) return 0;
-  
+
   const valoresNumericos = valores.filter(v => typeof v === 'number' && !isNaN(v));
-  
+
   if (valoresNumericos.length === 0) return 0;
-  
+
   return valoresNumericos.reduce((a, b) => a + b, 0) / valoresNumericos.length;
 }
 
@@ -74,7 +74,7 @@ function agruparPorDia(datos) {
   datos.forEach(dato => {
     if (!dato.estanque) return;
 
-    const hora = moment(dato.fecha).tz(ZONA_HORARIA).startOf('hour').format(); 
+    const hora = moment(dato.fecha).tz(ZONA_HORARIA).startOf('hour').format();
 
     if (!datosAgrupados[hora]) {
       datosAgrupados[hora] = {
@@ -97,9 +97,9 @@ function agruparPorDia(datos) {
     datosAgrupados[hora].luminosidad = sumarSegura(datosAgrupados[hora].luminosidad, dato.luminosidad);
     datosAgrupados[hora].conductividadElectrica = sumarSegura(datosAgrupados[hora].conductividadElectrica, dato.conductividadElectrica);
     datosAgrupados[hora].co2 = sumarSegura(datosAgrupados[hora].co2, dato.co2);
-    
-    if ([dato.ph, dato.temperaturaAgua, dato.temperaturaAmbiente, dato.humedad, 
-         dato.luminosidad, dato.conductividadElectrica, dato.co2].some(v => typeof v === 'number' && !isNaN(v))) {
+
+    if ([dato.ph, dato.temperaturaAgua, dato.temperaturaAmbiente, dato.humedad,
+    dato.luminosidad, dato.conductividadElectrica, dato.co2].some(v => typeof v === 'number' && !isNaN(v))) {
       datosAgrupados[hora].count++;
     }
   });
@@ -127,11 +127,11 @@ function agruparPorSemana(datos) {
     const fechaDato = moment(dato.fecha).tz(ZONA_HORARIA);
     const lunesSemana = fechaDato.clone().startOf('week').format('YYYY-MM-DD');
     const clave = `${lunesSemana}_${dato.estanque.nombre}`;
-    
+
     if (!agrupados[clave]) {
-      agrupados[clave] = { 
-        estanque: dato.estanque.nombre, 
-        datos: [] 
+      agrupados[clave] = {
+        estanque: dato.estanque.nombre,
+        datos: []
       };
     }
     agrupados[clave].datos.push(dato);
@@ -161,11 +161,11 @@ function agruparPorMes(datos) {
 
     const dia = moment(dato.fecha).tz(ZONA_HORARIA).format('YYYY-MM-DD');
     const clave = `${dia}_${dato.estanque.nombre}`;
-    
+
     if (!agrupados[clave]) {
-      agrupados[clave] = { 
-        estanque: dato.estanque.nombre, 
-        datos: [] 
+      agrupados[clave] = {
+        estanque: dato.estanque.nombre,
+        datos: []
       };
     }
     agrupados[clave].datos.push(dato);
@@ -195,11 +195,11 @@ function agruparPorAnio(datos) {
 
     const mes = moment(dato.fecha).tz(ZONA_HORARIA).format('YYYY-MM');
     const clave = `${mes}_${dato.estanque.nombre}`;
-    
+
     if (!agrupados[clave]) {
-      agrupados[clave] = { 
-        estanque: dato.estanque.nombre, 
-        datos: [] 
+      agrupados[clave] = {
+        estanque: dato.estanque.nombre,
+        datos: []
       };
     }
     agrupados[clave].datos.push(dato);
@@ -222,12 +222,12 @@ function agruparPorAnio(datos) {
   });
 }
 
-exports.generarReporte = async (periodo, fechaStr) => {
+exports.generarReporte = async (periodo, fechaStr, nombreEstanqueFiltrado = null) => {
   try {
-    const doc = new PDFDocument({ 
-      margin: 20, 
-      size: 'A4', 
-      bufferPages: true 
+    const doc = new PDFDocument({
+      margin: 20,
+      size: 'A4',
+      bufferPages: true
     });
 
     const rutaReportes = path.join(__dirname, '../reportes', periodo);
@@ -241,6 +241,9 @@ exports.generarReporte = async (periodo, fechaStr) => {
     let contador = 0;
     const BATCH_SIZE = 100;
 
+    let primerDato = null;
+    let ultimoDato = null;
+
     console.log('Iniciando consulta a MongoDB...');
     const datosCursor = DatosSensor.find({
       fecha: { $gte: fechaInicio, $lte: fechaFin }
@@ -250,19 +253,27 @@ exports.generarReporte = async (periodo, fechaStr) => {
       .cursor();
 
     for await (const dato of datosCursor) {
-      if (!dato.estanque) {
-        console.warn('Registro sin estanque encontrado:', dato._id);
+      if (!dato.estanque || !dato.estanque.nombre) {
+        console.warn('Registro sin estanque o sin nombre encontrado:', dato._id);
         continue;
       }
-      
-      const nombreEstanque = dato.estanque.nombre;
-      
-      if (!datosPorEstanque[nombreEstanque]) {
-        datosPorEstanque[nombreEstanque] = [];
+
+      const nombreEstanque = dato.estanque.nombre.trim().toLowerCase();
+      const nombreFiltrado = nombreEstanqueFiltrado?.trim().toLowerCase();
+
+      if (nombreEstanqueFiltrado && nombreEstanque !== nombreFiltrado) {
+        continue;
       }
-      
-      datosPorEstanque[nombreEstanque].push(dato);
+
+      if (!datosPorEstanque[dato.estanque.nombre]) {
+        datosPorEstanque[dato.estanque.nombre] = [];
+      }
+
+      datosPorEstanque[dato.estanque.nombre].push(dato);
       contador++;
+
+      if (!primerDato || dato.fecha < primerDato.fecha) primerDato = dato;
+      if (!ultimoDato || dato.fecha > ultimoDato.fecha) ultimoDato = dato;
 
       if (contador % BATCH_SIZE === 0) {
         await new Promise(resolve => setImmediate(resolve));
@@ -270,8 +281,10 @@ exports.generarReporte = async (periodo, fechaStr) => {
       }
     }
 
+
+
     if (contador === 0) {
-      throw new Error('No hay datos para el período seleccionado');
+      throw new Error('No hay datos para el período y estanque seleccionado');
     }
 
     console.log(`Total de registros procesados: ${contador}`);
@@ -307,7 +320,7 @@ exports.generarReporte = async (periodo, fechaStr) => {
           console.log('PDF generado exitosamente');
           resolve(rutaArchivo);
         });
-        
+
         stream.on('error', (error) => {
           console.error('Error en el stream de escritura:', error);
           doc.end();
@@ -420,7 +433,7 @@ exports.generarReporte = async (periodo, fechaStr) => {
 
             for (let i = 0; i < datosEstanque.length; i += CHUNK_SIZE) {
               const chunk = datosEstanque.slice(i, i + CHUNK_SIZE);
-              
+
               const tabla = {
                 headers: configColumnas.map(col => col.label),
                 rows: chunk.map(item => configColumnas.map(col => col.format(item[col.key])))
@@ -440,7 +453,7 @@ exports.generarReporte = async (periodo, fechaStr) => {
 
               if (i + CHUNK_SIZE < datosEstanque.length) {
                 await new Promise(resolve => setImmediate(resolve));
-                console.log(`Procesando chunk ${i}-${i+CHUNK_SIZE} de ${datosEstanque.length}...`);
+                console.log(`Procesando chunk ${i}-${i + CHUNK_SIZE} de ${datosEstanque.length}...`);
               }
             }
           }

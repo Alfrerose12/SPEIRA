@@ -13,7 +13,8 @@ const swaggerDefinition = {
     '/datos': {
       post: {
         tags: ['Datos'],
-        summary: 'Registrar datos de sensores',
+        summary: 'Registrar datos',
+        description: 'Registra los datos que se mandan desde los sensores.',
         requestBody: {
           required: true,
           content: {
@@ -78,8 +79,8 @@ const swaggerDefinition = {
     '/datos/generales': {
       get: {
         tags: ['Datos'],
-        summary: 'Obtener datos generales de sensores',
-        description: 'Obtiene los datos generales de todos los sensores registrados.',
+        summary: 'Obtener datos generales de todos los estanques',
+        description: 'Obtiene los datos registrados de todos los estanques.',
         responses: {
           200: {
             description: 'Datos generales obtenidos exitosamente',
@@ -134,7 +135,7 @@ const swaggerDefinition = {
     '/datos/{periodo}/{fecha}': {
       get: {
         tags: ['Datos'],
-        summary: 'Obtener datos de sensores por período y fecha',
+        summary: 'Obtener datos de todos los estanques por período y fecha',
         description: 'Obtiene datos según el período especificado. Formatos de fecha requeridos:<br>' +
           '- Diario: YYYY-MM-DD (ej: 2025-01-01)<br>' +
           '- Semanal: YYYY-MM-DD (debe ser lunes, ej: 2025-01-06)<br>' +
@@ -217,8 +218,8 @@ const swaggerDefinition = {
     '/datos/estanque/{nombre}': {
       get: {
         tags: ['Datos'],
-        summary: 'Obtener datos de sensores por estanque',
-        description: 'Obtiene datos de un estanque específico.',
+        summary: 'Obtener datos de un estanque específico',
+        description: 'Obtiene todos los datos de un estanque específico.',
         parameters: [
           {
             name: 'nombre',
@@ -257,7 +258,7 @@ const swaggerDefinition = {
       post: {
         tags: ['Datos'],
         summary: 'Generar reporte PDF por estanque',
-        description: 'Genera un reporte PDF según el período especificado. Formatos de fecha requeridos:<br>' +
+        description: 'Genera un reporte PDF de un estanque específico según el período especificado. Formatos de fecha requeridos:<br>' +
           '- Diario: YYYY-MM-DD (ej: 2025-01-01)<br>' +
           '- Semanal: YYYY-MM-DD (debe ser lunes, ej: 2025-01-06)<br>' +
           '- Mensual: YYYY-MM (ej: 2025-01)<br>' +
@@ -356,7 +357,7 @@ const swaggerDefinition = {
       post: {
         tags: ['Datos'],
         summary: 'Generar reporte PDF general',
-        description: 'Genera un reporte PDF según el período especificado. Formatos de fecha requeridos:<br>' +
+        description: 'Genera un reporte PDF general de todos los estanques según el período especificado. Formatos de fecha requeridos:<br>' +
           '- Diario: YYYY-MM-DD (ej: 2025-01-01)<br>' +
           '- Semanal: YYYY-MM-DD (debe ser lunes, ej: 2025-01-06)<br>' +
           '- Mensual: YYYY-MM (ej: 2025-01)<br>' +
@@ -449,7 +450,7 @@ const swaggerDefinition = {
     '/estanque': {
       post: {
         tags: ['Estanque'],
-        summary: 'Crear estanque',
+        summary: 'Crear un estanque',
         description: 'Crea un nuevo estanque en el sistema.',
         requestBody: {
           required: true,
@@ -604,23 +605,6 @@ const swaggerDefinition = {
                     properties: {
                       _id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
                       nombre: { type: 'string', example: 'Estanque 1' },
-                      DatosSensor: {
-                        type: 'array',
-                        items: {
-                          type: 'object',
-                          properties: {
-                            id: { type: 'string', example: '60d5f484f1b2c8a4b8e4c8a4' },
-                            ph: { type: 'number', example: 7.5 },
-                            temperaturaAgua: { type: 'number', example: 30.0 },
-                            temperaturaAmbiente: { type: 'number', example: 25.0 },
-                            humedad: { type: 'number', example: 60.0 },
-                            luminosidad: { type: 'number', example: 500 },
-                            conductividadElectrica: { type: 'number', example: 1500 },
-                            co2: { type: 'number', example: 400 },
-                            fecha: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' }
-                          }
-                        }
-                      },
                       createdAt: { type: 'string', format: 'date-time', example: '2025-01-01T14:30:00.000Z' },
                       updatedAt: { type: 'string', format: 'date-time', example: '2025-01-01T15:45:00.000Z' }
                     }

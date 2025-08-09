@@ -1,7 +1,0 @@
-{
-  "name": "speira-app",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "angular"
-}
