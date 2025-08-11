@@ -21,6 +21,21 @@ exports.crearDato = async (req, res) => {
       co2
     } = req.body;
 
+    // Función para normalizar valores (convertir negativos a 0 y mantener null/undefined)
+    const normalizarValor = (valor) => {
+      if (valor === undefined || valor === null) return null;
+      const num = parseFloat(valor);
+      return num < 0 ? 0 : num;
+    };
+
+    // Función para normalizar con rango específico
+    const normalizarConRango = (valor, min, max) => {
+      if (valor === undefined || valor === null) return null;
+      const num = parseFloat(valor);
+      const valorNormalizado = num < 0 ? 0 : num;
+      return Math.min(max, Math.max(min, valorNormalizado));
+    };
+
     let estanque = null;
     if (estanqueId) {
       estanque = await Estanque.findById(estanqueId);
@@ -34,13 +49,13 @@ exports.crearDato = async (req, res) => {
     }
 
     const datosConFecha = {
-      ph: ph !== undefined ? parseFloat(ph) : null,
-      temperaturaAgua: temperaturaAgua !== undefined ? parseFloat(temperaturaAgua) : null,
-      temperaturaAmbiente: temperaturaAmbiente !== undefined ? parseFloat(temperaturaAmbiente) : null,
-      humedad: humedad !== undefined ? parseFloat(humedad) : null,
-      luminosidad: luminosidad !== undefined ? parseFloat(luminosidad) : null,
-      conductividadElectrica: conductividadElectrica !== undefined ? parseFloat(conductividadElectrica) : null,
-      co2: co2 !== undefined ? parseFloat(co2) : null,
+      ph: normalizarConRango(ph, 0, 14), 
+      temperaturaAgua: normalizarValor(temperaturaAgua),
+      temperaturaAmbiente: normalizarValor(temperaturaAmbiente),
+      humedad: normalizarConRango(humedad, 0, 100), 
+      luminosidad: normalizarValor(luminosidad),
+      conductividadElectrica: normalizarValor(conductividadElectrica),
+      co2: normalizarValor(co2),
       fecha: moment.tz(ZONA_HORARIA).toDate(),
       estanque: estanque._id
     };
