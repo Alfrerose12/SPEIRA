@@ -13,8 +13,7 @@ import { CommonModule } from '@angular/common';
 
         <!-- Admin: Reportes -->
         <ion-item 
-          button detail="false"
-          *ngIf="isAdmin"  
+          button detail="false" 
           (click)="close('reportes')"
           class="menu-item">
           <ion-icon name="document-text-outline" slot="start"></ion-icon>
