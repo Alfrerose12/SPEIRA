@@ -13,6 +13,9 @@ import { HttpResponse } from '@angular/common/http';
 })
 export class ReportePage implements OnInit {
 
+  estanquesDisponibles: string[] = [];
+  estanqueSeleccionado = '';
+
   estanque = '';
   periodo = '';
   fechaSeleccionada = '';
@@ -29,6 +32,34 @@ export class ReportePage implements OnInit {
 
   navigateBack() {
     this.navCtrl.back();
+  }
+
+  cargarEstanquesDisponibles() {
+    this.apiService.getEstanquesDisponibles().subscribe({
+      next: (estanques: { nombre: string }[]) => {
+        if (estanques.length > 0) {
+          this.estanquesDisponibles = estanques
+            .map(e => e.nombre)
+            .filter(nombre => {
+              const nombreLower = nombre.toLowerCase();
+              return nombreLower.includes('estanque') ||
+                nombreLower.includes('caja') ||
+                nombreLower.includes('piscina');
+            });
+
+          if (this.estanquesDisponibles.length > 0) {
+            this.estanqueSeleccionado = this.estanquesDisponibles[0];
+          } else {
+            console.warn('No hay estanques, cajas o piscinas disponibles.');
+            this.estanquesDisponibles = ['No hay unidades disponibles'];
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Error cargando unidades disponibles:', err);
+        this.estanquesDisponibles = ['Error al cargar unidades'];
+      }
+    });
   }
 
   obtenerPresentacionFecha(): string {

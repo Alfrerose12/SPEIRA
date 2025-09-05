@@ -23,8 +23,37 @@
 
       <!-- Estanque -->
       <ion-item class="form-item" lines="none">
-        <ion-label position="floating" class="input-label">Estanque</ion-label>
-        <ion-input [(ngModel)]="estanque" name="estanque" class="form-input"></ion-input>
+        <ion-label position="stacked" class="input-label">Seleccionar Unidad</ion-label>
+
+        <ion-select [(ngModel)]="estanqueSeleccionado" name="estanque" class="form-input" interface="action-sheet"
+          [disabled]="estanquesDisponibles.length === 0 || estanquesDisponibles[0] === 'No hay unidades disponibles' || estanquesDisponibles[0] === 'Error al cargar unidades'"
+          placeholder="Seleccione una unidad">
+
+          <ion-select-option *ngFor="let estanque of estanquesDisponibles" [value]="estanque"
+            [disabled]="estanque === 'No hay unidades disponibles' || estanque === 'Error al cargar unidades'">
+            {{ estanque }}
+          </ion-select-option>
+
+        </ion-select>
+      </ion-item>
+
+      <!-- Mensaje de estado cuando no hay unidades o error -->
+      <ion-item lines="none"
+        *ngIf="estanquesDisponibles.length > 0 && (estanquesDisponibles[0] === 'No hay unidades disponibles' || estanquesDisponibles[0] === 'Error al cargar unidades')">
+        <ion-label [color]="estanquesDisponibles[0] === 'Error al cargar unidades' ? 'danger' : 'warning'">
+          <ion-icon [name]="estanquesDisponibles[0] === 'Error al cargar unidades' ? 'alert-circle' : 'warning'"
+            slot="start">
+          </ion-icon>
+          {{ estanquesDisponibles[0] }}
+        </ion-label>
+      </ion-item>
+
+      <!-- Loading state (opcional, si agregas variable de loading) -->
+      <ion-item lines="none" *ngIf="!estanquesDisponibles.length">
+        <ion-label color="medium">
+          <ion-spinner name="dots" slot="start"></ion-spinner>
+          Cargando unidades disponibles...
+        </ion-label>
       </ion-item>
 
       <!-- Periodo -->
