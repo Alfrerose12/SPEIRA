@@ -13,7 +13,7 @@ import { ApiService } from '../services/api.service';
 export class ReportePage implements OnInit {
 
   estanquesDisponibles: string[] = [];
-  estanqueSeleccionado = ''; 
+  estanqueSeleccionado = '';
   cargando = true;
   error = false;
 
@@ -89,7 +89,7 @@ export class ReportePage implements OnInit {
     this.generando = true;
 
     const body = {
-      estanque: this.estanqueSeleccionado.trim(), // ← Usar estanqueSeleccionado, no estanque
+      estanque: this.estanqueSeleccionado.trim(),
       periodo: this.periodo,
       fecha: this.formatearFecha(this.fechaSeleccionada)
     };
@@ -105,13 +105,12 @@ export class ReportePage implements OnInit {
 
   private formatearFecha(fecha: string): string {
     if (this.periodo === 'mensual') {
-      // Para mes, usar formato YYYY-MM
       return fecha.substring(0, 7);
+
     } else if (this.periodo === 'anual') {
-      // Para año, usar solo YYYY
       return fecha.substring(0, 4);
     }
-    // Para diario y semanal, usar YYYY-MM-DD
+
     return fecha.split('T')[0];
   }
 
@@ -121,14 +120,12 @@ export class ReportePage implements OnInit {
       return false;
     }
 
-    // Validar que no sea un mensaje de error
     if (this.estanqueSeleccionado === 'No hay unidades disponibles' || 
         this.estanqueSeleccionado === 'Error al cargar unidades') {
       alert('Selecciona una unidad válida.');
       return false;
     }
 
-    // Validación más flexible para el formato
     if (!this.validarFormatoEstanque()) {
       alert('Por favor selecciona una unidad válida de la lista.');
       return false;
@@ -138,7 +135,7 @@ export class ReportePage implements OnInit {
   }
 
   private validarFormatoEstanque(): boolean {
-    // Validación más flexible - solo verificar que no sea un mensaje de error
+
     return this.estanqueSeleccionado.trim().length > 0 &&
            this.estanqueSeleccionado !== 'No hay unidades disponibles' &&
            this.estanqueSeleccionado !== 'Error al cargar unidades';
