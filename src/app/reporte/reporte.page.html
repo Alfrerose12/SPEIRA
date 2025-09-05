@@ -25,7 +25,7 @@
       <ion-item class="form-item" lines="none">
         <ion-label position="stacked" class="input-label">Seleccionar Unidad</ion-label>
 
-        <ion-select [(ngModel)]="estanqueSeleccionado" name="estanque" class="form-input" interface="action-sheet"
+        <ion-select [(ngModel)]="estanqueSeleccionado" name="estanque" class="form-input" interface="popover"
           [disabled]="estanquesDisponibles.length === 0 || estanquesDisponibles[0] === 'No hay unidades disponibles' || estanquesDisponibles[0] === 'Error al cargar unidades'"
           placeholder="Seleccione una unidad">
 
