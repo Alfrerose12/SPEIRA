@@ -15,6 +15,8 @@ export class ReportePage implements OnInit {
 
   estanquesDisponibles: string[] = [];
   estanqueSeleccionado = '';
+  cargando = true;
+  error = false;
 
   estanque = '';
   periodo = '';
@@ -28,7 +30,9 @@ export class ReportePage implements OnInit {
     private location: Location
   ) { }
 
-  ngOnInit() { }
+  ngOnInit() { 
+    this.cargarEstanquesDisponibles();
+  }
 
   navigateBack() {
     this.navCtrl.back();
