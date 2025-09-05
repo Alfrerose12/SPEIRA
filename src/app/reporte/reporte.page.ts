@@ -3,7 +3,6 @@ import { NavController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { ApiService } from '../services/api.service';
-import { HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-reporte',
@@ -14,11 +13,10 @@ import { HttpResponse } from '@angular/common/http';
 export class ReportePage implements OnInit {
 
   estanquesDisponibles: string[] = [];
-  estanqueSeleccionado = '';
+  estanqueSeleccionado = ''; 
   cargando = true;
   error = false;
 
-  estanque = '';
   periodo = '';
   fechaSeleccionada = '';
   generando = false;
@@ -39,9 +37,14 @@ export class ReportePage implements OnInit {
   }
 
   cargarEstanquesDisponibles() {
+    this.cargando = true;
+    this.error = false;
+    
     this.apiService.getEstanquesDisponibles().subscribe({
       next: (estanques: { nombre: string }[]) => {
-        if (estanques.length > 0) {
+        this.cargando = false;
+        
+        if (estanques && estanques.length > 0) {
           this.estanquesDisponibles = estanques
             .map(e => e.nombre)
             .filter(nombre => {
@@ -57,9 +60,13 @@ export class ReportePage implements OnInit {
             console.warn('No hay estanques, cajas o piscinas disponibles.');
             this.estanquesDisponibles = ['No hay unidades disponibles'];
           }
+        } else {
+          this.estanquesDisponibles = ['No hay unidades disponibles'];
         }
       },
       error: (err) => {
+        this.cargando = false;
+        this.error = true;
         console.error('Error cargando unidades disponibles:', err);
         this.estanquesDisponibles = ['Error al cargar unidades'];
       }
@@ -69,7 +76,7 @@ export class ReportePage implements OnInit {
   obtenerPresentacionFecha(): string {
     switch (this.periodo) {
       case 'diario': return 'date';
-      case 'semanal': return 'date';
+      case 'semanal': return 'week';
       case 'mensual': return 'month';
       case 'anual': return 'year';
       default: return 'date';
@@ -82,39 +89,48 @@ export class ReportePage implements OnInit {
     this.generando = true;
 
     const body = {
-      estanque: this.estanque.trim(),
+      estanque: this.estanqueSeleccionado.trim(), // ← Usar estanqueSeleccionado, no estanque
       periodo: this.periodo,
       fecha: this.formatearFecha(this.fechaSeleccionada)
     };
 
+    console.log('Enviando:', body); // Para debug
+
     this.apiService.generarReporte(body).subscribe({
-      next: (response) => this.descargarPDF(response),
+      next: (response: Blob) => this.descargarPDF(response),
       error: (err) => this.manejarError(err),
       complete: () => this.generando = false
     });
   }
 
   private formatearFecha(fecha: string): string {
-    const date = new Date(fecha);
-    return date.toISOString().split('T')[0];
+    if (this.periodo === 'mensual') {
+      // Para mes, usar formato YYYY-MM
+      return fecha.substring(0, 7);
+    } else if (this.periodo === 'anual') {
+      // Para año, usar solo YYYY
+      return fecha.substring(0, 4);
+    }
+    // Para diario y semanal, usar YYYY-MM-DD
+    return fecha.split('T')[0];
   }
 
   private validarCampos(): boolean {
-    if (!this.estanque?.trim() || !this.periodo || !this.fechaSeleccionada) {
+    if (!this.estanqueSeleccionado?.trim() || !this.periodo || !this.fechaSeleccionada) {
       alert('Completa todos los campos correctamente.');
       return false;
     }
 
-    if (this.periodo === 'semanal') {
-      const date = new Date(this.fechaSeleccionada);
-      if (date.getDay() !== 1) {
-        alert('Para reportes semanales, la fecha debe ser un lunes.');
-        return false;
-      }
+    // Validar que no sea un mensaje de error
+    if (this.estanqueSeleccionado === 'No hay unidades disponibles' || 
+        this.estanqueSeleccionado === 'Error al cargar unidades') {
+      alert('Selecciona una unidad válida.');
+      return false;
     }
 
+    // Validación más flexible para el formato
     if (!this.validarFormatoEstanque()) {
-      alert('Formato sugerido: "Caja 10" o similar');
+      alert('Por favor selecciona una unidad válida de la lista.');
       return false;
     }
 
@@ -122,32 +138,49 @@ export class ReportePage implements OnInit {
   }
 
   private validarFormatoEstanque(): boolean {
-    return /([A-Za-zÁ-Úá-úñÑ\s]+\s*\d+)/.test(this.estanque.trim());
+    // Validación más flexible - solo verificar que no sea un mensaje de error
+    return this.estanqueSeleccionado.trim().length > 0 &&
+           this.estanqueSeleccionado !== 'No hay unidades disponibles' &&
+           this.estanqueSeleccionado !== 'Error al cargar unidades';
   }
 
   private descargarPDF(pdfBlob: Blob) {
-    const pdfUrl = URL.createObjectURL(pdfBlob);
+    try {
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = pdfUrl;
+      
+      const fechaFormateada = this.formatearFechaParaNombre(this.fechaSeleccionada);
+      downloadLink.download = `reporte_${this.estanqueSeleccionado}_${this.periodo}_${fechaFormateada}.pdf`;
 
-    const downloadLink = document.createElement('a');
-    downloadLink.href = pdfUrl;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
 
-    downloadLink.download = `reporte_${this.estanque}_${this.periodo}_${this.fechaSeleccionada.split('T')[0]}.pdf`;
-
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-
-    setTimeout(() => {
-      document.body.removeChild(downloadLink);
-      URL.revokeObjectURL(pdfUrl);
-      this.generando = false;
-    }, 100);
+      setTimeout(() => {
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(pdfUrl);
+      }, 100);
+    } catch (error) {
+      console.error('Error al descargar PDF:', error);
+      alert('Error al descargar el reporte. Intenta nuevamente.');
+    }
   }
 
+  private formatearFechaParaNombre(fecha: string): string {
+    return fecha.split('T')[0].replace(/-/g, '');
+  }
 
   private manejarError(err: any) {
     this.generando = false;
     console.error('Error al generar el reporte:', err);
-    alert('No se pudo generar el reporte. Intenta nuevamente.');
+    
+    if (err.status === 404) {
+      alert('No se encontraron datos para el reporte solicitado.');
+    } else if (err.status === 500) {
+      alert('Error del servidor. Intenta nuevamente más tarde.');
+    } else {
+      alert('No se pudo generar el reporte. Verifica los datos e intenta nuevamente.');
+    }
   }
 
   logout() {
@@ -156,9 +189,7 @@ export class ReportePage implements OnInit {
         localStorage.removeItem('authToken');
         localStorage.removeItem('userData');
         localStorage.removeItem('userRole');
-
         this.router.navigate(['/login']);
-        this.location.replaceState('/login');
       },
       error: (err) => {
         console.error('Error en logout:', err);
