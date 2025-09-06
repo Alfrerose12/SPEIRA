@@ -17,7 +17,6 @@ ion-content.report-content {
   min-height: 100vh;
   padding: 20px;
   box-sizing: border-box;
-  overflow-y: auto;
 }
 
 .report-card {
@@ -82,7 +81,6 @@ ion-content.report-content {
 }
 
 /* ===== ESTILOS ESPECÍFICOS PARA EL DATETIME ===== */
-/* Contenedor principal del datetime */
 .form-item:has(ion-datetime) {
   --background: #ffffff !important;
   border: 2px solid #c2e9e5;
@@ -94,7 +92,6 @@ ion-content.report-content {
   --background: #f8f8f8 !important;
 }
 
-/* Estilos generales para ion-datetime */
 .form-item ion-datetime {
   width: 100%;
   --background: transparent !important;
@@ -102,7 +99,16 @@ ion-content.report-content {
   --padding-end: 0;
 }
 
-/* Texto del datetime */
+/* Forzar que en escritorio no tenga scroll interno */
+@media (min-width: 769px) {
+  .form-item ion-datetime {
+    max-height: 44px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+}
+
 .form-item ion-datetime::part(text) {
   color: #333 !important;
   font-size: 1rem !important;
@@ -110,19 +116,16 @@ ion-content.report-content {
   padding: 8px 0 !important;
 }
 
-/* Placeholder del datetime */
 .form-item ion-datetime::part(placeholder) {
   color: #666 !important;
   font-size: 1rem !important;
 }
 
-/* Contenedores responsivos */
 .desktop-date,
 .mobile-date {
   width: 100%;
 }
 
-/* Ocultar/mostrar según el dispositivo */
 .desktop-date {
   display: block;
 }
@@ -136,16 +139,8 @@ ion-content.report-content {
   .desktop-date {
     display: block;
   }
-  
   .mobile-date {
     display: none;
-  }
-  
-  /* Mejorar apariencia en escritorio */
-  .desktop-date ion-datetime {
-    min-height: 44px;
-    display: flex;
-    align-items: center;
   }
 }
 
@@ -154,41 +149,33 @@ ion-content.report-content {
   .desktop-date {
     display: none;
   }
-  
   .mobile-date {
     display: block;
   }
-  
-  /* Estilos para la versión móvil con ruedas */
   .mobile-date ion-datetime {
     --wheel-highlight-background: #0e6d2d;
     --wheel-fade-background-rgb: 255, 255, 255;
   }
-  
   ion-datetime::part(wheel-item) {
     font-size: 16px !important;
     padding: 8px 0 !important;
     color: #333 !important;
   }
-  
   ion-datetime::part(wheel-item active) {
     color: #0e6d2d !important;
     font-weight: bold !important;
   }
-  
   ion-datetime::part(time-button) {
     font-size: 16px !important;
     color: #0e6d2d !important;
     font-weight: 600 !important;
   }
-  
-  /* Ajustar el contenedor en móvil */
   .form-item:has(ion-datetime) {
     padding: 6px 10px;
   }
 }
 
-/* ===== ESTILOS GENERALES QUE DEBEN IR AL FINAL ===== */
+/* ===== ESTILOS GENERALES ===== */
 .password-toggle {
   color: #666;
   font-size: 1.4rem;
@@ -263,65 +250,51 @@ ion-icon:hover {
     max-width: 90%;
     padding: 20px 15px;
   }
-
   .report-title {
     font-size: 1.4rem;
   }
-
   .report-subtitle {
     font-size: 0.85rem;
   }
-
   .form-input {
     font-size: 0.95rem;
   }
-
   .report-button {
     font-size: 0.95rem;
     height: 45px;
   }
-  
-  /* Ajustes adicionales para móvil */
   .form-item {
     --min-height: 50px;
     --padding-start: 10px;
     margin-bottom: 10px;
   }
-  
   .input-label {
     font-size: 0.9rem;
   }
-  
-  /* Ajustes específicos para datetime en móvil */
   .form-item:has(ion-datetime) {
     padding: 4px 8px;
   }
-  
   .form-item ion-datetime::part(text) {
     font-size: 0.95rem !important;
     padding: 6px 0 !important;
   }
 }
 
-/* Media query adicional para tablets */
 @media (min-width: 481px) and (max-width: 768px) {
   .report-card {
     max-width: 85%;
     padding: 25px 20px;
   }
-  
   .form-item:has(ion-datetime) {
     padding: 8px 12px;
   }
 }
 
-/* Asegurar que los selectores de fecha sean visibles */
 ion-datetime {
   opacity: 1 !important;
   visibility: visible !important;
 }
 
-/* Forzar visibilidad del texto */
 ion-datetime .datetime-text {
   color: #333 !important;
   font-weight: 500 !important;
