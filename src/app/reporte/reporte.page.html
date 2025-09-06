@@ -56,10 +56,11 @@
         </ion-label>
       </ion-item>
 
-      <!-- Periodo -->
+      <!-- Asegúrate de que el select de período llame a onPeriodoChange() -->
       <ion-item class="form-item" lines="none">
         <ion-label position="floating" class="input-label">Periodo</ion-label>
-        <ion-select [(ngModel)]="periodo" name="periodo" interface="popover" class="form-input">
+        <ion-select [(ngModel)]="periodo" name="periodo" interface="popover" class="form-input"
+          (ionChange)="onPeriodoChange()">
           <ion-select-option value="diario">Diario</ion-select-option>
           <ion-select-option value="semanal">Semanal</ion-select-option>
           <ion-select-option value="mensual">Mensual</ion-select-option>
@@ -67,14 +68,24 @@
         </ion-select>
       </ion-item>
 
-      <!-- Fecha dinámica -->
+      <!-- Y el datetime debe estar así: -->
       <ion-item class="form-item" lines="none" *ngIf="periodo">
-        <ion-label position="floating" class="input-label">Fecha</ion-label>
-        <ion-datetime [(ngModel)]="fechaSeleccionada" name="fechaSeleccionada"
-          [presentation]="obtenerPresentacionFecha()" class="form-input">
-        </ion-datetime>
+        <ion-label position="stacked" class="input-label">Fecha</ion-label>
+
+        <div class="desktop-date">
+          <ion-datetime [(ngModel)]="fechaSeleccionada" name="fechaSeleccionada"
+            [presentation]="obtenerPresentacionFecha()" class="form-input">
+          </ion-datetime>
+        </div>
+
+        <div class="mobile-date">
+          <ion-datetime [(ngModel)]="fechaSeleccionada" name="fechaSeleccionada"
+            [presentation]="obtenerPresentacionFecha()" [preferWheel]="true" class="form-input">
+          </ion-datetime>
+        </div>
       </ion-item>
 
+      
       <div class="divider"></div>
 
       <ion-button expand="block" class="report-button" (click)="generarReporte()" [disabled]="generando">

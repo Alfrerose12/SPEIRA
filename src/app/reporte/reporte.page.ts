@@ -28,22 +28,29 @@ export class ReportePage implements OnInit {
     private location: Location
   ) { }
 
-  ngOnInit() { 
+  ngOnInit() {
     this.cargarEstanquesDisponibles();
+    this.inicializarFechaPorDefecto(); // ← Añadido
   }
 
   navigateBack() {
     this.navCtrl.back();
   }
 
+  // NUEVO: Inicializar fecha por defecto
+  inicializarFechaPorDefecto() {
+    const fechaActual = new Date();
+    this.fechaSeleccionada = fechaActual.toISOString();
+  }
+
   cargarEstanquesDisponibles() {
     this.cargando = true;
     this.error = false;
-    
+
     this.apiService.getEstanquesDisponibles().subscribe({
       next: (estanques: { nombre: string }[]) => {
         this.cargando = false;
-        
+
         if (estanques && estanques.length > 0) {
           this.estanquesDisponibles = estanques
             .map(e => e.nombre)
@@ -83,6 +90,41 @@ export class ReportePage implements OnInit {
     }
   }
 
+  // NUEVO: Manejar cambio de período
+  onPeriodoChange() {
+    // Cuando cambia el período, ajustar la fecha seleccionada
+    if (this.fechaSeleccionada) {
+      this.ajustarFechaAlPeriodo();
+    }
+  }
+
+  // NUEVO: Ajustar fecha según el período seleccionado
+  private ajustarFechaAlPeriodo() {
+    const fecha = new Date(this.fechaSeleccionada);
+    
+    switch (this.periodo) {
+      case 'semanal':
+        // Ajustar al lunes de la semana
+        const diaSemana = fecha.getDay();
+        const diff = fecha.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+        fecha.setDate(diff);
+        break;
+      
+      case 'mensual':
+        // Ajustar al primer día del mes
+        fecha.setDate(1);
+        break;
+      
+      case 'anual':
+        // Ajustar al primer día del año
+        fecha.setMonth(0);
+        fecha.setDate(1);
+        break;
+    }
+    
+    this.fechaSeleccionada = fecha.toISOString();
+  }
+
   generarReporte() {
     if (!this.validarCampos()) return;
 
@@ -91,10 +133,10 @@ export class ReportePage implements OnInit {
     const body = {
       estanque: this.estanqueSeleccionado.trim(),
       periodo: this.periodo,
-      fecha: this.formatearFecha(this.fechaSeleccionada)
+      fecha: this.formatearFechaParaAPI() // ← Método modificado
     };
 
-    console.log('Enviando:', body); // Para debug
+    console.log('Enviando:', body);
 
     this.apiService.generarReporte(body).subscribe({
       next: (response: Blob) => this.descargarPDF(response),
@@ -103,42 +145,58 @@ export class ReportePage implements OnInit {
     });
   }
 
-  private formatearFecha(fecha: string): string {
-    if (this.periodo === 'mensual') {
-      return fecha.substring(0, 7);
-
-    } else if (this.periodo === 'anual') {
-      return fecha.substring(0, 4);
+  // MODIFICADO: Formatear fecha para la API correctamente
+  private formatearFechaParaAPI(): string {
+    if (!this.fechaSeleccionada) return '';
+    
+    const fecha = new Date(this.fechaSeleccionada);
+    
+    switch (this.periodo) {
+      case 'diario':
+        return fecha.toISOString().split('T')[0]; // YYYY-MM-DD
+      
+      case 'semanal':
+        // Para semanal, devolver el lunes de la semana
+        return fecha.toISOString().split('T')[0];
+      
+      case 'mensual':
+        // YYYY-MM
+        return `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}`;
+      
+      case 'anual':
+        // YYYY
+        return fecha.getFullYear().toString();
+      
+      default:
+        return fecha.toISOString().split('T')[0];
     }
-
-    return fecha.split('T')[0];
   }
 
+  // MODIFICADO: Validación mejorada
   private validarCampos(): boolean {
     if (!this.estanqueSeleccionado?.trim() || !this.periodo || !this.fechaSeleccionada) {
       alert('Completa todos los campos correctamente.');
       return false;
     }
 
+    // Validar que no sea un mensaje de error
     if (this.estanqueSeleccionado === 'No hay unidades disponibles' || 
         this.estanqueSeleccionado === 'Error al cargar unidades') {
       alert('Selecciona una unidad válida.');
       return false;
     }
 
-    if (!this.validarFormatoEstanque()) {
-      alert('Por favor selecciona una unidad válida de la lista.');
-      return false;
+    // Validación específica para período semanal
+    if (this.periodo === 'semanal') {
+      const fecha = new Date(this.fechaSeleccionada);
+      // Validar que sea lunes (día 1 de la semana, donde 0 es domingo)
+      if (fecha.getDay() !== 1) {
+        alert('Para reportes semanales, la fecha debe ser un lunes.');
+        return false;
+      }
     }
 
     return true;
-  }
-
-  private validarFormatoEstanque(): boolean {
-
-    return this.estanqueSeleccionado.trim().length > 0 &&
-           this.estanqueSeleccionado !== 'No hay unidades disponibles' &&
-           this.estanqueSeleccionado !== 'Error al cargar unidades';
   }
 
   private descargarPDF(pdfBlob: Blob) {
@@ -146,9 +204,11 @@ export class ReportePage implements OnInit {
       const pdfUrl = URL.createObjectURL(pdfBlob);
       const downloadLink = document.createElement('a');
       downloadLink.href = pdfUrl;
-      
+
       const fechaFormateada = this.formatearFechaParaNombre(this.fechaSeleccionada);
-      downloadLink.download = `reporte_${this.estanqueSeleccionado}_${this.periodo}_${fechaFormateada}.pdf`;
+      // Limpiar el nombre del estanque para el nombre de archivo
+      const nombreEstanque = this.estanqueSeleccionado.replace(/[^a-zA-Z0-9]/g, '_');
+      downloadLink.download = `reporte_${nombreEstanque}_${this.periodo}_${fechaFormateada}.pdf`;
 
       document.body.appendChild(downloadLink);
       downloadLink.click();
@@ -156,15 +216,18 @@ export class ReportePage implements OnInit {
       setTimeout(() => {
         document.body.removeChild(downloadLink);
         URL.revokeObjectURL(pdfUrl);
+        this.generando = false; // ← Asegurar que se resetee el estado
       }, 100);
     } catch (error) {
       console.error('Error al descargar PDF:', error);
       alert('Error al descargar el reporte. Intenta nuevamente.');
+      this.generando = false;
     }
   }
 
-  private formatearFechaParaNombre(fecha: string): string {
-    return fecha.split('T')[0].replace(/-/g, '');
+  private formatearFechaParaNombre(fechaISO: string): string {
+    const fecha = new Date(fechaISO);
+    return fecha.toISOString().split('T')[0].replace(/-/g, '');
   }
 
   private manejarError(err: any) {
