@@ -4,7 +4,7 @@ ion-content.report-content {
   justify-content: center;
   align-items: center;
   --padding-top: 35px;
-  --padding-bottom: 0;
+  --padding-bottom: 35px;
   height: 100%;
 }
 
@@ -17,6 +17,7 @@ ion-content.report-content {
   min-height: 100vh;
   padding: 20px;
   box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .report-card {
@@ -80,102 +81,6 @@ ion-content.report-content {
   color: #333;
 }
 
-/* ===== ESTILOS ESPECÍFICOS PARA EL DATETIME ===== */
-.form-item:has(ion-datetime) {
-  --background: #ffffff !important;
-  border: 2px solid #c2e9e5;
-  padding: 8px 12px;
-}
-
-.form-item:has(ion-datetime):focus-within {
-  border-color: #0e6d2d;
-  --background: #f8f8f8 !important;
-}
-
-.form-item ion-datetime {
-  width: 100%;
-  --background: transparent !important;
-  --padding-start: 0;
-  --padding-end: 0;
-}
-
-/* Forzar que en escritorio no tenga scroll interno */
-@media (min-width: 769px) {
-  .form-item ion-datetime {
-    max-height: 44px;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-  }
-}
-
-.form-item ion-datetime::part(text) {
-  color: #333 !important;
-  font-size: 1rem !important;
-  font-weight: 500 !important;
-  padding: 8px 0 !important;
-}
-
-.form-item ion-datetime::part(placeholder) {
-  color: #666 !important;
-  font-size: 1rem !important;
-}
-
-.desktop-date,
-.mobile-date {
-  width: 100%;
-}
-
-.desktop-date {
-  display: block;
-}
-
-.mobile-date {
-  display: none;
-}
-
-/* ===== ESTILOS PARA ESCRITORIO ===== */
-@media (min-width: 769px) {
-  .desktop-date {
-    display: block;
-  }
-  .mobile-date {
-    display: none;
-  }
-}
-
-/* ===== ESTILOS PARA MÓVIL ===== */
-@media (max-width: 768px) {
-  .desktop-date {
-    display: none;
-  }
-  .mobile-date {
-    display: block;
-  }
-  .mobile-date ion-datetime {
-    --wheel-highlight-background: #0e6d2d;
-    --wheel-fade-background-rgb: 255, 255, 255;
-  }
-  ion-datetime::part(wheel-item) {
-    font-size: 16px !important;
-    padding: 8px 0 !important;
-    color: #333 !important;
-  }
-  ion-datetime::part(wheel-item active) {
-    color: #0e6d2d !important;
-    font-weight: bold !important;
-  }
-  ion-datetime::part(time-button) {
-    font-size: 16px !important;
-    color: #0e6d2d !important;
-    font-weight: 600 !important;
-  }
-  .form-item:has(ion-datetime) {
-    padding: 6px 10px;
-  }
-}
-
-/* ===== ESTILOS GENERALES ===== */
 .password-toggle {
   color: #666;
   font-size: 1.4rem;
@@ -244,58 +149,81 @@ ion-icon:hover {
   }
 }
 
-/* ===== MEDIA QUERIES RESPONSIVAS ===== */
 @media (max-width: 480px) {
   .report-card {
     max-width: 90%;
     padding: 20px 15px;
   }
+
   .report-title {
     font-size: 1.4rem;
   }
+
   .report-subtitle {
     font-size: 0.85rem;
   }
+
   .form-input {
     font-size: 0.95rem;
   }
+
   .report-button {
     font-size: 0.95rem;
     height: 45px;
   }
-  .form-item {
-    --min-height: 50px;
-    --padding-start: 10px;
-    margin-bottom: 10px;
+}
+
+
+/* Ocultar/mostrar según el dispositivo */
+.desktop-date {
+  display: block;
+}
+
+.mobile-date {
+  display: none;
+}
+
+/* Para dispositivos móviles */
+@media (max-width: 768px) {
+  .desktop-date {
+    display: none;
   }
-  .input-label {
-    font-size: 0.9rem;
-  }
-  .form-item:has(ion-datetime) {
-    padding: 4px 8px;
-  }
-  .form-item ion-datetime::part(text) {
-    font-size: 0.95rem !important;
-    padding: 6px 0 !important;
+  
+  .mobile-date {
+    display: block;
   }
 }
 
-@media (min-width: 481px) and (max-width: 768px) {
-  .report-card {
-    max-width: 85%;
-    padding: 25px 20px;
+/* Para tablets (opcional) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .desktop-date {
+    display: block;
   }
-  .form-item:has(ion-datetime) {
-    padding: 8px 12px;
+  
+  .mobile-date {
+    display: none;
   }
 }
 
+/* Asegurar que el datetime ocupe todo el ancho */
 ion-datetime {
-  opacity: 1 !important;
-  visibility: visible !important;
+  width: 100%;
 }
 
-ion-datetime .datetime-text {
-  color: #333 !important;
-  font-weight: 500 !important;
+/* Estilos específicos para la versión móvil con ruedas */
+.mobile-date ion-datetime {
+  --wheel-highlight-background: var(--ion-color-primary);
+  --wheel-fade-background-rgb: 255, 255, 255;
+}
+
+/* Mejorar la apariencia del datetime en móvil */
+@media (max-width: 768px) {
+  ion-datetime::part(wheel-item) {
+    font-size: 16px;
+  }
+  
+  ion-datetime::part(wheel-item active) {
+    color: var(--ion-color-primary);
+    font-weight: bold;
+  }
 }
